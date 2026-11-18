@@ -1,0 +1,35 @@
+services:
+  - type: web
+    name: asbimart
+    runtime: node
+    plan: free
+    healthCheckPath: /api/health
+    buildCommand: cd backend && npm install
+    startCommand: node backend/server.js
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: BASE_URL
+        sync: false
+      - key: AUTH_SECRET
+        generateValue: true
+      - key: GOOGLE_CLIENT_ID
+        sync: false
+      - key: GOOGLE_CLIENT_SECRET
+        sync: false
+      - key: FACEBOOK_APP_ID
+        sync: false
+      - key: FACEBOOK_APP_SECRET
+        sync: false
+      - key: SMTP_HOST
+        value: smtp.gmail.com
+      - key: SMTP_PORT
+        value: "465"
+      - key: SMTP_SECURE
+        value: "true"
+      - key: SMTP_USER
+        value: asby056@gmail.com
+      - key: SMTP_PASS
+        sync: false
+      - key: MERCHANT_MFS_NUMBER
+        value: "01821-296056"

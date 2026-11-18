@@ -1,0 +1,1708 @@
+const FEATURED_CATEGORIES = [
+  {
+    "id": "honey",
+    "name": "Raw Honey & Sweets",
+    "count": "7 Products",
+    "image": "https://images.unsplash.com/photo-1558642452-9d2a7deb7f62?auto=format&fit=crop&w=300&q=80",
+    "bgClass": "bg-amber-50 text-amber-900 border-amber-200"
+  },
+  {
+    "id": "ghee",
+    "name": "Traditional Cow Ghee",
+    "count": "3 Products",
+    "image": "../assets/products/ghee-buffalo-07.jpg",
+    "bgClass": "bg-yellow-50 text-yellow-900 border-yellow-200"
+  },
+  {
+    "id": "oil",
+    "name": "Pure Ghani Oils",
+    "count": "4 Products",
+    "image": "https://images.unsplash.com/photo-1474979266404-7eaacbcd87c5?auto=format&fit=crop&w=300&q=80",
+    "bgClass": "bg-emerald-50 text-emerald-900 border-emerald-200"
+  },
+  {
+    "id": "nuts",
+    "name": "Nuts & Dry Fruits",
+    "count": "9 Products",
+    "image": "https://images.unsplash.com/photo-1514537193821-ed4955693802?auto=format&fit=crop&w=300&q=80",
+    "bgClass": "bg-stone-50 text-stone-900 border-stone-200"
+  },
+  {
+    "id": "personalcare",
+    "name": "Organic Personal Care",
+    "count": "5 Products",
+    "image": "https://images.unsplash.com/photo-1556228720-195a672e8a03?auto=format&fit=crop&w=300&q=80",
+    "bgClass": "bg-cyan-50 text-cyan-900 border-cyan-200"
+  },
+  {
+    "id": "superfood",
+    "name": "Organic Superfood",
+    "count": "5 Products",
+    "image": "../assets/products/chia-seed-organic-24.jpg",
+    "bgClass": "bg-teal-50 text-teal-900 border-teal-200"
+  },
+  {
+    "id": "spices",
+    "name": "Organic Spices & Tea",
+    "count": "6 Products",
+    "image": "https://images.unsplash.com/photo-1596040033229-a9821ebd058d?auto=format&fit=crop&w=300&q=80",
+    "bgClass": "bg-red-50 text-red-900 border-red-200"
+  }
+];
+
+const PRODUCTS_DATA = [
+  {
+    "id": "honey-sundarban-01",
+    "name": "Sundarbans Raw Wild Honey",
+    "banglaName": "সুন্দরবনের কাঁচা মধু",
+    "category": "honey",
+    "categoryBangla": "মধু ও প্রাকৃতিক মিষ্টি",
+    "isBestSeller": true,
+    "rating": 5,
+    "reviewsCount": 142,
+    "discountPercent": 15,
+    "image": "https://images.unsplash.com/photo-1558642452-9d2a7deb7f62?auto=format&fit=crop&w=800&q=80",
+    "gallery": [
+      "https://images.unsplash.com/photo-1558642452-9d2a7deb7f62?auto=format&fit=crop&w=800&q=80"
+    ],
+    "description": "সুন্দরবনের গভীর অরণ্য থেকে মৌয়ালদের মাধ্যমে সরাসরি চাক ভেঙে সংগ্রহকৃত শতভাগ প্রাকৃতিক ও খাঁটি অপরিশোধিত কাঁচা মধু। এতে কোনো প্রকার প্রসেসিং, হিটিং কিংবা কৃত্রিম সুগার মেশানো হয় না। প্রাকৃতিকভাবে এনজাইম, পোলেন ও অ্যান্টিঅক্সিডেন্টে ভরপুর এই মধু রোগ প্রতিরোধ ক্ষমতা বৃদ্ধিতে অতুলনীয়।",
+    "benefits": [
+      "১০০% প্রাকৃতিক সুন্দরবনের চাকভাঙা অপরিশোধিত কাঁচা মধু",
+      "রোগ প্রতিরোধ ক্ষমতা ও শারীরিক এনার্জি বাড়ায়",
+      "কাশি ও ঠান্ডা নিরাময়ে কার্যকরী",
+      "ল্যাব টেস্টে উত্তীর্ণ ও চিনিমুক্ত"
+    ],
+    "variants": [
+      {
+        "size": "৫০০ গ্রাম",
+        "price": 650,
+        "originalPrice": 765,
+        "stock": 25
+      },
+      {
+        "size": "১ কেজি",
+        "price": 1250,
+        "originalPrice": 1470,
+        "stock": 18
+      }
+    ],
+    "reviews": [
+      {
+        "name": "মাহমুদ হাসান",
+        "rating": 5,
+        "date": "৩ দিন আগে",
+        "comment": "মধুর ঘ্রাণ এবং স্বাদ অসাধারণ! খাঁটি কাঁচা মধু।"
+      },
+      {
+        "name": "আরিফুল ইসলাম",
+        "rating": 5,
+        "date": "১ সপ্তাহ আগে",
+        "comment": "প্যাকেজিং খুবই চমৎকার ছিল। সম্পূর্ণ অক্ষত পেয়েছি।"
+      }
+    ]
+  },
+  {
+    "id": "honey-kalojira-02",
+    "name": "Pure Black Seed Flower Honey",
+    "banglaName": "কালোজিরা ফুলের মধু",
+    "category": "honey",
+    "categoryBangla": "মধু ও প্রাকৃতিক মিষ্টি",
+    "isBestSeller": false,
+    "rating": 4.9,
+    "reviewsCount": 96,
+    "discountPercent": 12,
+    "image": "../assets/products/honey-kalojira-02.jpg",
+    "gallery": [
+      "../assets/products/honey-kalojira-02.jpg"
+    ],
+    "description": "কালোজিরা ফুলের মাঠ থেকে সংগৃহীত পুষ্টিকর ও সুস্বাদু বিশেষ প্রজাতির মধু। এর গাঢ় লালচে আভা ও অনন্য স্বাদ রয়েছে। কালোজিরার ঔষধি গুণের সাথে খাঁটি মধুর সংমিশ্রণ এটি স্বাস্থ্যের জন্য মহৌষধ।",
+    "benefits": [
+      "কালোজিরা ফুলের প্রাকৃতিক নির্যাস সমৃদ্ধ",
+      "গ্যাস্ট্রিক ও হজমের সমস্যা দূর করে",
+      "দীর্ঘস্থায়ী এনার্জি যোগায়"
+    ],
+    "variants": [
+      {
+        "size": "৫০০ গ্রাম",
+        "price": 720,
+        "originalPrice": 820,
+        "stock": 30
+      },
+      {
+        "size": "১ কেজি",
+        "price": 1380,
+        "originalPrice": 1570,
+        "stock": 15
+      }
+    ],
+    "reviews": [
+      {
+        "name": "তাহসিন উল্লাহ",
+        "rating": 5,
+        "date": "২ দিন আগে",
+        "comment": "গাঢ় প্রাকৃতিক মধু, অনেক ভালো লেগেছে।"
+      }
+    ]
+  },
+  {
+    "id": "honey-litchi-03",
+    "name": "Litchi Blossom Pure Raw Honey",
+    "banglaName": "লিচু ফুলের মধু",
+    "category": "honey",
+    "categoryBangla": "মধু ও প্রাকৃতিক মিষ্টি",
+    "isBestSeller": false,
+    "rating": 4.8,
+    "reviewsCount": 68,
+    "discountPercent": 10,
+    "image": "../assets/products/honey-litchi-03.jpg",
+    "gallery": [
+      "../assets/products/honey-litchi-03.jpg"
+    ],
+    "description": "দিনাজপুরের বিখ্যাত লিচু বাগান থেকে মৌমাছির প্রাকৃতিক পরাগায়নের মাধ্যমে সংগৃহীত হালকা সোনালী রঙের সুমিষ্ট কাঁচা মধু। বাচ্চাদের জন্য এবং প্রতিদিনের শরবতে অত্যন্ত লোভনীয়।",
+    "benefits": [
+      "লিচু ফুলের মিষ্টি সুবাস ও হালকা টেক্সচার",
+      "বাচ্চাদের ক্ষুধা ও পুষ্টি বাড়াতে সহায়ক",
+      "প্রাকৃতিক ভিটামিন ও গ্লুকোজ সমৃদ্ধ"
+    ],
+    "variants": [
+      {
+        "size": "৫০০ গ্রাম",
+        "price": 580,
+        "originalPrice": 650,
+        "stock": 35
+      },
+      {
+        "size": "১ কেজি",
+        "price": 1100,
+        "originalPrice": 1250,
+        "stock": 20
+      }
+    ],
+    "reviews": [
+      {
+        "name": "সাইফুল ইসলাম",
+        "rating": 5,
+        "date": "৫ দিন আগে",
+        "comment": "বাচ্চারা খুব পছন্দ করেছে। দারুণ স্বাদ।"
+      }
+    ]
+  },
+  {
+    "id": "honey-mustard-04",
+    "name": "Mustard Blossom Cream Honey",
+    "banglaName": "সরিষা ফুলের মধু",
+    "category": "honey",
+    "categoryBangla": "মধু ও প্রাকৃতিক মিষ্টি",
+    "isBestSeller": false,
+    "rating": 4.8,
+    "reviewsCount": 54,
+    "discountPercent": 10,
+    "image": "https://images.unsplash.com/photo-1471943311424-646960669fbc?auto=format&fit=crop&w=800&q=80",
+    "gallery": [
+      "https://images.unsplash.com/photo-1471943311424-646960669fbc?auto=format&fit=crop&w=800&q=80"
+    ],
+    "description": "শীতকালে সরিষা ক্ষেত থেকে সংগৃহীত হালকা সোনালী ক্রিমি মধু। ঠান্ডা আবহাওয়ায় এটি প্রাকৃতিকভাবে ক্রিমি জমে যায়, যা খাঁটি সরিষা মধুর প্রধান বৈশিষ্ট্য।",
+    "benefits": [
+      "প্রাকৃতিক গ্লুকোজে ভরপুর পুষ্টিকর মধু",
+      "শীতের সকালে দুধ বা রুটির সাথে চমৎকার",
+      "১০০% প্রাকৃতিক কোনো প্রক্রিয়াজাত ছাড়া"
+    ],
+    "variants": [
+      {
+        "size": "৫০০ গ্রাম",
+        "price": 480,
+        "originalPrice": 540,
+        "stock": 40
+      },
+      {
+        "size": "১ কেজি",
+        "price": 920,
+        "originalPrice": 1030,
+        "stock": 25
+      }
+    ],
+    "reviews": [
+      {
+        "name": "জসিম উদ্দিন",
+        "rating": 5,
+        "date": "১ সপ্তাহ আগে",
+        "comment": "একদম ক্রিমি আসল সরিষা ফুলের মধু।"
+      }
+    ]
+  },
+  {
+    "id": "honey-nut-premium-05",
+    "name": "Royal Honey Nut Superfood Jar",
+    "banglaName": "প্রিমিয়াম হানি নাট জার",
+    "category": "honey",
+    "categoryBangla": "মধু ও বাদাম কম্বো",
+    "isBestSeller": true,
+    "rating": 5,
+    "reviewsCount": 185,
+    "discountPercent": 16,
+    "image": "../assets/products/honey-nut-premium-05.jpg",
+    "gallery": [
+      "../assets/products/honey-nut-premium-05.jpg"
+    ],
+    "description": "খাঁটি সুন্দরবনের কাঁচা মধুতে ডুবানো কাঠবাদাম, কাজুবাদাম, আখরোট, পেস্তা, কিসমিস, আনজির ও কুমড়ার বীজের স্বর্গীয় মিশ্রণ। ক্লান্তি দূর করতে এবং শরীর ও মনের তাৎক্ষণিক শক্তির জন্য অন্যতম সেরা ন্যাচারাল হেলথ ফুড।",
+    "benefits": [
+      "৮টি প্রিমিয়াম ড্রাই ফ্রুটস ও খাঁটি কাঁচা মধুর মিশ্রণ",
+      "সকালে এক চামচেই সারাদিনের পরিপূর্ণ শক্তি",
+      "শিশু ও বড়দের স্মৃতিশক্তি ও হাড়ের পুষ্টি জোগায়"
+    ],
+    "variants": [
+      {
+        "size": "৫০০ গ্রাম",
+        "price": 790,
+        "originalPrice": 940,
+        "stock": 40
+      },
+      {
+        "size": "১ কেজি",
+        "price": 1500,
+        "originalPrice": 1780,
+        "stock": 20
+      }
+    ],
+    "reviews": [
+      {
+        "name": "শাকিল আহমেদ",
+        "rating": 5,
+        "date": "১ দিন আগে",
+        "comment": "অবিশ্বাস্য রকমের সুস্বাদু! এক চামচ খেলেই মন ভরে যায়।"
+      }
+    ]
+  },
+  {
+    "id": "ghee-pabna-06",
+    "name": "Premium Danadar Cow Ghee",
+    "banglaName": "খাঁটি গাওয়া ঘি",
+    "category": "ghee",
+    "categoryBangla": "ঐতিহ্যবাহী গাওয়া ঘি",
+    "isBestSeller": true,
+    "rating": 5,
+    "reviewsCount": 198,
+    "discountPercent": 12,
+    "image": "https://images.unsplash.com/photo-1589985270826-4b7bb135bc9d?auto=format&fit=crop&w=800&q=80",
+    "gallery": [
+      "https://images.unsplash.com/photo-1589985270826-4b7bb135bc9d?auto=format&fit=crop&w=800&q=80"
+    ],
+    "description": "পাবনা ও সিরাজগঞ্জের দেশি গরুর খাঁটি দুধের মাখন থেকে ঐতিহ্যবাহী সনাতন পদ্ধতিতে জ্বাল দেওয়া সুস্বাদু দানাদার গাওয়া ঘি। এর মোহনীয় প্রাকৃতিক সুবাস খাবারে এনে দেয় রাজকীয় তৃপ্তি।",
+    "benefits": [
+      "১০০% খাঁটি দেশি গরুর দুধের ননী থেকে প্রস্তুত",
+      "প্রাকৃতিক দানাদার টেক্সচার ও মিষ্টি সুবাস",
+      "হজমশক্তি বাড়ায় ও হাড় মজবুত রাখে"
+    ],
+    "variants": [
+      {
+        "size": "৫০০ গ্রাম",
+        "price": 950,
+        "originalPrice": 1080,
+        "stock": 45
+      },
+      {
+        "size": "১ কেজি",
+        "price": 1850,
+        "originalPrice": 2100,
+        "stock": 20
+      }
+    ],
+    "reviews": [
+      {
+        "name": "তাহমিনা বেগম",
+        "rating": 5,
+        "date": "২ দিন আগে",
+        "comment": "ঘির ঘ্রাণে পুরো বাড়ি ম ম করছে। দানাদার খাঁটি ঘি!"
+      }
+    ]
+  },
+  {
+    "id": "ghee-buffalo-07",
+    "name": "Pure Buffalo Danadar Ghee",
+    "banglaName": "মহিষের খাঁটি ঘি",
+    "category": "ghee",
+    "categoryBangla": "ঐতিহ্যবাহী ঘি",
+    "isBestSeller": false,
+    "rating": 4.9,
+    "reviewsCount": 76,
+    "discountPercent": 10,
+    "image": "../assets/products/ghee-buffalo-07.jpg",
+    "gallery": [
+      "../assets/products/ghee-buffalo-07.jpg"
+    ],
+    "description": "ভোলার চরাঞ্চলের ঘাস খাওয়া দেশি মহিষের দুধের ননী থেকে তৈরি গাঢ় দানাদার মহিষের ঘি। এতে রয়েছে উচ্চমাত্রার ক্যালসিয়াম ও প্রাকৃতিক সুবাস।",
+    "benefits": [
+      "প্রাকৃতিক ক্যালসিয়াম ও ফসফরাস সমৃদ্ধ",
+      "শারীরিক শক্তি ও ওজন বৃদ্ধিতে সাহায্য করে",
+      "হালুয়া ও মিষ্টিতে দারুণ সুবাস এনে দেয়"
+    ],
+    "variants": [
+      {
+        "size": "৫০০ গ্রাম",
+        "price": 880,
+        "originalPrice": 980,
+        "stock": 35
+      },
+      {
+        "size": "১ কেজি",
+        "price": 1700,
+        "originalPrice": 1900,
+        "stock": 15
+      }
+    ],
+    "reviews": [
+      {
+        "name": "কামাল উদ্দিন",
+        "rating": 5,
+        "date": "৪ দিন আগে",
+        "comment": "মহিষের খাঁটি ঘি পাওয়া খুব কঠিন ছিল। অসাধারণ কোয়ালিটি।"
+      }
+    ]
+  },
+  {
+    "id": "ghee-butter-home-08",
+    "name": "Hand-Churned Cultured Ghee",
+    "banglaName": "বিলোন বাখন ঘি",
+    "category": "ghee",
+    "categoryBangla": "ঐতিহ্যবাহী ঘি",
+    "isBestSeller": false,
+    "rating": 4.9,
+    "reviewsCount": 63,
+    "discountPercent": 10,
+    "image": "../assets/products/ghee-butter-home-08.jpg",
+    "gallery": [
+      "../assets/products/ghee-butter-home-08.jpg"
+    ],
+    "description": "দই মন্থন করে কাঠের মন্থনী দিয়ে হাতে মাখন তুলে ধীরে ধীরে তৈরি করা খাঁটি বৈদিক বিলোনা ঘি। এটি সহজে হজমযোগ্য ও পরম পুষ্টিকর।",
+    "benefits": [
+      "বৈদিক বিলোনা পদ্ধতিতে হাতে তৈরি খাঁটি ঘি",
+      "অন্ত্রের সুস্বাস্থ্য ও স্মৃতিশক্তি বর্ধক",
+      "ল্যাকটোজ ও ক্যাসিন মুক্ত"
+    ],
+    "variants": [
+      {
+        "size": "৫০০ গ্রাম",
+        "price": 1100,
+        "originalPrice": 1220,
+        "stock": 25
+      },
+      {
+        "size": "১ কেজি",
+        "price": 2150,
+        "originalPrice": 2390,
+        "stock": 10
+      }
+    ],
+    "reviews": [
+      {
+        "name": "মনিরুল ইসলাম",
+        "rating": 5,
+        "date": "৩ দিন আগে",
+        "comment": "বিলোনার আসল ঘ্রাণ পাওয়া যায়। সেরা ঘি!"
+      }
+    ]
+  },
+  {
+    "id": "oil-mustard-ghani-09",
+    "name": "Cold-Pressed Wood Ghani Mustard Oil",
+    "banglaName": "ঘানিভাঙা সরিষার তেল",
+    "category": "oil",
+    "categoryBangla": "ঘানিভাঙা খাঁটি তেল",
+    "isBestSeller": true,
+    "rating": 4.8,
+    "reviewsCount": 115,
+    "discountPercent": 10,
+    "image": "https://images.unsplash.com/photo-1474979266404-7eaacbcd87c5?auto=format&fit=crop&w=800&q=80",
+    "gallery": [
+      "https://images.unsplash.com/photo-1474979266404-7eaacbcd87c5?auto=format&fit=crop&w=800&q=80"
+    ],
+    "description": "বাছাইকৃত দেশি মাঘী সরিষা কাঠের ঘানিতে ধীরগতিতে কোল্ড-প্রেসড করে তৈরি খাঁটি সরিষার তেল। এতে সরিষার প্রাকৃতিক ঝাঁঝ, পুষ্টিগুণ এবং র ভিটামিন অক্ষুণ্ন থাকে।",
+    "benefits": [
+      "কাঠের ঘানিতে ধীরগতির চাপে ভাঙানো শতভাগ খাঁটি তেল",
+      "তীক্ষ্ণ আসল প্রাকৃতিক ঝাঁঝ ও খাঁটি স্বাদ",
+      "হৃদযন্ত্র সুস্থ রাখতে ও কোলেস্টেরল নিয়ন্ত্রণে সহায়ক"
+    ],
+    "variants": [
+      {
+        "size": "১ লিটার",
+        "price": 320,
+        "originalPrice": 355,
+        "stock": 50
+      },
+      {
+        "size": "৫ লিটার",
+        "price": 1500,
+        "originalPrice": 1680,
+        "stock": 15
+      }
+    ],
+    "reviews": [
+      {
+        "name": "ফারুক আহমেদ",
+        "rating": 5,
+        "date": "৪ দিন আগে",
+        "comment": "তিলের ঝাঁঝ আর আসল সরিষার গন্ধ পাওয়া যায়।"
+      }
+    ]
+  },
+  {
+    "id": "kalojira-oil-pure-10",
+    "name": "Pure Cold Pressed Black Seed Oil",
+    "banglaName": "কোল্ড প্রেসড কালোজিরা তেল",
+    "category": "oil",
+    "categoryBangla": "ঘানিভাঙা খাঁটি তেল",
+    "isBestSeller": false,
+    "rating": 4.9,
+    "reviewsCount": 74,
+    "discountPercent": 15,
+    "image": "https://images.unsplash.com/photo-1550160770-005c21924d66?auto=format&fit=crop&w=800&q=80",
+    "gallery": [
+      "https://images.unsplash.com/photo-1550160770-005c21924d66?auto=format&fit=crop&w=800&q=80"
+    ],
+    "description": "খাঁটি দেশি কালোজিরা থেকে ফার্স্ট কোল্ড-প্রেসড পদ্ধতিতে সংগৃহীত মহৌষধতুল্য কালোজিরা তেল। দেহের সার্বিক রোগ প্রতিরোধ ক্ষমতা বাড়াতে মহৌষধ হিসেবে কাজ করে।",
+    "benefits": [
+      "১০০% খাঁটি কোল্ড প্রেসড অপরিশোধিত কালোজিরা তেল",
+      "শ্বাসকষ্ট ও সাইনাস নিরাময়ে সহায়ক",
+      "চুল পড়া বন্ধে এবং ত্বকের সুস্থতায় ফলদায়ক"
+    ],
+    "variants": [
+      {
+        "size": "১০০ মিলি",
+        "price": 210,
+        "originalPrice": 245,
+        "stock": 30
+      },
+      {
+        "size": "২৫০ মিলি",
+        "price": 460,
+        "originalPrice": 540,
+        "stock": 25
+      }
+    ],
+    "reviews": [
+      {
+        "name": "আকতার হোসেন",
+        "rating": 5,
+        "date": "৪ দিন আগে",
+        "comment": "তেলটা একদম আসল ও ঘন।"
+      }
+    ]
+  },
+  {
+    "id": "coconut-oil-extra-virgin-11",
+    "name": "Extra Virgin Cold Pressed Coconut Oil",
+    "banglaName": "এক্সট্রা ভার্জিন নারিকেল তেল",
+    "category": "oil",
+    "categoryBangla": "ঘানিভাঙা খাঁটি তেল",
+    "isBestSeller": false,
+    "rating": 4.8,
+    "reviewsCount": 62,
+    "discountPercent": 10,
+    "image": "https://images.unsplash.com/photo-1526947425960-945c6e72858f?auto=format&fit=crop&w=800&q=80",
+    "gallery": [
+      "https://images.unsplash.com/photo-1526947425960-945c6e72858f?auto=format&fit=crop&w=800&q=80"
+    ],
+    "description": "তাজা নারিকেলের দুধ থেকে কোল্ড-সেন্ট্রিফিউজ পদ্ধতিতে সংগৃহীত শতভাগ খাঁটি ও খাবার উপযোগী এক্সট্রা ভার্জিন কোকোনাট অয়েল। চুল, ত্বক ও কিটো ডায়েটের জন্য আদর্শ।",
+    "benefits": [
+      "১০০% খাঁটি ও খাওয়ার উপযোগী র ভার্জিন তেল",
+      "চুলের গোড়া শক্ত করে ও ত্বকে গভীর ময়েশ্চার যোগায়",
+      "কিটো ডায়েটে দ্রুত চর্বি পোড়াতে সাহায্য করে"
+    ],
+    "variants": [
+      {
+        "size": "২৫০ মিলি",
+        "price": 340,
+        "originalPrice": 380,
+        "stock": 40
+      },
+      {
+        "size": "৫০০ মিলি",
+        "price": 650,
+        "originalPrice": 730,
+        "stock": 25
+      }
+    ],
+    "reviews": [
+      {
+        "name": "সামিয়া হক",
+        "rating": 5,
+        "date": "৩ দিন আগে",
+        "comment": "নারিকেলের মিষ্টি প্রাকৃতিক গন্ধ। চুল পরা কমে গেছে।"
+      }
+    ]
+  },
+  {
+    "id": "oil-sesame-til-12",
+    "name": "Cold Pressed Pure Sesame (Til) Oil",
+    "banglaName": "খাঁটি তিলের তেল",
+    "category": "oil",
+    "categoryBangla": "ঘানিভাঙা খাঁটি তেল",
+    "isBestSeller": false,
+    "rating": 4.8,
+    "reviewsCount": 45,
+    "discountPercent": 12,
+    "image": "https://images.unsplash.com/photo-1608571423902-eed4a5ad8108?auto=format&fit=crop&w=800&q=80",
+    "gallery": [
+      "https://images.unsplash.com/photo-1608571423902-eed4a5ad8108?auto=format&fit=crop&w=800&q=80"
+    ],
+    "description": "কালো তিল থেকে কাঠের ঘানিতে ভাঙানো খাঁটি তিলের তেল। আয়ুর্বেদিক মালিশ, বাতের ব্যথা উপশমে এবং রান্নায় সুস্বাদু অ্যারোমা যোগ করতে চমৎকার।",
+    "benefits": [
+      "প্রাকৃতিক ক্যালসিয়াম ও অ্যান্টিঅক্সিডেন্টে ভরপুর",
+      "হাড়ের জোড়া ও পেশির ব্যথা উপশমে সাহায্য করে",
+      "ত্বকের তারুণ্য ধরে রাখে"
+    ],
+    "variants": [
+      {
+        "size": "২৫০ মিলি",
+        "price": 290,
+        "originalPrice": 330,
+        "stock": 35
+      },
+      {
+        "size": "৫০০ মিলি",
+        "price": 550,
+        "originalPrice": 620,
+        "stock": 20
+      }
+    ],
+    "reviews": [
+      {
+        "name": "আনিসুল হক",
+        "rating": 5,
+        "date": "১ সপ্তাহ আগে",
+        "comment": "ব্যথায় মালিশ করে খুব আরাম পেয়েছি।"
+      }
+    ]
+  },
+  {
+    "id": "nuts-dryfruits-mix-13",
+    "name": "Premium Royal Mixed Dry Fruits & Nuts",
+    "banglaName": "মিক্সড নাটস ও ড্রাই ফ্রুটস",
+    "category": "nuts",
+    "categoryBangla": "বাদাম ও ড্রাই ফ্রুটস",
+    "isBestSeller": true,
+    "rating": 4.9,
+    "reviewsCount": 164,
+    "discountPercent": 18,
+    "image": "https://images.unsplash.com/photo-1514537193821-ed4955693802?auto=format&fit=crop&w=800&q=80",
+    "gallery": [
+      "https://images.unsplash.com/photo-1514537193821-ed4955693802?auto=format&fit=crop&w=800&q=80"
+    ],
+    "description": "আমেরিকার কাঠবাদাম, কাজুবাদাম, আখরোট, পেস্তা, কিসমিস, আনজির ও মিষ্টি ক্র্যানবেরির প্রিমিয়াম কম্বিনেশন। প্রতিটি বাদাম একদম ফ্রেশ, মুচমুচে ও পুষ্টিতে ভরপুর।",
+    "benefits": [
+      "সেরা মানের ৮টি প্রিমিয়াম ড্রাই ফ্রুটস ও বাদামের সুষম মিশ্রণ",
+      "ব্রেন পাওয়ার, মেমোরি ও হৃদযন্ত্র সুস্থ রাখতে সহায়ক",
+      "প্রাকৃতিক প্রোটিন, ফাইবার ও হেলদি ফ্যাটের উৎকৃষ্ট উৎস"
+    ],
+    "variants": [
+      {
+        "size": "৫০০ গ্রাম",
+        "price": 790,
+        "originalPrice": 960,
+        "stock": 50
+      },
+      {
+        "size": "১ কেজি",
+        "price": 1520,
+        "originalPrice": 1850,
+        "stock": 20
+      }
+    ],
+    "reviews": [
+      {
+        "name": "নাবিল চৌধুরী",
+        "rating": 5,
+        "date": "৩ দিন আগে",
+        "comment": "প্রতিটি বাদাম অনেক ফ্রেশ এবং ক্রিস্পি।"
+      }
+    ]
+  },
+  {
+    "id": "almond-california-14",
+    "name": "California Supreme Almonds",
+    "banglaName": "ক্যালিফোর্নিয়া কাঠবাদাম",
+    "category": "nuts",
+    "categoryBangla": "বাদাম ও ড্রাই ফ্রুটস",
+    "isBestSeller": false,
+    "rating": 4.9,
+    "reviewsCount": 108,
+    "discountPercent": 10,
+    "image": "https://images.unsplash.com/photo-1508061253366-f7da158b6d46?auto=format&fit=crop&w=800&q=80",
+    "gallery": [
+      "https://images.unsplash.com/photo-1508061253366-f7da158b6d46?auto=format&fit=crop&w=800&q=80"
+    ],
+    "description": "যুক্তরাষ্ট্রের ক্যালিফোর্নিয়া থেকে সরাসরি আমদানিকৃত সুপ্রিম গোল্ডেন কাঠবাদাম। নিয়মিত কাঠবাদাম খেলে মস্তিষ্কের কার্যক্ষমতা বৃদ্ধি পায় এবং ত্বক উজ্জ্বল থাকে।",
+    "benefits": [
+      "ভিটামিন-ই ও শক্তিশালী অ্যান্টিঅক্সিডেন্টে ভরপুর",
+      "কোলেস্টেরল কমাতে সাহায্য করে",
+      "হাড় ও দাঁতের সুরক্ষায় অত্যন্ত কার্যকর"
+    ],
+    "variants": [
+      {
+        "size": "২৫০ গ্রাম",
+        "price": 350,
+        "originalPrice": 390,
+        "stock": 40
+      },
+      {
+        "size": "৫০০ গ্রাম",
+        "price": 680,
+        "originalPrice": 760,
+        "stock": 30
+      }
+    ],
+    "reviews": [
+      {
+        "name": "ডা. ইমরান কবীর",
+        "rating": 5,
+        "date": "১ সপ্তাহ আগে",
+        "comment": "সাইজ বড় এবং স্বাদে অতুলনীয়।"
+      }
+    ]
+  },
+  {
+    "id": "cashew-premium-15",
+    "name": "Premium Roasted Cashew Nuts",
+    "banglaName": "প্রিমিয়াম কাজুবাদাম",
+    "category": "nuts",
+    "categoryBangla": "বাদাম ও ড্রাই ফ্রুটস",
+    "isBestSeller": false,
+    "rating": 4.9,
+    "reviewsCount": 89,
+    "discountPercent": 12,
+    "image": "../assets/products/cashew-premium-15.jpg",
+    "gallery": [
+      "../assets/products/cashew-premium-15.jpg"
+    ],
+    "description": "বড় সাইজের রোস্টেড প্রিমিয়াম কাজুবাদাম। মিষ্টি ও ক্রাঞ্চি স্বাদের এই কাজুবাদাম রান্নায় অথবা প্রতিদিনের পুষ্টিকর নাস্তায় দারুণ উপভোগ্য।",
+    "benefits": [
+      "উচ্চমানের উদ্ভিজ্জ প্রোটিন ও মিনারেলস সমৃদ্ধ",
+      "হৃদযন্ত্র ভালো রাখতে ও রক্তচাপ নিয়ন্ত্রণে সাহায্য করে",
+      "শরীরে শক্তি যোগায় ও ক্লান্তি দূর করে"
+    ],
+    "variants": [
+      {
+        "size": "২৫০ গ্রাম",
+        "price": 390,
+        "originalPrice": 440,
+        "stock": 35
+      },
+      {
+        "size": "৫০০ গ্রাম",
+        "price": 760,
+        "originalPrice": 860,
+        "stock": 25
+      }
+    ],
+    "reviews": [
+      {
+        "name": "সুলতানা রহমান",
+        "rating": 5,
+        "date": "৩ দিন আগে",
+        "comment": "মুচমুচে এবং মিষ্টি টেস্ট।"
+      }
+    ]
+  },
+  {
+    "id": "walnut-kashmiri-16",
+    "name": "Kashmiri Kagzi Akhrot (Walnut)",
+    "banglaName": "কাশ্মীরি আস্ত আখরোট",
+    "category": "nuts",
+    "categoryBangla": "বাদাম ও ড্রাই ফ্রুটস",
+    "isBestSeller": false,
+    "rating": 4.8,
+    "reviewsCount": 57,
+    "discountPercent": 14,
+    "image": "../assets/products/walnut-kashmiri-16.jpg",
+    "gallery": [
+      "../assets/products/walnut-kashmiri-16.jpg"
+    ],
+    "description": "কাশ্মীরের ঐতিহ্যবাহী পাতলা খোসাযুক্ত কাগজি আখরোট। এটি মস্তিষ্কের গঠন ও কার্যকারিতা বাড়াতে ব্রেন ফুড হিসেবে বিশ্বখ্যাত।",
+    "benefits": [
+      "উচ্চমাত্রার উদ্ভিজ্জ ওমেগা-৩ ফ্যাটি অ্যাসিড যুক্ত",
+      "স্মৃতিশক্তি ও ব্রেইন ফাংশন বৃদ্ধি করে",
+      "রক্তে ক্ষতিকর এলডিএল কোলেস্টেরল কমায়"
+    ],
+    "variants": [
+      {
+        "size": "২৫০ গ্রাম",
+        "price": 420,
+        "originalPrice": 490,
+        "stock": 30
+      },
+      {
+        "size": "৫০০ গ্রাম",
+        "price": 820,
+        "originalPrice": 950,
+        "stock": 20
+      }
+    ],
+    "reviews": [
+      {
+        "name": "মিজানুর রহমান",
+        "rating": 5,
+        "date": "৪ দিন আগে",
+        "comment": "হাতে চাপ দিলেই খোসা ভেঙে যায়।"
+      }
+    ]
+  },
+  {
+    "id": "pista-iranian-17",
+    "name": "Iranian Roasted Salted Pistachios",
+    "banglaName": "ইরানি পেস্তা বাদাম",
+    "category": "nuts",
+    "categoryBangla": "বাদাম ও ড্রাই ফ্রুটস",
+    "isBestSeller": false,
+    "rating": 4.9,
+    "reviewsCount": 71,
+    "discountPercent": 12,
+    "image": "../assets/products/pista-iranian-17.jpg",
+    "gallery": [
+      "../assets/products/pista-iranian-17.jpg"
+    ],
+    "description": "ইরানের বিখ্যাত সুস্বাদু রোস্টেড ও হালকা সল্টেড পেস্তা বাদাম। আকর্ষণীয় প্রাকৃতিক সবুজ ও বেগুনি আভা সমেত খাঁটি পেস্তা বাদাম।",
+    "benefits": [
+      "চোখের জ্যোতি ও দৃষ্টিশক্তি সুরক্ষায় কার্যকর",
+      "প্রচুর প্রোটিন ও ফাইবার সমৃদ্ধ",
+      "রক্তে হিমোগ্লোবিন বাড়াতে সাহায্য করে"
+    ],
+    "variants": [
+      {
+        "size": "২৫০ গ্রাম",
+        "price": 550,
+        "originalPrice": 620,
+        "stock": 30
+      },
+      {
+        "size": "৫০০ গ্রাম",
+        "price": 1080,
+        "originalPrice": 1220,
+        "stock": 15
+      }
+    ],
+    "reviews": [
+      {
+        "name": "সোহাগ রানা",
+        "rating": 5,
+        "date": "৫ দিন আগে",
+        "comment": "অসাধারণ স্বাদ ও নিখুঁত সাইজ।"
+      }
+    ]
+  },
+  {
+    "id": "raisin-golden-18",
+    "name": "Afghan Jumbo Golden Raisins",
+    "banglaName": "আফগান গোল্ডেন কিসমিস",
+    "category": "nuts",
+    "categoryBangla": "বাদাম ও ড্রাই ফ্রুটস",
+    "isBestSeller": false,
+    "rating": 4.8,
+    "reviewsCount": 60,
+    "discountPercent": 10,
+    "image": "../assets/products/raisin-golden-18.jpg",
+    "gallery": [
+      "../assets/products/raisin-golden-18.jpg"
+    ],
+    "description": "আফগানিস্তানের মিষ্টি ও রসালো লম্বা গোল্ডেন কিসমিস। রক্তে আয়রনের ঘাটতি পূরণে ও মিষ্টি রান্নায় অত্যন্ত আকর্ষণীয়।",
+    "benefits": [
+      "প্রাকৃতিক আয়রন ও পটাসিয়াম সমৃদ্ধ",
+      "রক্তস্বল্পতা দূর করতে বিশেষ উপকারী",
+      "হজমে সহায়তা করে ও কোষ্ঠকাঠিন্য কমায়"
+    ],
+    "variants": [
+      {
+        "size": "২৫০ গ্রাম",
+        "price": 210,
+        "originalPrice": 235,
+        "stock": 50
+      },
+      {
+        "size": "৫০০ গ্রাম",
+        "price": 400,
+        "originalPrice": 450,
+        "stock": 35
+      }
+    ],
+    "reviews": [
+      {
+        "name": "ফারহানা আক্তার",
+        "rating": 5,
+        "date": "১ সপ্তাহ আগে",
+        "comment": "খুব মিষ্টি এবং পরিচ্ছন্ন।"
+      }
+    ]
+  },
+  {
+    "id": "care-neem-toothpaste-19",
+    "name": "Organic Neem & Clove Herbal Toothpaste",
+    "banglaName": "অর্গানিক নিম টুথপেস্ট",
+    "category": "personalcare",
+    "categoryBangla": "ন্যাচারাল পার্সোনাল কেয়ার",
+    "isBestSeller": false,
+    "rating": 4.8,
+    "reviewsCount": 72,
+    "discountPercent": 10,
+    "image": "https://images.unsplash.com/photo-1556228720-195a672e8a03?auto=format&fit=crop&w=800&q=80",
+    "gallery": [
+      "https://images.unsplash.com/photo-1556228720-195a672e8a03?auto=format&fit=crop&w=800&q=80"
+    ],
+    "description": "খাঁটি নিমপাতা ও লবঙ্গের নির্যাস সমৃদ্ধ ১০০% ন্যাচারাল ভেষজ টুথপেস্ট। কোনো ক্ষতিকর ফ্লোরাইড বা রাসায়নিক ফেনা সৃষ্টিকারী উপাদান ছাড়াই দাঁতের মাড়ি সুরক্ষা ও ক্যাভিটি প্রতিরোধে অত্যন্ত কার্যকরী।",
+    "benefits": [
+      "ফ্লোরাইড ও কৃত্রিম কেমিক্যাল মুক্ত প্রাকৃতিক ভেষজ পেস্ট",
+      "দাঁতের মাড়ি থেকে রক্ত পড়া বন্ধ করে ও মুখের দুর্গন্ধ দূর করে",
+      "দাঁত রাখে ঝকঝকে সাদা ও ফ্রেশ"
+    ],
+    "variants": [
+      {
+        "size": "১০০ গ্রাম টিউব",
+        "price": 180,
+        "originalPrice": 200,
+        "stock": 50
+      },
+      {
+        "size": "২০০ গ্রাম ফ্যামিলি প্যাক",
+        "price": 340,
+        "originalPrice": 380,
+        "stock": 40
+      }
+    ],
+    "reviews": [
+      {
+        "name": "আতিকুর রহমান",
+        "rating": 5,
+        "date": "৩ দিন আগে",
+        "comment": "দাঁতের শিরশিরানি ভাব একদম কমে গেছে।"
+      }
+    ]
+  },
+  {
+    "id": "care-bamboo-brush-20",
+    "name": "Natural Bamboo Eco Toothbrush (Set of 4)",
+    "banglaName": "ন্যাচারাল ব্যাম্বু টুথব্রাশ",
+    "category": "personalcare",
+    "categoryBangla": "ন্যাচারাল পার্সোনাল কেয়ার",
+    "isBestSeller": false,
+    "rating": 4.9,
+    "reviewsCount": 65,
+    "discountPercent": 15,
+    "image": "https://images.unsplash.com/photo-1607613009820-a29f7bb81c04?auto=format&fit=crop&w=800&q=80",
+    "gallery": [
+      "https://images.unsplash.com/photo-1607613009820-a29f7bb81c04?auto=format&fit=crop&w=800&q=80"
+    ],
+    "description": "১০০% পরিবেশবান্ধব বাঁশ থেকে তৈরি অর্গানিক টুথব্রাশ। এর আল্ট্রা-সফট ব্রিসল দাঁতের এনামেল বা মাড়ির কোনো ক্ষতি না করে অত্যন্ত যত্নের সাথে দাঁত পরিষ্কার করে।",
+    "benefits": [
+      "১০০% বায়োডিগ্রেডেবল ও প্লাস্টিকমুক্ত পরিবেশবান্ধব ব্রাশ",
+      "মাড়ির জন্য কোমল ও আরামদায়ক চারকোল ব্রিসল",
+      "জীবাণুরোধী প্রাকৃতিক বাঁশের হাতল"
+    ],
+    "variants": [
+      {
+        "size": "৪ পিসের ফ্যামিলি বক্স",
+        "price": 260,
+        "originalPrice": 310,
+        "stock": 45
+      }
+    ],
+    "reviews": [
+      {
+        "name": "সায়মা সুলতানা",
+        "rating": 5,
+        "date": "৫ দিন আগে",
+        "comment": "খুবই সফট ব্রিসল আর চমৎকার কোয়ালিটি।"
+      }
+    ]
+  },
+  {
+    "id": "care-organic-lotion-21",
+    "name": "Pure Shea Butter & Almond Body Lotion",
+    "banglaName": "অর্গানিক আমন্ড বডি লোশন",
+    "category": "personalcare",
+    "categoryBangla": "ন্যাচারাল পার্সোনাল কেয়ার",
+    "isBestSeller": false,
+    "rating": 4.9,
+    "reviewsCount": 88,
+    "discountPercent": 12,
+    "image": "https://images.unsplash.com/photo-1617897903246-719242758050?auto=format&fit=crop&w=800&q=80",
+    "gallery": [
+      "https://images.unsplash.com/photo-1617897903246-719242758050?auto=format&fit=crop&w=800&q=80"
+    ],
+    "description": "খাঁটি শিয়া বাটার, কাঠবাদামের তেল ও অ্যালোভেরা জেল দিয়ে প্রস্তুত প্রাকৃতিক ময়েশ্চারাইজিং বডি লোশন। ক্ষতিকর প্যারাবেন ও কৃত্রিম সুগন্ধিমুক্ত এই লোশন শুষ্ক ত্বককে করে কোমল ও উজ্জ্বল।",
+    "benefits": [
+      "প্যারাবেন, সালফেট ও কৃত্রিম কেমিক্যাল মুক্ত ফর্মুলা",
+      "২৪ ঘণ্টা গভীর ময়েশ্চারাইজিং ও ত্বকের খসখসে ভাব দূর করে",
+      "ভিটামিন-ই সমৃদ্ধ প্রাকৃতিক পুষ্টি"
+    ],
+    "variants": [
+      {
+        "size": "২০০ মিলি বোতল",
+        "price": 450,
+        "originalPrice": 510,
+        "stock": 35
+      },
+      {
+        "size": "৪০০ মিলি পাম্প বোতল",
+        "price": 820,
+        "originalPrice": 930,
+        "stock": 25
+      }
+    ],
+    "reviews": [
+      {
+        "name": "ফারজানা শারমিন",
+        "rating": 5,
+        "date": "১ দিন আগে",
+        "comment": "একটুও চিটচিটে না, ত্বক নরম রাখে।"
+      }
+    ]
+  },
+  {
+    "id": "care-neem-soap-22",
+    "name": "Handmade Organic Neem & Turmeric Soap",
+    "banglaName": "অর্গানিক নিম সাবান",
+    "category": "personalcare",
+    "categoryBangla": "ন্যাচারাল পার্সোনাল কেয়ার",
+    "isBestSeller": false,
+    "rating": 4.8,
+    "reviewsCount": 59,
+    "discountPercent": 10,
+    "image": "https://images.unsplash.com/photo-1600857544200-b2f666a9a2ec?auto=format&fit=crop&w=800&q=80",
+    "gallery": [
+      "https://images.unsplash.com/photo-1600857544200-b2f666a9a2ec?auto=format&fit=crop&w=800&q=80"
+    ],
+    "description": "খাঁটি নিম তেল, কাঁচা হলুদ ও নারকেল তেল দিয়ে কোল্ড-প্রসেস পদ্ধতিতে হাতে তৈরি ভেষজ সাবান। ব্রণ, ঘামাচি ও ত্বকের ইনফেকশন দূর করতে প্রাকৃতিক অ্যান্টিব্যাকটেরিয়াল সুরক্ষা দেয়।",
+    "benefits": [
+      "১০০% ন্যাচারাল কেমিক্যালমুক্ত কোল্ড-প্রসেস সাবান",
+      "ব্রণ ও ত্বকের ব্যাকটেরিয়াল ইনফেকশন দূর করে",
+      "ত্বকের আর্দ্রতা ধরে রেখে ন্যাচারাল গ্লো এনে দেয়"
+    ],
+    "variants": [
+      {
+        "size": "১০০ গ্রাম বার",
+        "price": 150,
+        "originalPrice": 170,
+        "stock": 60
+      },
+      {
+        "size": "৩টির কম্বো প্যাক",
+        "price": 420,
+        "originalPrice": 480,
+        "stock": 35
+      }
+    ],
+    "reviews": [
+      {
+        "name": "মাহমুদুল হক",
+        "rating": 5,
+        "date": "৪ দিন আগে",
+        "comment": "সাবানটা মুখে দিলে দারুণ ফ্রেশ লাগে।"
+      }
+    ]
+  },
+  {
+    "id": "care-aloevera-gel-23",
+    "name": "Pure Organic Aloe Vera Soothing Gel",
+    "banglaName": "খাঁটি অ্যালোভেরা জেল",
+    "category": "personalcare",
+    "categoryBangla": "ন্যাচারাল পার্সোনাল কেয়ার",
+    "isBestSeller": false,
+    "rating": 4.9,
+    "reviewsCount": 77,
+    "discountPercent": 12,
+    "image": "../assets/products/care-aloevera-gel-23.jpg",
+    "gallery": [
+      "../assets/products/care-aloevera-gel-23.jpg"
+    ],
+    "description": "তাজা অর্গানিক ঘৃতকুমারী পাতা থেকে নিষ্কাশিত ৯৯% পিওর অ্যালোভেরা জেল। রোদপোড়া ত্বক শান্ত করতে এবং চুলের কন্ডিশনিং ও ড্যানড্রাফ দূর করতে দারুণ উপযোগী।",
+    "benefits": [
+      "অ্যালকোহল ও কৃত্রিম রঙ মুক্ত ৯৯% পিওর জেল",
+      "সানবার্ন ও ব্রণ দ্রুত উপশম করে",
+      "চুল সিল্কি ও খুশকিমুক্ত করে"
+    ],
+    "variants": [
+      {
+        "size": "২০০ মিলি জার",
+        "price": 320,
+        "originalPrice": 360,
+        "stock": 40
+      }
+    ],
+    "reviews": [
+      {
+        "name": "সুমাইয়া আক্তার",
+        "rating": 5,
+        "date": "২ দিন আগে",
+        "comment": "খুবই স্নিগ্ধ এবং ত্বকে দ্রুত মিশে যায়।"
+      }
+    ]
+  },
+  {
+    "id": "chia-seed-organic-24",
+    "name": "Organic Mexican Chia Seeds",
+    "banglaName": "অর্গানিক চিয়া সিড",
+    "category": "superfood",
+    "categoryBangla": "অর্গানিক সুপারফুড",
+    "isBestSeller": false,
+    "rating": 4.9,
+    "reviewsCount": 88,
+    "discountPercent": 14,
+    "image": "../assets/products/chia-seed-organic-24.jpg",
+    "gallery": [
+      "../assets/products/chia-seed-organic-24.jpg"
+    ],
+    "description": "মেক্সিকো থেকে সংগৃহীত শতভাগ অর্গানিক চিয়া সিড। প্রচুর পরিমাণে ওমেগা-৩ ও ডায়েটারি ফাইবার সমৃদ্ধ এই সুপারফুড ওজন নিয়ন্ত্রণ এবং বডি ডিটক্সে অত্যন্ত জনপ্রিয়।",
+    "benefits": [
+      "প্রচুর ডায়েটারি ফাইবার ও ওমেগা-৩ ফ্যাটি অ্যাসিড সমৃদ্ধ",
+      "পেটের চর্বি কমাতে ও ওজন নিয়ন্ত্রণে সাহায্য করে",
+      "রক্তে শর্করার মাত্রা ও কোলেস্টেরল নিয়ন্ত্রণে সহায়ক"
+    ],
+    "variants": [
+      {
+        "size": "২৫০ গ্রাম",
+        "price": 280,
+        "originalPrice": 320,
+        "stock": 40
+      },
+      {
+        "size": "৫০০ গ্রাম",
+        "price": 520,
+        "originalPrice": 600,
+        "stock": 30
+      }
+    ],
+    "reviews": [
+      {
+        "name": "নুসরাত জাহান",
+        "rating": 5,
+        "date": "২ দিন আগে",
+        "comment": "দানাদানা একদম পরিষ্কার ও প্রিমিয়াম।"
+      }
+    ]
+  },
+  {
+    "id": "flax-seed-organic-25",
+    "name": "Organic Brown Flax Seeds (তিসি বীজ)",
+    "banglaName": "অর্গানিক তিসি বীজ",
+    "category": "superfood",
+    "categoryBangla": "অর্গানিক সুপারফুড",
+    "isBestSeller": false,
+    "rating": 4.8,
+    "reviewsCount": 51,
+    "discountPercent": 12,
+    "image": "../assets/products/flax-seed-organic-25.jpg",
+    "gallery": [
+      "../assets/products/flax-seed-organic-25.jpg"
+    ],
+    "description": "উচ্চমানের অপরিশোধিত ব্রাউন তিসি বীজ। লিগনান ও স্বাস্থ্যকর ফাইবারে ভরপুর এই সুপারফুড হার্ট ভালো রাখতে এবং হরমোনের ভারসাম্য রক্ষা করতে চিকিৎসকদের প্রথম পছন্দ।",
+    "benefits": [
+      "উচ্চমাত্রার দ্রবণীয় ফাইবার ও ওমেগা-৩ যুক্ত",
+      "হজমশক্তি বৃদ্ধি করে ও কোষ্ঠকাঠিন্য দূর করে",
+      "উচ্চ রক্তচাপ নিয়ন্ত্রণে সাহায্য করে"
+    ],
+    "variants": [
+      {
+        "size": "২৫০ গ্রাম",
+        "price": 180,
+        "originalPrice": 205,
+        "stock": 45
+      },
+      {
+        "size": "৫০০ গ্রাম",
+        "price": 340,
+        "originalPrice": 390,
+        "stock": 30
+      }
+    ],
+    "reviews": [
+      {
+        "name": "মোশাররফ হোসেন",
+        "rating": 5,
+        "date": "৫ দিন আগে",
+        "comment": "পরিচ্ছন্ন দানা, ভালো মানের তিসি।"
+      }
+    ]
+  },
+  {
+    "id": "pumpkin-seeds-26",
+    "name": "Raw Shelled Pumpkin Seeds (কুমড়ার বীজ)",
+    "banglaName": "খোসাছাড়া কুমড়ার বীজ",
+    "category": "superfood",
+    "categoryBangla": "অর্গানিক সুপারফুড",
+    "isBestSeller": false,
+    "rating": 4.9,
+    "reviewsCount": 64,
+    "discountPercent": 15,
+    "image": "../assets/products/pumpkin-seeds-26.jpg",
+    "gallery": [
+      "../assets/products/pumpkin-seeds-26.jpg"
+    ],
+    "description": "প্রাকৃতিক জিংক ও ম্যাগনেসিয়ামে ভরপুর খোসাছাড়া কাঁচা মিষ্টি কুমড়ার বীজ। টেস্টোস্টেরন হরমোন বৃদ্ধি এবং পুরুষদের সার্বিক প্রস্টেট স্বাস্থ্য ভালো রাখতে এটি অনবদ্য।",
+    "benefits": [
+      "প্রাকৃতিক জিংকের সর্বোত্তম উদ্ভিজ্জ উৎস",
+      "প্রস্টেট স্বাস্থ্য ও ঘুমের গভীরতা বৃদ্ধি করে",
+      "ইমিউনিটি বুস্টার হিসেবে কাজ করে"
+    ],
+    "variants": [
+      {
+        "size": "২৫০ গ্রাম",
+        "price": 320,
+        "originalPrice": 375,
+        "stock": 35
+      },
+      {
+        "size": "৫০০ গ্রাম",
+        "price": 620,
+        "originalPrice": 720,
+        "stock": 20
+      }
+    ],
+    "reviews": [
+      {
+        "name": "মাহবুব জামান",
+        "rating": 5,
+        "date": "৩ দিন আগে",
+        "comment": "রোস্ট করে খেতে দারুণ মজা।"
+      }
+    ]
+  },
+  {
+    "id": "sunflower-seeds-27",
+    "name": "Raw Shelled Sunflower Seeds (সূর্যমুখী বীজ)",
+    "banglaName": "সূর্যমুখী ফুলের বীজ",
+    "category": "superfood",
+    "categoryBangla": "অর্গানিক সুপারফুড",
+    "isBestSeller": false,
+    "rating": 4.8,
+    "reviewsCount": 48,
+    "discountPercent": 10,
+    "image": "../assets/products/sunflower-seeds-27.jpg",
+    "gallery": [
+      "../assets/products/sunflower-seeds-27.jpg"
+    ],
+    "description": "ভিটামিন-ই ও সেলেনিয়াম সমৃদ্ধ খোসাছাড়া সূর্যমুখী বীজ। ত্বকের মসৃণতা ফিরিয়ে আনতে এবং ক্ষতিকর ফ্রি র‍্যাডিকেল দূর করতে প্রতিদিন সালাদে বা নাস্তায় সেরা।",
+    "benefits": [
+      "প্রচুর ভিটামিন-ই ও সেলেনিয়াম সমৃদ্ধ",
+      "ত্বকের তারুণ্য ধরে রাখে ও বার্ধক্য কমায়",
+      "হৃদযন্ত্রের রক্তনালী নমনীয় রাখে"
+    ],
+    "variants": [
+      {
+        "size": "২৫০ গ্রাম",
+        "price": 210,
+        "originalPrice": 235,
+        "stock": 40
+      },
+      {
+        "size": "৫০০ গ্রাম",
+        "price": 390,
+        "originalPrice": 440,
+        "stock": 25
+      }
+    ],
+    "reviews": [
+      {
+        "name": "আরিফা আক্তার",
+        "rating": 5,
+        "date": "৬ দিন আগে",
+        "comment": "খুবই মুচমুচে এবং টেস্ট ভালো।"
+      }
+    ]
+  },
+  {
+    "id": "dates-ajwa-madinah-28",
+    "name": "Madinah Supreme Ajwa Dates",
+    "banglaName": "মদিনার প্রিমিয়াম আজওয়া খেজুর",
+    "category": "nuts",
+    "categoryBangla": "বাদাম ও ড্রাই ফ্রুটস",
+    "isBestSeller": false,
+    "rating": 5,
+    "reviewsCount": 95,
+    "discountPercent": 15,
+    "image": "../assets/products/dates-ajwa-madinah-28.jpg",
+    "gallery": [
+      "../assets/products/dates-ajwa-madinah-28.jpg"
+    ],
+    "description": "পবিত্র মদিনা মুনাওয়ারা থেকে সরাসরি সংগৃহীত সেরা মানের জেনুইন আজওয়া খেজুর। নরম ও মিষ্টি স্বাদের এই খেজুর হৃদযন্ত্রের সুরক্ষা ও বরকতময় সুন্নাহ হিসেবে অতুলনীয়।",
+    "benefits": [
+      "মদিনা শরিফের আসল বড় সাইজের ফ্রেশ আজওয়া খেজুর",
+      "হৃদরোগ ও রক্তনালীর ব্লকেজ প্রতিরোধে অত্যন্ত কার্যকরী",
+      "প্রাকৃতিক ফ্রুক্টোজ যা সারাদিনের এনার্জি বজায় রাখে"
+    ],
+    "variants": [
+      {
+        "size": "৫০০ গ্রাম",
+        "price": 850,
+        "originalPrice": 1000,
+        "stock": 35
+      },
+      {
+        "size": "১ কেজি",
+        "price": 1650,
+        "originalPrice": 1950,
+        "stock": 20
+      }
+    ],
+    "reviews": [
+      {
+        "name": "হাফেজ জুবায়ের",
+        "rating": 5,
+        "date": "১ দিন আগে",
+        "comment": "খেজুরগুলো অত্যন্ত নরম ও মিষ্টি।"
+      }
+    ]
+  },
+  {
+    "id": "spices-haldi-morich-29",
+    "name": "Pure Organic Turmeric & Red Chilli Powder",
+    "banglaName": "খাঁটি হলুদ ও মরিচ গুঁড়া",
+    "category": "spices",
+    "categoryBangla": "অর্গানিক মসলা",
+    "isBestSeller": false,
+    "rating": 4.9,
+    "reviewsCount": 65,
+    "discountPercent": 12,
+    "image": "https://images.unsplash.com/photo-1596040033229-a9821ebd058d?auto=format&fit=crop&w=800&q=80",
+    "gallery": [
+      "https://images.unsplash.com/photo-1596040033229-a9821ebd058d?auto=format&fit=crop&w=800&q=80"
+    ],
+    "description": "রং ও কেমিক্যালমুক্ত দেশি কাঁচা হলুদ ও লাল মরিচ রোদে শুকিয়ে পরিচ্ছন্নভাবে ভাঙানো খাঁটি গুঁড়া মসলা। রান্নায় আনে অসাধারণ প্রাকৃতিক রং ও ঘ্রাণ।",
+    "benefits": [
+      "কোনো কৃত্রিম রং বা ভেজাল প্রিজারভেটিভ নেই",
+      "কারকিউমিন সমৃদ্ধ প্রাকৃতিক হলুদ গুঁড়া",
+      "দেশি ঝাল ও আসল ঘ্রাণে ভরপুর মরিচ গুঁড়া"
+    ],
+    "variants": [
+      {
+        "size": "৫০০ গ্রাম",
+        "price": 320,
+        "originalPrice": 360,
+        "stock": 35
+      },
+      {
+        "size": "১ কেজি",
+        "price": 620,
+        "originalPrice": 700,
+        "stock": 20
+      }
+    ],
+    "reviews": [
+      {
+        "name": "রোকেয়া খাতুন",
+        "rating": 5,
+        "date": "৫ দিন আগে",
+        "comment": "বাজারের প্যাকেট মসলার চেয়ে অনেক ভালো।"
+      }
+    ]
+  },
+  {
+    "id": "spices-cumin-jeera-30",
+    "name": "Pure Roasted Cumin & Coriander Powder",
+    "banglaName": "জিরার গুঁড়া ও ধনিয়া গুঁড়া",
+    "category": "spices",
+    "categoryBangla": "অর্গানিক মসলা",
+    "isBestSeller": false,
+    "rating": 4.8,
+    "reviewsCount": 49,
+    "discountPercent": 10,
+    "image": "https://images.unsplash.com/photo-1509358271058-acd22cc93898?auto=format&fit=crop&w=800&q=80",
+    "gallery": [
+      "https://images.unsplash.com/photo-1509358271058-acd22cc93898?auto=format&fit=crop&w=800&q=80"
+    ],
+    "description": "বাছাইকৃত আস্ত জিরা ও ধনিয়া ধুয়ে রোদে শুকিয়ে হালকা ভেজে ভাঙানো সুবাসিত গুঁড়া মসলা। প্রতিটি রান্নায় আনে জিভে জল আনা দেশি তরকারির সুঘ্রাণ।",
+    "benefits": [
+      "ধুলোবালি ও ভেজালমুক্ত পরিষ্কার বীজ থেকে প্রস্তুত",
+      "হালকা রোস্টেড মিষ্টি গন্ধ রান্নায় অনন্য স্বাদ দেয়",
+      "হজমে সহায়তা করে"
+    ],
+    "variants": [
+      {
+        "size": "২৫০ গ্রাম জিরা + ২৫০ গ্রাম ধনিয়া",
+        "price": 340,
+        "originalPrice": 380,
+        "stock": 40
+      }
+    ],
+    "reviews": [
+      {
+        "name": "শাহীন আলম",
+        "rating": 5,
+        "date": "৩ দিন আগে",
+        "comment": "ঘিয়ে ভাজার চমৎকার ঘ্রাণ আসে।"
+      }
+    ]
+  },
+  {
+    "id": "tea-sreemangal-green-31",
+    "name": "Sreemangal Premium Organic Green Tea",
+    "banglaName": "শ্রীমঙ্গলের গ্রিন টি",
+    "category": "spices",
+    "categoryBangla": "ভেষজ ও গ্রিন টি",
+    "isBestSeller": false,
+    "rating": 4.8,
+    "reviewsCount": 52,
+    "discountPercent": 10,
+    "image": "https://images.unsplash.com/photo-1576092768241-dec231879fc3?auto=format&fit=crop&w=800&q=80",
+    "gallery": [
+      "https://images.unsplash.com/photo-1576092768241-dec231879fc3?auto=format&fit=crop&w=800&q=80"
+    ],
+    "description": "শ্রীমঙ্গলের মনোরম পাহাড়ি বাগান থেকে বাছাইকৃত কচি দুটি পাতা ও একটি কুঁড়ি থেকে প্রক্রিয়াজাত প্রিমিয়াম অর্গানিক গ্রিন টি। ওজন কমানো এবং মেটাবলিজম বুস্টে অত্যন্ত কার্যকর।",
+    "benefits": [
+      "প্রচুর ক্যাটেচিন ও শক্তিশালী অ্যান্টিঅক্সিডেন্ট সমৃদ্ধ",
+      "শরীরের চর্বি বার্ন করতে ও মেটাবলিজম বাড়াতে সহায়ক",
+      "হৃদযন্ত্র ভালো রাখে ও মানসিক প্রশান্তি দেয়"
+    ],
+    "variants": [
+      {
+        "size": "১০০ গ্রাম",
+        "price": 240,
+        "originalPrice": 270,
+        "stock": 45
+      },
+      {
+        "size": "২৫০ গ্রাম",
+        "price": 540,
+        "originalPrice": 600,
+        "stock": 25
+      }
+    ],
+    "reviews": [
+      {
+        "name": "তানভীর হাসান",
+        "rating": 5,
+        "date": "৬ দিন আগে",
+        "comment": "দারুণ সতেজ ঘ্রাণ।"
+      }
+    ]
+  },
+  {
+    "id": "tea-masala-black-32",
+    "name": "Sylhet Organic CTC Masala Black Tea",
+    "banglaName": "সিলেটের মসলা চা পাতা",
+    "category": "spices",
+    "categoryBangla": "ভেষজ ও গ্রিন টি",
+    "isBestSeller": false,
+    "rating": 4.9,
+    "reviewsCount": 83,
+    "discountPercent": 10,
+    "image": "https://images.unsplash.com/photo-1558160074-4d7d8bdf4256?auto=format&fit=crop&w=800&q=80",
+    "gallery": [
+      "https://images.unsplash.com/photo-1558160074-4d7d8bdf4256?auto=format&fit=crop&w=800&q=80"
+    ],
+    "description": "সিলেটের চা বাগানের সেরা দানাদার সিটিসি ব্ল্যাক টির সাথে এলাচ, দারুচিনি, লবঙ্গ ও আদার সংমিশ্রণে তৈরি রাজকীয় মসলা চা। ক্লান্তি নিমেষেই দূর করে মনে এনে দেয় ফুরফুরে চাঙ্গাভাব।",
+    "benefits": [
+      "কড়া লিকার ও মনমাতানো এলাচ-লবঙ্গের প্রাকৃতিক সুবাস",
+      "ক্লান্তি ও মানসিক অবসাদ দূর করে এনার্জি আনে",
+      "গলার খুসখুস ও ঠান্ডায় দারুণ আরামদায়ক"
+    ],
+    "variants": [
+      {
+        "size": "২৫০ গ্রাম",
+        "price": 220,
+        "originalPrice": 245,
+        "stock": 50
+      },
+      {
+        "size": "৫০০ গ্রাম",
+        "price": 410,
+        "originalPrice": 460,
+        "stock": 30
+      }
+    ],
+    "reviews": [
+      {
+        "name": "রাকিবুল হাসান",
+        "rating": 5,
+        "date": "২ দিন আগে",
+        "comment": "সিলেটের চায়ের আসল স্বাদ! লিকার অনেক কড়া।"
+      }
+    ]
+  },
+  {
+    "id": "superfood-moringa-powder-33",
+    "name": "Organic Moringa Oleifera Leaf Powder",
+    "banglaName": "সজিনা পাতা গুঁড়া (মরিঙ্গা)",
+    "category": "superfood",
+    "categoryBangla": "অর্গানিক সুপারফুড",
+    "isBestSeller": false,
+    "rating": 4.9,
+    "reviewsCount": 57,
+    "discountPercent": 12,
+    "image": "https://images.unsplash.com/photo-1582793988951-9aed5509eb97?auto=format&fit=crop&w=800&q=80",
+    "gallery": [
+      "https://images.unsplash.com/photo-1582793988951-9aed5509eb97?auto=format&fit=crop&w=800&q=80"
+    ],
+    "description": "কচি সজিনা পাতা পরিষ্কার করে ধুয়ে ছায়ায় শুকিয়ে তৈরি পুষ্টির মহাধন অর্গানিক মরিঙ্গা পাউডার। এতে কমলার চেয়ে ৭ গুণ বেশি ভিটামিন সি এবং দুধের চেয়ে ৪ গুণ বেশি ক্যালসিয়াম রয়েছে।",
+    "benefits": [
+      "৯২টিরও বেশি পুষ্টি উপাদান ও ৪৬টি অ্যান্টিঅক্সিডেন্ট সমৃদ্ধ",
+      "ডায়াবেটিস নিয়ন্ত্রণ ও উচ্চ রক্তচাপ কমাতে সাহায্য করে",
+      "শারীরিক দুর্বলতা দূর করে ও রোগ প্রতিরোধ ক্ষমতা বহুগুণ বাড়ায়"
+    ],
+    "variants": [
+      {
+        "size": "১০০ গ্রাম",
+        "price": 180,
+        "originalPrice": 205,
+        "stock": 40
+      },
+      {
+        "size": "২৫০ গ্রাম",
+        "price": 380,
+        "originalPrice": 430,
+        "stock": 25
+      }
+    ],
+    "reviews": [
+      {
+        "name": "আব্দুল্লাহ আল নোমান",
+        "rating": 5,
+        "date": "১ দিন আগে",
+        "comment": "সকালে হালকা গরম পানিতে মিশিয়ে খাই, সারাদিন অনেক এনার্জি পাই।"
+      }
+    ]
+  },
+  {
+    "id": "honey-comb-wild-34",
+    "name": "Wild Raw Honeycomb with Pure Honey",
+    "banglaName": "সুন্দরবনের চাকসহ মধু",
+    "category": "honey",
+    "categoryBangla": "মধু ও প্রাকৃতিক মিষ্টি",
+    "isBestSeller": false,
+    "rating": 5,
+    "reviewsCount": 43,
+    "discountPercent": 15,
+    "image": "../assets/products/honey-comb-wild-34.jpg",
+    "gallery": [
+      "../assets/products/honey-comb-wild-34.jpg"
+    ],
+    "description": "মৌমাছির প্রাকৃতিক চাকের মোমসহ সরাসরি সংরক্ষিত অপরিশোধিত কাঁচা মধু। মোম চিবিয়ে রস আস্বাদন করার রাজকীয় তৃপ্তি এবং প্রাকৃতিক মৌমাছির বিষ, প্রোপোলিস ও পোলেনের সম্পূর্ণ উপকারিতা।",
+    "benefits": [
+      "১০০% অপরিশোধিত প্রাকৃতিক চাকের টুকরোসহ আসল মধু",
+      "অ্যালার্জি ও শ্বাসনালীর প্রদাহ দূর করতে বিশেষ কার্যকর",
+      "প্রোপোলিস ও প্রাকৃতিক ভিটামিন এনজাইম সমৃদ্ধ"
+    ],
+    "variants": [
+      {
+        "size": "৫০০ গ্রাম জার",
+        "price": 850,
+        "originalPrice": 1000,
+        "stock": 20
+      },
+      {
+        "size": "১ কেজি জার",
+        "price": 1650,
+        "originalPrice": 1950,
+        "stock": 12
+      }
+    ],
+    "reviews": [
+      {
+        "name": "সোহেল রানা",
+        "rating": 5,
+        "date": "৩ দিন আগে",
+        "comment": "চাকের মোম চিবিয়ে খাওয়ার ফিলটাই আলাদা! দারুণ অরিজিনাল।"
+      }
+    ]
+  },
+  {
+    "id": "salt-himalayan-pink-35",
+    "name": "Himalayan Pink Rock Salt (Fine Granules)",
+    "banglaName": "খাঁটি হিমালয়ান পিংক সল্ট",
+    "category": "spices",
+    "categoryBangla": "প্রাকৃতিক মসলা ও লবণ",
+    "isBestSeller": false,
+    "rating": 4.9,
+    "reviewsCount": 65,
+    "discountPercent": 10,
+    "image": "../assets/products/salt-himalayan-pink-35.jpg",
+    "gallery": [
+      "../assets/products/salt-himalayan-pink-35.jpg"
+    ],
+    "description": "হিমালয় পর্বতের প্রাচীন খনি থেকে উত্তোলিত ৮৪টিরও বেশি প্রাকৃতিক খনিজ সমৃদ্ধ খাঁটি পিংক সল্ট। এটি সাধারণ টেবিল লবণের ক্ষতিকর প্রভাবমুক্ত এবং রক্তচাপ ও ইলেক্ট্রোলাইট নিয়ন্ত্রণে সহায়ক।",
+    "benefits": [
+      "৮৪টি প্রাকৃতিক ট্রেস মিনারেলসে সমৃদ্ধ",
+      "শরীরের পিএইচ লেভেল এবং রক্তচাপের ভারসাম্য বজায় রাখে",
+      "টক্সিনমুক্ত ও ক্ষতিকর রিফাইনিং কেমিক্যাল ছাড়া প্রাকৃতিক লবণ"
+    ],
+    "variants": [
+      {
+        "size": "৫০০ গ্রাম",
+        "price": 150,
+        "originalPrice": 170,
+        "stock": 60
+      },
+      {
+        "size": "১ কেজি",
+        "price": 280,
+        "originalPrice": 320,
+        "stock": 35
+      }
+    ],
+    "reviews": [
+      {
+        "name": "নাসরিন সুলতানা",
+        "rating": 5,
+        "date": "৪ দিন আগে",
+        "comment": "রান্নায় সাধারণ লবণের বদলে পিংক সল্ট ব্যবহার করছি, স্বাদ খুব ভালো।"
+      }
+    ]
+  },
+  {
+    "id": "dates-mabroom-saudi-36",
+    "name": "Saudi Premium Mabroom Dates",
+    "banglaName": "সৌদি মাবরুম খেজুর",
+    "category": "nuts",
+    "categoryBangla": "প্রিমিয়াম খেজুর ও বাদাম",
+    "isBestSeller": false,
+    "rating": 4.9,
+    "reviewsCount": 88,
+    "discountPercent": 12,
+    "image": "../assets/products/dates-mabroom-saudi-36.jpg",
+    "gallery": [
+      "../assets/products/dates-mabroom-saudi-36.jpg"
+    ],
+    "description": "সৌদি আরবের মদিনা মোনাওয়ারা থেকে সংগৃহীত লম্বাটে আকৃতির সুস্বাদু ও মাঝারি মিষ্টির মাবরুম খেজুর। এর চামড়া মসৃণ এবং ভেতরটা চিবিয়ে খাওয়ার মতো নরম ও সুস্বাদু।",
+    "benefits": [
+      "প্রাকৃতিক ফাইবার ও পটাশিয়ামে ভরপুর",
+      "হজমের উন্নতি ঘটায় ও তাত্ক্ষণিক মিষ্টির চাহিদা পূরণ করে",
+      "গর্ভবতী মা ও শিশুদের পুষ্টির নিরাপদ আধার"
+    ],
+    "variants": [
+      {
+        "size": "৫০০ গ্রাম",
+        "price": 650,
+        "originalPrice": 740,
+        "stock": 30
+      },
+      {
+        "size": "১ কেজি",
+        "price": 1250,
+        "originalPrice": 1420,
+        "stock": 18
+      }
+    ],
+    "reviews": [
+      {
+        "name": "হাসিবুল ইসলাম",
+        "rating": 5,
+        "date": "২ দিন আগে",
+        "comment": "খেজুরগুলো খুব ফ্রেশ ও সুস্বাদু ছিল।"
+      }
+    ]
+  },
+  {
+    "id": "combo-health-pack-37",
+    "name": "Family Health & Energy Mega Combo",
+    "banglaName": "ফ্যামিলি হেলথ মেগা কম্বো",
+    "category": "honey",
+    "categoryBangla": "স্পেশাল ডিসকাউন্ট কম্বো",
+    "isBestSeller": true,
+    "rating": 5,
+    "reviewsCount": 110,
+    "discountPercent": 20,
+    "image": "../assets/products/combo-health-pack-37.jpg",
+    "gallery": [
+      "../assets/products/combo-health-pack-37.jpg"
+    ],
+    "description": "সুন্দরবনের কাঁচা মধু ৫০০ গ্রাম + পাবনার খাঁটি গাওয়া ঘি ৫০০ গ্রাম + ঘানিভাঙা সরিষার তেল ১ লিটার — পুরো পরিবারের স্বাস্থ্য ও রোগ প্রতিরোধ ক্ষমতার জন্য পরিপূর্ণ অর্গানিক সুপার কম্বো প্যাকেজ।",
+    "benefits": [
+      "এক প্যাকেজেই পরিবারের প্রয়োজনীয় তিনটি সেরা অর্গানিক খাদ্য",
+      "আলাদা কেনার চেয়ে ২০% সাশ্রয়ী অফার মূল্য",
+      "১০০% খাঁটি ও বিশুদ্ধতার সর্বোচ্চ নিশ্চয়তা"
+    ],
+    "variants": [
+      {
+        "size": "১ মেগা প্যাক (৩টি পণ্য)",
+        "price": 1750,
+        "originalPrice": 2190,
+        "stock": 25
+      }
+    ],
+    "reviews": [
+      {
+        "name": "মুস্তাফিজুর রহমান",
+        "rating": 5,
+        "date": "১ দিন আগে",
+        "comment": "এক সাথে খাঁটি মধু, ঘি ও সরিষার তেল পেয়ে অনেক টাকা বাঁচল। পণ্যের মান টপ নচ।"
+      }
+    ]
+  },
+  {
+    "id": "combo-royal-nuts-38",
+    "name": "Royal 4-in-1 Dry Fruits & Honey Nut Combo",
+    "banglaName": "রয়্যাল ড্রাই ফ্রুটস ও হানি নাট কম্বো",
+    "category": "nuts",
+    "categoryBangla": "স্পেশাল ডিসকাউন্ট কম্বো",
+    "isBestSeller": true,
+    "rating": 5,
+    "reviewsCount": 94,
+    "discountPercent": 18,
+    "image": "../assets/products/combo-royal-nuts-38.jpg",
+    "gallery": [
+      "../assets/products/combo-royal-nuts-38.jpg"
+    ],
+    "description": "প্রিমিয়াম হানি নাট জার ৫০০ গ্রাম + রোস্টেড কাজুবাদাম ২৫০ গ্রাম + ক্যালিফোর্নিয়া কাঠবাদাম ২৫০ গ্রাম + মদিনার আজওয়া খেজুর ২৫০ গ্রাম — অভিজাত ড্রাই ফ্রুটসের এক লোভনীয় মহা আয়োজন।",
+    "benefits": [
+      "রোজ সকালে মস্তিষ্কের তীক্ষ্ণতা ও দীর্ঘমেয়াদী দৈহিক শক্তি বৃদ্ধি করে",
+      "আলাদা কেনার চেয়ে সাশ্রয়ী রাজকীয় প্যাকেজ",
+      "উপহার দেওয়ার জন্য আকর্ষণীয় ও প্রিমিয়াম বক্স প্যাকেজিং"
+    ],
+    "variants": [
+      {
+        "size": "১ রয়্যাল প্যাক (৪টি পণ্য)",
+        "price": 1980,
+        "originalPrice": 2420,
+        "stock": 20
+      }
+    ],
+    "reviews": [
+      {
+        "name": "মাহমুদুল করিম",
+        "rating": 5,
+        "date": "২ দিন আগে",
+        "comment": "প্যাকেজিং আর বাদামের কোয়ালিটি সত্যিই অসাধারণ। ধন্যবাদ আসবিমার্ট।"
+      }
+    ]
+  },
+  {
+    "id": "spices-green-cardamom-31",
+    "name": "Premium Green Cardamom (সবুজ এলাচ)",
+    "banglaName": "প্রিমিয়াম সবুজ এলাচ",
+    "category": "spices",
+    "categoryBangla": "খাঁটি মসলা ও অর্গানিক চা",
+    "isBestSeller": false,
+    "rating": 5,
+    "reviewsCount": 68,
+    "discountPercent": 12,
+    "image": "../assets/products/spices-green-cardamom-31.jpg",
+    "gallery": [
+      "../assets/products/spices-green-cardamom-31.jpg"
+    ],
+    "description": "সরাসরি বাগান থেকে বাছাইকৃত বড় দানা ও তীব্র সুগন্ধিযুক্ত প্রিমিয়াম সবুজ এলাচ। পোলাও, বিরিয়ানি, পায়েস ও মসলা চায়ের স্বাদ ও ঘ্রাণ বহুগুণে বাড়িয়ে তোলে।",
+    "benefits": [
+      "শতভাগ বাছাইকৃত বড় দানা ও তাজা সবুজ এলাচ",
+      "হজমশক্তি বাড়ায় ও মুখের দুর্গন্ধ দূর করে",
+      "কোনো কৃত্রিম রঙ বা প্রিজারভেটিভ মুক্ত"
+    ],
+    "variants": [
+      {
+        "size": "১০০ গ্রাম",
+        "price": 380,
+        "originalPrice": 430,
+        "stock": 40
+      },
+      {
+        "size": "২৫০ গ্রাম",
+        "price": 920,
+        "originalPrice": 1050,
+        "stock": 25
+      }
+    ],
+    "reviews": [
+      {
+        "name": "সাবিনা ইয়াসমিন",
+        "rating": 5,
+        "date": "৪ দিন আগে",
+        "comment": "এলাচের ঘ্রাণ অসাধারণ! একদম ফ্রেশ ও বড় দানা।"
+      }
+    ]
+  }
+];
