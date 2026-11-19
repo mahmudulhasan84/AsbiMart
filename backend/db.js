@@ -48,44 +48,172 @@ ensureFileExists(FILES.users, [
   }
 ]);
 
-ensureFileExists(FILES.orders, [
+const SEED_ORDERS = [
   {
-    orderId: 'ASBI-782910',
+    orderId: "ASBI-836892",
+    userId: null,
     customer: {
-      name: 'আসবি (Asbi)',
-      phone: '01700000000',
-      address: 'বাড়ি #১২, রোড #০৪, সেক্টর #১১, উত্তরা, ঢাকা-১২৩০',
-      area: 'dhaka'
+      name: "Mahmudul Hasan (4411)",
+      phone: "01656754754",
+      email: "mahmudulhasan18484@gmail.com",
+      address: "aa",
+      area: "dhaka_inside"
     },
     items: [
       {
-        id: 'honey-sundarban-01',
-        name: 'সুন্দরবনের কাঁচা মধু',
-        variant: '৫০০ গ্রাম',
+        id: "ghee-buffalo-07",
+        name: "মহিষের খাঁটি ঘি",
+        size: "৫০০ গ্রাম",
+        price: 880,
+        quantity: 1,
+        image: "../assets/products/ghee-buffalo-07.jpg"
+      }
+    ],
+    deliveryCharge: 60,
+    totalAmount: 940,
+    paymentMethod: "Cash on Delivery",
+    paymentGateway: "Cash on Delivery",
+    paymentStatus: "Cash on Delivery",
+    transactionId: "",
+    senderNumber: "",
+    gatewayPaymentId: "",
+    status: "অর্ডার গৃহীত হয়েছে (Pending)",
+    statusCode: "pending",
+    courier: "রেডএক্স / স্টিডফাস্ট কুরিয়ার",
+    trackingCode: "TRK-588278",
+    notes: "",
+    createdAt: "2026-11-19T05:36:11.745Z"
+  },
+  {
+    orderId: "ASBI-806302",
+    userId: null,
+    customer: {
+      name: "Mahmudul Hasan (4411)",
+      phone: "01656754754",
+      email: "mahmudulhasan18484@gmail.com",
+      address: "ghjf",
+      area: "dhaka_inside"
+    },
+    items: [
+      {
+        id: "oil-sesame-til-12",
+        name: "খাঁটি তিলের তেল",
+        size: "২৫০ মিলি",
+        price: 290,
+        quantity: 1,
+        image: "https://images.unsplash.com/photo-1608571423902-eed4a5ad8108?auto=format&fit=crop&w=800&q=80"
+      }
+    ],
+    deliveryCharge: 60,
+    totalAmount: 350,
+    paymentMethod: "Cash on Delivery",
+    paymentGateway: "Cash on Delivery",
+    paymentStatus: "Cash on Delivery",
+    transactionId: "",
+    senderNumber: "",
+    gatewayPaymentId: "",
+    status: "অর্ডার গৃহীত হয়েছে (Pending)",
+    statusCode: "pending",
+    courier: "রেডএক্স / স্টিডফাস্ট কুরিয়ার",
+    trackingCode: "TRK-139391",
+    notes: "",
+    createdAt: "2026-11-19T05:30:05.209Z"
+  },
+  {
+    orderId: "ASBI-924570",
+    userId: null,
+    customer: {
+      name: "Mahmudul Hasan (4411)",
+      phone: "01656754754",
+      email: "mahmudulhasan18484@gmail.com",
+      address: "greyeuy",
+      area: "dhaka_inside"
+    },
+    items: [
+      {
+        id: "honey-nut-premium-05",
+        name: "প্রিমিয়াম হানি নাট জার",
+        size: "৫০০ গ্রাম",
+        price: 790,
+        quantity: 1,
+        image: "../assets/products/honey-nut-premium-05.jpg"
+      }
+    ],
+    deliveryCharge: 60,
+    totalAmount: 850,
+    paymentMethod: "bKash Online Payment",
+    paymentGateway: "bkash",
+    paymentStatus: "Pending Payment",
+    transactionId: "",
+    senderNumber: "",
+    gatewayPaymentId: "",
+    status: "অর্ডার গৃহীত হয়েছে (Pending)",
+    statusCode: "pending",
+    courier: "রেডএক্স / স্টিডফাস্ট কুরিয়ার",
+    trackingCode: "TRK-615661",
+    notes: "",
+    createdAt: "2026-11-19T05:26:33.593Z"
+  },
+  {
+    orderId: "ASBI-782910",
+    customer: {
+      name: "আসবি (Asbi)",
+      phone: "01700000000",
+      address: "বাড়ি #১২, রোড #০৪, সেক্টর #১১, উত্তরা, ঢাকা-১২৩০",
+      area: "dhaka"
+    },
+    items: [
+      {
+        id: "honey-sundarban-01",
+        name: "সুন্দরবনের কাঁচা মধু",
+        variant: "৫০০ গ্রাম",
         price: 650,
         quantity: 1,
-        image: 'https://images.unsplash.com/photo-1558642452-9d2a7deb7f62?auto=format&fit=crop&w=300&q=80'
+        image: "https://images.unsplash.com/photo-1558642452-9d2a7deb7f62?auto=format&fit=crop&w=300&q=80"
       },
       {
-        id: 'ghee-pabna-06',
-        name: 'খাঁটি গাওয়া ঘি',
-        variant: '৫০০ গ্রাম',
+        id: "ghee-pabna-06",
+        name: "খাঁটি গাওয়া ঘি",
+        variant: "৫০০ গ্রাম",
         price: 950,
         quantity: 1,
-        image: 'https://images.unsplash.com/photo-1589985270826-4b7bb135bc9d?auto=format&fit=crop&w=300&q=80'
+        image: "https://images.unsplash.com/photo-1589985270826-4b7bb135bc9d?auto=format&fit=crop&w=300&q=80"
       }
     ],
     deliveryCharge: 60,
     totalAmount: 1660,
-    paymentMethod: 'cod',
-    status: 'অন ডেলিভারি (On Delivery)',
-    statusCode: 'shipped',
-    courier: 'রেডএক্স (RedX Express)',
-    trackingCode: 'REDX-ASBI-99238',
-    notes: 'প্যাকেজ সাবধানে পাঠাবেন।',
-    createdAt: new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString()
+    paymentMethod: "cod",
+    status: "অন ডেলিভারি (On Delivery)",
+    statusCode: "shipped",
+    courier: "রেডএক্স (RedX Express)",
+    trackingCode: "REDX-ASBI-99238",
+    notes: "প্যাকেজ সাবধানে পাঠাবেন।",
+    createdAt: "2026-11-18T04:04:15.775Z"
   }
-]);
+];
+
+// Ensure all seed orders exist in FILES.orders
+(function mergeSeedOrders() {
+  ensureFileExists(FILES.orders, SEED_ORDERS);
+  try {
+    const existing = readData('orders');
+    const map = new Map();
+    existing.forEach(o => { if (o.orderId) map.set(o.orderId.toLowerCase(), o); });
+    let changed = false;
+    SEED_ORDERS.forEach(s => {
+      if (!map.has(s.orderId.toLowerCase())) {
+        existing.unshift(s);
+        map.set(s.orderId.toLowerCase(), s);
+        changed = true;
+      }
+    });
+    if (changed) {
+      writeData('orders', existing);
+    }
+  } catch (e) {
+    console.error('[DB Orders Init Error]:', e);
+  }
+})();
 
 ensureFileExists(FILES.messages, []);
 ensureFileExists(FILES.products, []);
