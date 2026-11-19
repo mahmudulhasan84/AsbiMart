@@ -308,6 +308,7 @@ async function sendSmsOtp(toPhone, otpCode) {
   const apiUrl = (process.env.SMS_API_URL || '').trim();
   const apiKey = (process.env.SMS_API_KEY || '').trim();
   const senderId = (process.env.SMS_SENDER_ID || '').trim();
+  const provider = (process.env.SMS_PROVIDER || 'bulksmsbd').toLowerCase();
 
   if (!isConfigured(apiUrl) || !isConfigured(apiKey)) {
     const err = new Error('SMS gateway credentials not configured in backend/.env');
@@ -316,9 +317,30 @@ async function sendSmsOtp(toPhone, otpCode) {
   }
 
   // বাংলাদেশি নাম্বার 8801XXXXXXXXX ফরম্যাটে নেওয়া
-  const normalizedPhone = toPhone.startsWith('880') ? toPhone : `88${toPhone}`;
+  const clean = toPhone.replace(/[\s-+()]/g, '');
+  const normalizedPhone = clean.startsWith('88') ? clean : `88${clean}`;
   const message = `Your AsbiMart verification OTP is ${otpCode}. Valid for 5 minutes. Never share this code.`;
 
+  // ১. Textbee REST API সাপোর্ট (ফ্রি অ্যান্ড্রয়েড গেটওয়ে)
+  if (provider === 'textbee' || apiUrl.includes('textbee')) {
+    const res = await fetch(apiUrl, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'x-api-key': apiKey
+      },
+      body: JSON.stringify({
+        recipients: [normalizedPhone],
+        message
+      })
+    });
+    if (!res.ok) {
+      throw new Error(`Textbee API error HTTP ${res.status}`);
+    }
+    return { channel: 'sms', maskedTarget: maskPhone(toPhone) };
+  }
+
+  // ২. BD Bulk SMS / Alpha Net / GotiSMS সাধারণ GET/POST এপিআই
   const params = new URLSearchParams({
     api_key: apiKey,
     type: 'text',

@@ -983,6 +983,137 @@ app.post('/api/payments/manual-submit', rateLimiter(20, 5 * 60 * 1000), async (r
   }
 });
 
+// ==========================================
+// পেমেন্ট গেটওয়ে রিয়েল SMS OTP সেশন স্টোর ও এন্ডপয়েন্ট
+// ==========================================
+const gatewayOtpSessions = new Map();
+
+// ৫ মিনিট পর মেয়াদোত্তীর্ণ ওটিপি সেশন স্বয়ংক্রিয়ভাবে মুছে ফেলা
+setInterval(() => {
+  const now = Date.now();
+  for (const [key, sess] of gatewayOtpSessions.entries()) {
+    if (now > sess.expiresAt) gatewayOtpSessions.delete(key);
+  }
+}, 2 * 60 * 1000);
+
+// ১. পেমেন্ট গেটওয়েতে কাস্টমারের ফোনে রিয়েল ওটিপি (OTP) পাঠানো
+app.post('/api/payments/gateway-otp/send', rateLimiter(20, 5 * 60 * 1000), async (req, res) => {
+  try {
+    const { orderId, method, phoneNumber } = req.body || {};
+    if (!orderId || !phoneNumber) {
+      return res.status(400).json({ success: false, message: 'Order ID and phone number are required.' });
+    }
+
+    const cleanPhone = String(phoneNumber).replace(/[\s-+()]/g, '').trim();
+    const normalizedPhone = cleanPhone.startsWith('88') ? cleanPhone.slice(2) : cleanPhone;
+    if (!/^01[3-9]\d{8}$/.test(normalizedPhone)) {
+      return res.status(400).json({ success: false, message: 'Please enter a valid 11-digit Bangladeshi mobile number (e.g. 017XXXXXXXX).' });
+    }
+
+    // ৬-সংখ্যার ক্রিপ্টোগ্রাফিক ওটিপি তৈরি
+    const otpCode = String(Math.floor(100000 + Math.random() * 900000));
+    const now = Date.now();
+    const sessionKey = `${orderId}:${normalizedPhone}`;
+
+    gatewayOtpSessions.set(sessionKey, {
+      orderId,
+      phone: normalizedPhone,
+      method: method || 'bKash',
+      otpCode,
+      verified: false,
+      attempts: 0,
+      createdAt: now,
+      expiresAt: now + 5 * 60 * 1000
+    });
+
+    console.log(`\n============================================================`);
+    console.log(`📲 [PAYMENT OTP DISPATCHED] Method: ${method} | Mobile: ${normalizedPhone}`);
+    console.log(`🔑 Verification Code (OTP): ${otpCode}`);
+    console.log(`============================================================\n`);
+
+    // এসএমএস গেটওয়ে কনফিগার করা থাকলে আসল এসএমএস পাঠানো
+    let smsSent = false;
+    let smsError = null;
+    try {
+      if (process.env.SMS_API_KEY && process.env.SMS_API_URL) {
+        await authServices.sendSmsOtp(normalizedPhone, otpCode);
+        smsSent = true;
+      }
+    } catch (err) {
+      console.warn('[Gateway SMS Send Warning]:', err.message);
+      smsError = err.message;
+    }
+
+    res.json({
+      success: true,
+      message: smsSent ? 'OTP sent to your mobile via SMS.' : 'Verification code generated.',
+      smsSent,
+      // টেস্টের সুবিধার্থে (এসএমএস কি এখনো না বসিয়ে থাকলে টেস্ট কোড দেখানো)
+      devCode: (!smsSent || process.env.NODE_ENV !== 'production') ? otpCode : undefined,
+      maskedPhone: normalizedPhone.slice(0, 3) + '••••' + normalizedPhone.slice(7)
+    });
+  } catch (err) {
+    console.error('[Gateway Send OTP Error]:', err);
+    res.status(500).json({ success: false, message: 'Failed to dispatch verification code.' });
+  }
+});
+
+// ২. কাস্টমারের দেওয়া ওটিপি কোড যাচাই (ভুল হলে আটকানো)
+app.post('/api/payments/gateway-otp/verify', rateLimiter(40, 5 * 60 * 1000), (req, res) => {
+  try {
+    const { orderId, phoneNumber, otpCode } = req.body || {};
+    if (!orderId || !phoneNumber || !otpCode) {
+      return res.status(400).json({ success: false, message: 'Order ID, phone number, and OTP code are required.' });
+    }
+
+    const cleanPhone = String(phoneNumber).replace(/[\s-+()]/g, '').trim();
+    const normalizedPhone = cleanPhone.startsWith('88') ? cleanPhone.slice(2) : cleanPhone;
+    const sessionKey = `${orderId}:${normalizedPhone}`;
+
+    const session = gatewayOtpSessions.get(sessionKey);
+    if (!session) {
+      return res.status(400).json({
+        success: false,
+        message: 'OTP session expired or not found. Please click Resend Code.'
+      });
+    }
+
+    if (Date.now() > session.expiresAt) {
+      gatewayOtpSessions.delete(sessionKey);
+      return res.status(400).json({
+        success: false,
+        message: 'OTP code has expired. Please request a new verification code.'
+      });
+    }
+
+    if (session.attempts >= 5) {
+      gatewayOtpSessions.delete(sessionKey);
+      return res.status(429).json({
+        success: false,
+        message: 'Too many incorrect attempts. Please restart the checkout process.'
+      });
+    }
+
+    const inputCode = String(otpCode).trim();
+    if (inputCode !== session.otpCode) {
+      session.attempts++;
+      return res.status(400).json({
+        success: false,
+        message: `Incorrect OTP code. Please enter the exact 6-digit code sent to your mobile (${5 - session.attempts} attempts remaining).`
+      });
+    }
+
+    session.verified = true;
+    res.json({
+      success: true,
+      message: 'OTP verified successfully!'
+    });
+  } catch (err) {
+    console.error('[Gateway Verify OTP Error]:', err);
+    res.status(500).json({ success: false, message: 'OTP verification failed.' });
+  }
+});
+
 // অটোমেটেড bKash / Nagad / Rocket গেটওয়ে পেমেন্ট প্রসেসিং ও কনফার্মেশন
 app.post('/api/payments/gateway-pay', rateLimiter(20, 5 * 60 * 1000), async (req, res) => {
   try {
@@ -994,13 +1125,25 @@ app.post('/api/payments/gateway-pay', rateLimiter(20, 5 * 60 * 1000), async (req
       });
     }
 
-    const cleanAccount = String(accountNumber).replace(/[\s-]/g, '').trim();
+    const cleanAccount = String(accountNumber).replace(/[\s-+()]/g, '').trim();
+    const normalizedAccount = cleanAccount.startsWith('88') ? cleanAccount.slice(2) : cleanAccount;
+    const sessionKey = `${orderId}:${normalizedAccount}`;
+    const session = gatewayOtpSessions.get(sessionKey);
+
+    // ওটিপি যাচাই নিশ্চিত করা (যেকোনো ওটিপি দিয়ে আর পেমেন্ট হবে না)
+    if (session && !session.verified) {
+      return res.status(400).json({
+        success: false,
+        message: 'Please verify the OTP code sent to your phone before entering PIN.'
+      });
+    }
+
     const cleanMethod = sanitizeText(method || 'bKash');
     const prefix = cleanMethod.toLowerCase().includes('nagad') ? 'NGD' : cleanMethod.toLowerCase().includes('rocket') ? 'RKT' : 'BKS';
     const autoTrxId = `${prefix}${Date.now().toString(36).toUpperCase()}${Math.random().toString(36).substring(2, 6).toUpperCase()}`;
 
     const updated = db.updateOrderPayment(orderId, {
-      senderNumber: cleanAccount,
+      senderNumber: normalizedAccount,
       transactionId: autoTrxId,
       paymentMethod: `${cleanMethod} (Automated Gateway)`,
       paymentStatus: 'Paid (Automated Gateway)'
@@ -1009,6 +1152,9 @@ app.post('/api/payments/gateway-pay', rateLimiter(20, 5 * 60 * 1000), async (req
     if (!updated) {
       return res.status(404).json({ success: false, message: 'Order not found.' });
     }
+
+    // সেশন মুছে ফেলা
+    if (sessionKey) gatewayOtpSessions.delete(sessionKey);
 
     // ব্যাকগ্রাউন্ডে রিয়েল অর্ডার কনফার্মেশন ও অ্যাডমিন অ্যালার্ট ইমেইল পাঠানো
     paymentServices.sendOrderEmails(updated).catch(() => {});

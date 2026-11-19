@@ -2160,35 +2160,93 @@ function closePaymentGateway() {
   if (gatewayCountdownInterval) clearInterval(gatewayCountdownInterval);
 }
 
-function proceedGatewayToOtp() {
+function showGatewayError(msg) {
+  const box = document.getElementById('gatewayErrorNotice');
+  const txt = document.getElementById('gatewayErrorMsg');
+  if (box && txt) {
+    txt.textContent = msg;
+    box.classList.remove('hidden');
+  } else {
+    alert(msg);
+  }
+}
+
+function hideGatewayError() {
+  const box = document.getElementById('gatewayErrorNotice');
+  if (box) box.classList.add('hidden');
+}
+
+async function proceedGatewayToOtp() {
+  hideGatewayError();
   const accountInput = document.getElementById('gatewayAccountInput');
   const termsCheck = document.getElementById('gatewayTermsCheck');
-  const val = accountInput ? accountInput.value.replace(/[\s-]/g, '').trim() : '';
+  const toOtpBtn = document.getElementById('gatewayToOtpBtn');
 
-  if (!/^01[3-9]\d{8}$/.test(val)) {
-    alert('Please enter a valid 11-digit Bangladeshi mobile number (e.g. 017XXXXXXXX).');
+  let val = accountInput ? accountInput.value.replace(/[\s-+()]/g, '').trim() : '';
+  if (val.startsWith('88')) val = val.slice(2);
+  if (val.length === 10 && val.startsWith('1')) val = '0' + val;
+
+  if (val.length !== 11 || !/^01[3-9]\d{8}$/.test(val)) {
+    showGatewayError('Please enter a valid 11-digit mobile number (e.g. 017XXXXXXXX)');
+    if (accountInput) accountInput.focus();
     return;
   }
   if (termsCheck && !termsCheck.checked) {
-    alert('Please agree to the Terms & Conditions to proceed.');
+    showGatewayError('Please agree to the Terms & Conditions to proceed.');
     return;
   }
 
-  const targetDisplay = document.getElementById('gatewayTargetNumberDisplay');
-  if (targetDisplay) targetDisplay.textContent = val;
-
-  document.getElementById('gatewayStepPhone').classList.add('hidden');
-  document.getElementById('gatewayStepOtp').classList.remove('hidden');
-  document.getElementById('gatewayStepPin').classList.add('hidden');
-  document.getElementById('gatewayStepProcessing').classList.add('hidden');
-
-  const otpInput = document.getElementById('gatewayOtpInput');
-  if (otpInput) {
-    otpInput.value = '';
-    otpInput.focus();
+  const origBtnText = toOtpBtn ? toOtpBtn.innerHTML : 'Proceed to OTP →';
+  if (toOtpBtn) {
+    toOtpBtn.disabled = true;
+    toOtpBtn.innerHTML = '<span>Sending OTP...</span>';
   }
 
-  startGatewayOtpCountdown();
+  try {
+    const orderId = currentGatewayOrderData ? currentGatewayOrderData.orderId : '';
+    const res = await fetch('/api/payments/gateway-otp/send', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        orderId,
+        method: currentGatewayMethod || 'bKash',
+        phoneNumber: val
+      })
+    });
+    const data = await res.json();
+    if (!res.ok || !data.success) {
+      showGatewayError(data.message || 'Failed to send OTP code. Please try again.');
+      return;
+    }
+
+    const targetDisplay = document.getElementById('gatewayTargetNumberDisplay');
+    if (targetDisplay) targetDisplay.textContent = val;
+
+    document.getElementById('gatewayStepPhone').classList.add('hidden');
+    document.getElementById('gatewayStepOtp').classList.remove('hidden');
+    document.getElementById('gatewayStepPin').classList.add('hidden');
+    document.getElementById('gatewayStepProcessing').classList.add('hidden');
+
+    const otpInput = document.getElementById('gatewayOtpInput');
+    if (otpInput) {
+      otpInput.value = '';
+      otpInput.focus();
+    }
+
+    startGatewayOtpCountdown();
+
+    if (data.devCode) {
+      console.log(`[TESTING OTP CODE]: ${data.devCode}`);
+      showGatewayError(`Verification Code sent to ${val}. (Test OTP: ${data.devCode})`);
+    }
+  } catch (err) {
+    showGatewayError('Server connection failed. Please try again.');
+  } finally {
+    if (toOtpBtn) {
+      toOtpBtn.disabled = false;
+      toOtpBtn.innerHTML = origBtnText;
+    }
+  }
 }
 
 function startGatewayOtpCountdown() {
@@ -2215,12 +2273,35 @@ function startGatewayOtpCountdown() {
   }, 1000);
 }
 
-function resendGatewayOtp() {
-  startGatewayOtpCountdown();
-  alert('A new 6-digit OTP verification code has been dispatched to your mobile.');
+async function resendGatewayOtp() {
+  const accountInput = document.getElementById('gatewayAccountInput');
+  let val = accountInput ? accountInput.value.replace(/[\s-+()]/g, '').trim() : '';
+  if (val.startsWith('88')) val = val.slice(2);
+  if (val.length === 10 && val.startsWith('1')) val = '0' + val;
+
+  const orderId = currentGatewayOrderData ? currentGatewayOrderData.orderId : '';
+  try {
+    const res = await fetch('/api/payments/gateway-otp/send', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ orderId, method: currentGatewayMethod || 'bKash', phoneNumber: val })
+    });
+    const data = await res.json();
+    if (data.success) {
+      startGatewayOtpCountdown();
+      if (data.devCode) {
+        showGatewayError(`New OTP Code sent to ${val}. (Test OTP: ${data.devCode})`);
+      } else {
+        showGatewayError(`New 6-digit OTP code sent to ${val}.`);
+      }
+    }
+  } catch (e) {
+    startGatewayOtpCountdown();
+  }
 }
 
 function backGatewayToPhone() {
+  hideGatewayError();
   document.getElementById('gatewayStepPhone').classList.remove('hidden');
   document.getElementById('gatewayStepOtp').classList.add('hidden');
   document.getElementById('gatewayStepPin').classList.add('hidden');
@@ -2228,27 +2309,72 @@ function backGatewayToPhone() {
   if (gatewayCountdownInterval) clearInterval(gatewayCountdownInterval);
 }
 
-function proceedGatewayToPin() {
+async function proceedGatewayToPin() {
+  hideGatewayError();
+  const accountInput = document.getElementById('gatewayAccountInput');
   const otpInput = document.getElementById('gatewayOtpInput');
+  const toPinBtn = document.getElementById('gatewayToPinBtn');
+
+  let phoneNumber = accountInput ? accountInput.value.replace(/[\s-+()]/g, '').trim() : '';
+  if (phoneNumber.startsWith('88')) phoneNumber = phoneNumber.slice(2);
+  if (phoneNumber.length === 10 && phoneNumber.startsWith('1')) phoneNumber = '0' + phoneNumber;
+
   const otpVal = otpInput ? otpInput.value.trim() : '';
   if (otpVal.length < 4) {
-    alert('Please enter the verification code sent to your mobile.');
+    showGatewayError('Please enter the 6-digit verification code sent to your mobile.');
+    if (otpInput) otpInput.focus();
     return;
   }
 
-  document.getElementById('gatewayStepPhone').classList.add('hidden');
-  document.getElementById('gatewayStepOtp').classList.add('hidden');
-  document.getElementById('gatewayStepPin').classList.remove('hidden');
-  document.getElementById('gatewayStepProcessing').classList.add('hidden');
+  const origBtnText = toPinBtn ? toPinBtn.innerHTML : 'Verify OTP →';
+  if (toPinBtn) {
+    toPinBtn.disabled = true;
+    toPinBtn.innerHTML = '<span>Verifying...</span>';
+  }
 
-  const pinInput = document.getElementById('gatewayPinInput');
-  if (pinInput) {
-    pinInput.value = '';
-    pinInput.focus();
+  try {
+    const orderId = currentGatewayOrderData ? currentGatewayOrderData.orderId : '';
+    const res = await fetch('/api/payments/gateway-otp/verify', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        orderId,
+        phoneNumber,
+        otpCode: otpVal
+      })
+    });
+    const data = await res.json();
+    if (!res.ok || !data.success) {
+      showGatewayError(data.message || 'Incorrect OTP code. Please enter the valid code.');
+      if (otpInput) {
+        otpInput.value = '';
+        otpInput.focus();
+      }
+      return;
+    }
+
+    document.getElementById('gatewayStepPhone').classList.add('hidden');
+    document.getElementById('gatewayStepOtp').classList.add('hidden');
+    document.getElementById('gatewayStepPin').classList.remove('hidden');
+    document.getElementById('gatewayStepProcessing').classList.add('hidden');
+
+    const pinInput = document.getElementById('gatewayPinInput');
+    if (pinInput) {
+      pinInput.value = '';
+      pinInput.focus();
+    }
+  } catch (err) {
+    showGatewayError('Server verification error. Please try again.');
+  } finally {
+    if (toPinBtn) {
+      toPinBtn.disabled = false;
+      toPinBtn.innerHTML = origBtnText;
+    }
   }
 }
 
 function backGatewayToOtp() {
+  hideGatewayError();
   document.getElementById('gatewayStepPhone').classList.add('hidden');
   document.getElementById('gatewayStepOtp').classList.remove('hidden');
   document.getElementById('gatewayStepPin').classList.add('hidden');
@@ -2256,17 +2382,22 @@ function backGatewayToOtp() {
 }
 
 async function executeAutomatedGatewayPayment() {
+  hideGatewayError();
   if (!currentGatewayOrderData) return;
   const accountInput = document.getElementById('gatewayAccountInput');
   const otpInput = document.getElementById('gatewayOtpInput');
   const pinInput = document.getElementById('gatewayPinInput');
 
-  const accountNumber = accountInput ? accountInput.value.replace(/[\s-]/g, '').trim() : '';
+  let accountNumber = accountInput ? accountInput.value.replace(/[\s-+()]/g, '').trim() : '';
+  if (accountNumber.startsWith('88')) accountNumber = accountNumber.slice(2);
+  if (accountNumber.length === 10 && accountNumber.startsWith('1')) accountNumber = '0' + accountNumber;
+
   const otp = otpInput ? otpInput.value.trim() : '';
   const pin = pinInput ? pinInput.value.trim() : '';
 
   if (pin.length < 4) {
-    alert('Please enter your 4 or 5 digit PIN.');
+    showGatewayError('Please enter your 4 or 5 digit PIN.');
+    if (pinInput) pinInput.focus();
     return;
   }
 
@@ -2289,7 +2420,7 @@ async function executeAutomatedGatewayPayment() {
     if (!res.ok || !data.success || !data.order) {
       document.getElementById('gatewayStepProcessing').classList.add('hidden');
       document.getElementById('gatewayStepPin').classList.remove('hidden');
-      alert(data.message || 'Payment processing failed. Please try again.');
+      showGatewayError(data.message || 'Payment processing failed. Please try again.');
       return;
     }
 
@@ -2302,6 +2433,15 @@ async function executeAutomatedGatewayPayment() {
       data.order.customer.address,
       data.order.totalAmount,
       data.order.paymentMethod,
+      data.order.transactionId
+    );
+    currentGatewayOrderData = null;
+  } catch (err) {
+    document.getElementById('gatewayStepProcessing').classList.add('hidden');
+    document.getElementById('gatewayStepPin').classList.remove('hidden');
+    showGatewayError('Server connection error. Please try again.');
+  }
+}
       data.order.transactionId
     );
     currentGatewayOrderData = null;

@@ -981,6 +981,12 @@
         <span id="gatewayPayableAmount" class="text-lg font-black text-slate-900">৳0</span>
       </div>
 
+      <!-- Error Notice Banner -->
+      <div id="gatewayErrorNotice" class="hidden px-5 py-2.5 bg-red-50 border-b border-red-200 text-red-700 text-xs font-bold flex items-center justify-between">
+        <span id="gatewayErrorMsg">Error message</span>
+        <button type="button" onclick="hideGatewayError()" class="text-red-400 hover:text-red-700 font-bold ml-2">✕</button>
+      </div>
+
       <!-- Payment Verification Body (Automated Gateway Flow) -->
       <div class="p-5 sm:p-6">
 
@@ -999,7 +1005,7 @@
                 <input 
                   type="tel" 
                   id="gatewayAccountInput" 
-                  maxlength="11" 
+                  maxlength="16" 
                   placeholder="01XXXXXXXXX" 
                   class="w-full text-sm sm:text-base font-bold py-2.5 pl-16 pr-3.5 bg-slate-50 border-2 border-slate-300 rounded-xl focus:outline-none focus:border-emerald-600 tracking-wider"
                 />
