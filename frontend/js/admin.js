@@ -1,10 +1,11 @@
-// AsbiMart (আসবিমার্ট) - অ্যাডমিন প্যানেল লজিক স্ক্রিপ্ট
+// AsbiMart - Admin Panel Logic Script (Default English Edition)
 
 let adminProducts = [];
 let adminOrders = [];
+let currentOrderFilter = 'all';
 
 // ==========================================
-// ০. অ্যাডমিন প্রমাণীকরণ ও এক্সেস সিকিউরিটি (Admin Auth Gate)
+// 0. Admin Authentication & Security
 // ==========================================
 function checkAdminAuth() {
   const isAuth = sessionStorage.getItem('asbi_admin_auth') === 'true';
@@ -30,7 +31,7 @@ function handleAdminLogin(e) {
   const id = idInput ? idInput.value.trim() : '';
   const pass = passInput ? passInput.value.trim() : '';
 
-  // সুরক্ষিত ক্রেডেনশিয়ালস: আইডি: asbi, পাসওয়ার্ড: asbi123
+  // Protected credentials: ID: asbi, Password: asbi123
   if (id === 'asbi' && pass === 'asbi123') {
     sessionStorage.setItem('asbi_admin_auth', 'true');
     if (errElem) errElem.classList.add('hidden');
@@ -41,32 +42,36 @@ function handleAdminLogin(e) {
 }
 
 function handleAdminLogout() {
-  if (confirm("আপনি কি নিশ্চিতভাবে অ্যাডমিন প্যানেল থেকে লগআউট করতে চান?")) {
+  if (confirm("Are you sure you want to sign out from the Admin Panel?")) {
     sessionStorage.removeItem('asbi_admin_auth');
     checkAdminAuth();
   }
 }
 
-// ডিফল্ট আন্তর্জাতিক ও ইংরেজি সংখ্যা ফরম্যাটার
-function toBanglaNum(num) {
-  if (num === null || num === undefined) return '';
+// Standard number formatter
+function formatNumber(num) {
+  if (num === null || num === undefined) return '0';
   return typeof num === 'number' ? num.toLocaleString('en-US') : String(num);
 }
 
-// পণ্যের ডাটা ইনিশিয়ালাইজেশন (লোকাল স্টোরেজ ও products.js সিঙ্ক)
-function initAdminData() {
+// ==========================================
+// 1. Data Initialization & Server Sync
+// ==========================================
+async function initAdminData() {
+  // 1. Products Initialization
   const storedProducts = localStorage.getItem('asbi_products_custom');
   if (storedProducts) {
     try {
       adminProducts = JSON.parse(storedProducts);
     } catch (e) {
-      adminProducts = [...PRODUCTS_DATA];
+      adminProducts = typeof PRODUCTS_DATA !== 'undefined' ? [...PRODUCTS_DATA] : [];
     }
   } else {
-    adminProducts = [...PRODUCTS_DATA];
+    adminProducts = typeof PRODUCTS_DATA !== 'undefined' ? [...PRODUCTS_DATA] : [];
     saveAdminProducts();
   }
 
+  // 2. Orders Initialization (Load local + fetch live from backend)
   const storedOrders = localStorage.getItem('asbi_orders');
   if (storedOrders) {
     try {
@@ -78,6 +83,37 @@ function initAdminData() {
     adminOrders = [];
   }
 
+  // Fetch real orders from backend server
+  await fetchServerOrders();
+
+  updateDashboardStats();
+  renderAdminProductsTable();
+  renderAdminOrdersTable();
+  renderAdminReviewsList();
+}
+
+async function fetchServerOrders() {
+  try {
+    const res = await fetch('/api/admin/orders');
+    if (res.ok) {
+      const data = await res.json();
+      if (data.success && Array.isArray(data.orders)) {
+        // Merge server orders with local orders by orderId
+        const existingMap = new Map();
+        adminOrders.forEach(o => { if (o.orderId) existingMap.set(o.orderId, o); });
+        data.orders.forEach(o => { existingMap.set(o.orderId, o); });
+        adminOrders = Array.from(existingMap.values()).sort((a, b) => new Date(b.createdAt || 0) - new Date(a.createdAt || 0));
+        saveAdminOrders();
+      }
+    }
+  } catch (e) {
+    // Graceful offline fallback
+    console.warn('[Admin] Server orders sync offline, using local storage.');
+  }
+}
+
+async function refreshAdminData() {
+  await fetchServerOrders();
   updateDashboardStats();
   renderAdminProductsTable();
   renderAdminOrdersTable();
@@ -95,16 +131,16 @@ function saveAdminOrders() {
 }
 
 // ==========================================
-// ১. ট্যাব স্যুইচিং লজিক (Tab Switching)
+// 2. Tab Navigation
 // ==========================================
 function switchTab(tabId) {
   const tabs = ['dashboard', 'products', 'addproduct', 'orders', 'reviews'];
   const titles = {
-    dashboard: 'ড্যাশবোর্ড ওভারভিউ',
-    products: 'পণ্য পরিচালনা ও তালিকা',
-    addproduct: 'নতুন পণ্য যুক্ত করুন',
-    orders: 'গ্রাহক অর্ডার তালিকা',
-    reviews: 'গ্রাহক রিভিউ ও রেটিং'
+    dashboard: 'Dashboard Overview',
+    products: 'Product Inventory & Catalog',
+    addproduct: 'Add New Product',
+    orders: 'Customer Orders Management',
+    reviews: 'Customer Reviews & Feedback'
   };
 
   tabs.forEach(t => {
@@ -125,7 +161,7 @@ function switchTab(tabId) {
 }
 
 // ==========================================
-// ২. ড্যাশবোর্ড স্ট্যাটাস ও মেট্রিক্স
+// 3. Dashboard Metrics & Recent Orders
 // ==========================================
 function updateDashboardStats() {
   const totalProducts = adminProducts.length;
@@ -140,35 +176,35 @@ function updateDashboardStats() {
   const sideP = document.getElementById('sidebarProductCount');
   const sideO = document.getElementById('sidebarOrderCount');
 
-  if (pCount) pCount.textContent = toBanglaNum(totalProducts);
-  if (oCount) oCount.textContent = toBanglaNum(totalOrders);
-  if (sCount) sCount.textContent = `৳${toBanglaNum(totalSales)}`;
-  if (rCount) rCount.textContent = toBanglaNum(totalReviews);
+  if (pCount) pCount.textContent = formatNumber(totalProducts);
+  if (oCount) oCount.textContent = formatNumber(totalOrders);
+  if (sCount) sCount.textContent = `৳${formatNumber(totalSales)}`;
+  if (rCount) rCount.textContent = formatNumber(totalReviews);
   if (sideP) sideP.textContent = String(totalProducts);
   if (sideO) sideO.textContent = String(totalOrders);
 
-  // রিসেন্ট অর্ডার প্রিভিউ
+  // Recent Orders Preview in Dashboard
   const recentOrdersTbody = document.getElementById('dashboardRecentOrders');
   if (recentOrdersTbody) {
     if (adminOrders.length === 0) {
       recentOrdersTbody.innerHTML = `
         <tr>
-          <td colspan="5" class="p-8 text-center text-slate-400">এখনো কোনো নতুন অর্ডার আসেনি। চেকআউট থেকে অর্ডার আসলে এখানে সাথে সাথে প্রদর্শিত হবে।</td>
+          <td colspan="5" class="p-8 text-center text-slate-400 font-semibold">No orders yet. Customer checkouts will appear here in real-time.</td>
         </tr>
       `;
     } else {
       recentOrdersTbody.innerHTML = adminOrders.slice(0, 5).map(o => `
         <tr class="hover:bg-slate-50 transition-colors">
-          <td class="p-3 font-bold text-blue-900 font-brand">${o.orderId}</td>
+          <td class="p-3 font-bold text-blue-900">${o.orderId || 'ORD-NEW'}</td>
           <td class="p-3">
-            <div class="font-bold text-slate-800">${o.customer ? o.customer.name : 'গ্রাহক'}</div>
-            <div class="text-[11px] text-slate-400 font-brand">${o.customer ? o.customer.phone : ''}</div>
+            <div class="font-bold text-slate-800">${o.customer ? o.customer.name : 'Customer'}</div>
+            <div class="text-[11px] text-slate-400">${o.customer ? o.customer.phone : ''}</div>
           </td>
           <td class="p-3 max-w-xs truncate text-slate-600">${o.customer ? o.customer.address : ''}</td>
-          <td class="p-3 font-bold text-emerald-700 font-brand">৳${toBanglaNum(o.totalAmount)}</td>
+          <td class="p-3 font-bold text-emerald-700">৳${formatNumber(o.totalAmount)}</td>
           <td class="p-3">
-            <span class="px-2 py-0.5 rounded-full text-[10px] font-bold ${getOrderStatusClass(o.status)}">
-              ${o.status || 'Pending'}
+            <span class="px-2.5 py-1 rounded-full text-[10px] font-bold ${getOrderStatusClass(o.status || o.statusCode)}">
+              ${cleanStatusDisplay(o.status || o.statusCode || 'Pending')}
             </span>
           </td>
         </tr>
@@ -177,16 +213,25 @@ function updateDashboardStats() {
   }
 }
 
+function cleanStatusDisplay(status) {
+  if (!status) return 'Pending';
+  const s = String(status).toLowerCase();
+  if (s.includes('delivered') || s.includes('সম্পন্ন')) return 'Delivered';
+  if (s.includes('processing') || s.includes('প্রক্রিয়াধীন')) return 'Processing';
+  if (s.includes('cancelled') || s.includes('বাতিল')) return 'Cancelled';
+  return 'Pending';
+}
+
 function getOrderStatusClass(status) {
-  if (!status) return 'bg-amber-100 text-amber-800';
-  if (status.includes('Delivered') || status.includes('সম্পন্ন')) return 'bg-emerald-100 text-emerald-800';
-  if (status.includes('Cancelled') || status.includes('বাতিল')) return 'bg-rose-100 text-rose-800';
-  if (status.includes('Processing') || status.includes('প্রক্রিয়াধীন')) return 'bg-blue-100 text-blue-800';
+  const s = String(status || '').toLowerCase();
+  if (s.includes('delivered') || s.includes('সম্পন্ন')) return 'bg-emerald-100 text-emerald-800';
+  if (s.includes('cancelled') || s.includes('বাতিল')) return 'bg-rose-100 text-rose-800';
+  if (s.includes('processing') || s.includes('প্রক্রিয়াধীন')) return 'bg-blue-100 text-blue-800';
   return 'bg-amber-100 text-amber-800';
 }
 
 // ==========================================
-// ৩. পণ্য তালিকা রেন্ডারিং ও অ্যাকশন
+// 4. Products Table Rendering & Actions
 // ==========================================
 function renderAdminProductsTable(productsToRender = adminProducts) {
   const tbody = document.getElementById('adminProductsTableBody');
@@ -195,43 +240,47 @@ function renderAdminProductsTable(productsToRender = adminProducts) {
   if (productsToRender.length === 0) {
     tbody.innerHTML = `
       <tr>
-        <td colspan="6" class="p-8 text-center text-slate-400 font-semibold">কোনো পণ্য পাওয়া যায়নি!</td>
+        <td colspan="6" class="p-8 text-center text-slate-400 font-semibold">No products found matching your filter!</td>
       </tr>
     `;
     return;
   }
 
   tbody.innerHTML = productsToRender.map(p => {
-    const v = p.variants && p.variants.length > 0 ? p.variants[0] : { price: 0, stock: 20, size: 'স্ট্যান্ডার্ড' };
+    const v = p.variants && p.variants.length > 0 ? p.variants[0] : { price: 0, stock: 20, size: 'Standard' };
+    const isLowStock = (v.stock || 0) < 10;
     return `
       <tr class="hover:bg-slate-50 transition-colors">
         <td class="p-3.5">
-          <img src="${p.image}" alt="${p.banglaName}" class="w-12 h-12 rounded-xl object-cover bg-slate-100 border border-slate-200"/>
+          <img src="${p.image}" alt="${p.name}" class="w-12 h-12 rounded-xl object-cover bg-slate-100 border border-slate-200"/>
         </td>
         <td class="p-3.5">
-          <div class="font-bold text-slate-900 text-xs sm:text-sm font-bangla-title">${p.banglaName}</div>
-          <div class="text-[11px] text-slate-400">${p.name}</div>
+          <div class="font-bold text-slate-900 text-xs sm:text-sm">${p.name}</div>
+          <div class="text-[11px] text-slate-400 font-bangla">${p.banglaName || ''}</div>
         </td>
         <td class="p-3.5">
-          <span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-slate-100 text-slate-700 border border-slate-200">
-            ${p.categoryBangla || p.category}
+          <span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-slate-100 text-slate-700 border border-slate-200 capitalize">
+            ${p.category || 'Organic'}
           </span>
         </td>
         <td class="p-3.5">
-          <div class="font-bold text-[#1E3A8A] text-xs sm:text-sm font-brand">৳${toBanglaNum(v.price)}</div>
-          ${v.originalPrice ? `<div class="text-[10px] text-slate-400 line-through font-brand">৳${toBanglaNum(v.originalPrice)}</div>` : ''}
+          <div class="font-bold text-[#1E3A8A] text-xs sm:text-sm">৳${formatNumber(v.price)}</div>
+          ${v.originalPrice ? `<div class="text-[10px] text-slate-400 line-through">৳${formatNumber(v.originalPrice)}</div>` : ''}
         </td>
         <td class="p-3.5">
-          <span class="font-bold text-xs ${v.stock < 10 ? 'text-rose-600' : 'text-emerald-700'} font-brand">
-            ${toBanglaNum(v.stock || 25)} পিস
-          </span>
+          <div class="flex items-center gap-1.5">
+            <span class="font-bold text-xs ${isLowStock ? 'text-rose-600' : 'text-emerald-700'}">
+              ${formatNumber(v.stock || 25)} pcs
+            </span>
+            ${isLowStock ? `<span class="px-1.5 py-0.5 rounded bg-rose-100 text-rose-700 text-[9px] font-extrabold uppercase">Low</span>` : ''}
+          </div>
         </td>
         <td class="p-3.5 text-center">
           <div class="flex items-center justify-center gap-1.5">
-            <button onclick="openEditProductModal('${p.id}')" class="p-1.5 rounded-lg bg-blue-50 hover:bg-blue-100 text-blue-700 font-bold transition-colors" title="এডিট করুন">
+            <button onclick="openEditProductModal('${p.id}')" class="p-1.5 rounded-lg bg-blue-50 hover:bg-blue-100 text-blue-700 font-bold transition-colors" title="Edit Product">
               ✏️
             </button>
-            <button onclick="deleteAdminProduct('${p.id}')" class="p-1.5 rounded-lg bg-rose-50 hover:bg-rose-100 text-rose-700 font-bold transition-colors" title="মুছে ফেলুন">
+            <button onclick="deleteAdminProduct('${p.id}')" class="p-1.5 rounded-lg bg-rose-50 hover:bg-rose-100 text-rose-700 font-bold transition-colors" title="Delete Product">
               🗑️
             </button>
           </div>
@@ -244,9 +293,10 @@ function renderAdminProductsTable(productsToRender = adminProducts) {
 function handleAdminProductSearch(query) {
   const q = query.toLowerCase().trim();
   const filtered = adminProducts.filter(p => 
-    p.banglaName.toLowerCase().includes(q) || 
-    p.name.toLowerCase().includes(q) || 
-    p.category.toLowerCase().includes(q)
+    (p.name && p.name.toLowerCase().includes(q)) || 
+    (p.banglaName && p.banglaName.toLowerCase().includes(q)) || 
+    (p.category && p.category.toLowerCase().includes(q)) ||
+    (p.id && p.id.toLowerCase().includes(q))
   );
   renderAdminProductsTable(filtered);
 }
@@ -261,7 +311,7 @@ function handleAdminCategoryFilter(category) {
 }
 
 // ==========================================
-// ৪. নতুন পণ্য যোগ করার লজিক (Add Product)
+// 5. Add Product Form
 // ==========================================
 function previewNewProductImage(url) {
   const preview = document.getElementById('addImagePreview');
@@ -273,31 +323,21 @@ function previewNewProductImage(url) {
 function handleAddNewProduct(e) {
   e.preventDefault();
   
-  const banglaName = document.getElementById('addBanglaName').value.trim();
   const englishName = document.getElementById('addEnglishName').value.trim();
+  const banglaName = document.getElementById('addBanglaName').value.trim();
   const category = document.getElementById('addCategory').value;
   const price = parseInt(document.getElementById('addPrice').value) || 0;
   const originalPrice = parseInt(document.getElementById('addOriginalPrice').value) || null;
   const discount = parseInt(document.getElementById('addDiscount').value) || 0;
-  const size = document.getElementById('addSize').value.trim() || '৫০০ গ্রাম';
+  const size = document.getElementById('addSize').value.trim() || '500g';
   const stock = parseInt(document.getElementById('addStock').value) || 30;
   const imageUrl = document.getElementById('addImageUrl').value.trim();
   const description = document.getElementById('addDescription').value.trim();
   const benefitsStr = document.getElementById('addBenefits').value.trim();
 
-  const categoryNames = {
-    honey: 'মধু ও প্রাকৃতিক মিষ্টি',
-    ghee: 'ঐতিহ্যবাহী গাওয়া ঘি',
-    oil: 'ঘানিভাঙা খাঁটি তেল',
-    nuts: 'বাদাম ও ড্রাই ফ্রুটস',
-    personalcare: 'অর্গানিক পার্সোনাল কেয়ার',
-    superfood: 'অর্গানিক সুপারফুড',
-    spices: 'প্রাকৃতিক মসলা ও চা'
-  };
-
   const benefits = benefitsStr ? benefitsStr.split(',').map(b => b.trim()).filter(Boolean) : [
-    '১০০% প্রাকৃতিক ও খাঁটি',
-    'সর্বোচ্চ পুষ্টিগুণ ও স্বাস্থ্যকর'
+    '100% Raw & Organic',
+    'Lab Tested Pure'
   ];
 
   const newProduct = {
@@ -305,7 +345,7 @@ function handleAddNewProduct(e) {
     name: englishName,
     banglaName: banglaName,
     category: category,
-    categoryBangla: categoryNames[category] || 'অর্গানিক পণ্য',
+    categoryBangla: category,
     isBestSeller: false,
     rating: 5.0,
     reviewsCount: 1,
@@ -318,35 +358,35 @@ function handleAddNewProduct(e) {
       { size: size, price: price, originalPrice: originalPrice, stock: stock }
     ],
     reviews: [
-      { name: 'আসবিমার্ট ক্রেতা', rating: 5, date: 'সম্প্রতি', comment: 'চমৎকার মান ও আসল খাঁটি পণ্য।' }
+      { name: 'Verified Buyer', rating: 5, date: 'Recent', comment: 'Authentic organic quality product.' }
     ]
   };
 
   adminProducts.unshift(newProduct);
   saveAdminProducts();
 
-  alert(`"${banglaName}" সফলভাবে ক্যাটালগে যুক্ত হয়েছে!`);
+  alert(`"${englishName}" successfully published to the product catalog!`);
   document.getElementById('addProductForm').reset();
   switchTab('products');
   renderAdminProductsTable();
 }
 
 // ==========================================
-// ৫. পণ্য এডিট মোডাল (Edit Product)
+// 6. Edit Product Modal
 // ==========================================
 function openEditProductModal(productId) {
   const product = adminProducts.find(p => p.id === productId);
   if (!product) return;
 
-  const v = product.variants && product.variants.length > 0 ? product.variants[0] : { price: 0, stock: 20, size: '৫০০ গ্রাম' };
+  const v = product.variants && product.variants.length > 0 ? product.variants[0] : { price: 0, stock: 20, size: '500g' };
 
   document.getElementById('editProductId').value = product.id;
-  document.getElementById('editBanglaName').value = product.banglaName;
   document.getElementById('editEnglishName').value = product.name;
+  document.getElementById('editBanglaName').value = product.banglaName || '';
   document.getElementById('editPrice').value = v.price;
   document.getElementById('editOriginalPrice').value = v.originalPrice || '';
   document.getElementById('editDiscount').value = product.discountPercent || 0;
-  document.getElementById('editSize').value = v.size || '৫০০ গ্রাম';
+  document.getElementById('editSize').value = v.size || '500g';
   document.getElementById('editStock').value = v.stock || 25;
   document.getElementById('editImageUrl').value = product.image;
 
@@ -363,8 +403,8 @@ function handleSaveEditedProduct(e) {
   const product = adminProducts.find(p => p.id === id);
   if (!product) return;
 
-  const banglaName = document.getElementById('editBanglaName').value.trim();
   const englishName = document.getElementById('editEnglishName').value.trim();
+  const banglaName = document.getElementById('editBanglaName').value.trim();
   const price = parseInt(document.getElementById('editPrice').value) || 0;
   const origPrice = parseInt(document.getElementById('editOriginalPrice').value) || null;
   const discount = parseInt(document.getElementById('editDiscount').value) || 0;
@@ -372,8 +412,8 @@ function handleSaveEditedProduct(e) {
   const stock = parseInt(document.getElementById('editStock').value) || 0;
   const imageUrl = document.getElementById('editImageUrl').value.trim();
 
-  product.banglaName = banglaName;
   product.name = englishName;
+  product.banglaName = banglaName;
   product.discountPercent = discount;
   product.image = imageUrl;
   product.gallery = [imageUrl];
@@ -388,93 +428,128 @@ function handleSaveEditedProduct(e) {
   saveAdminProducts();
   closeEditProductModal();
   renderAdminProductsTable();
-  alert("পণ্যের তথ্য সফলভাবে আপডেট করা হয়েছে!");
+  alert("Product details updated successfully!");
 }
 
-// ==========================================
-// ৬. পণ্য মুছে ফেলা (Delete Product)
-// ==========================================
 function deleteAdminProduct(productId) {
   const product = adminProducts.find(p => p.id === productId);
   if (!product) return;
 
-  const confirmed = confirm(`আপনি কি নিশ্চিতভাবে "${product.banglaName}" পণ্যটি মুছে ফেলতে চান?`);
+  const confirmed = confirm(`Are you sure you want to delete "${product.name}"?`);
   if (confirmed) {
     adminProducts = adminProducts.filter(p => p.id !== productId);
     saveAdminProducts();
     renderAdminProductsTable();
-    alert("পণ্যটি সফলভাবে মুছে ফেলা হয়েছে!");
+    alert("Product deleted successfully!");
   }
 }
 
 // ==========================================
-// ৭. অর্ডার পরিচালনা (Orders Management)
+// 7. Orders Management & Real Server Sync
 // ==========================================
+function filterAdminOrders(status) {
+  currentOrderFilter = status;
+  renderAdminOrdersTable();
+}
+
 function renderAdminOrdersTable() {
   const tbody = document.getElementById('adminOrdersTableBody');
   if (!tbody) return;
 
-  if (adminOrders.length === 0) {
+  let filtered = adminOrders;
+  if (currentOrderFilter !== 'all') {
+    filtered = adminOrders.filter(o => {
+      const s = String(o.statusCode || o.status || '').toLowerCase();
+      return s.includes(currentOrderFilter);
+    });
+  }
+
+  if (filtered.length === 0) {
     tbody.innerHTML = `
       <tr>
-        <td colspan="7" class="p-8 text-center text-slate-400 font-semibold">কোনো অর্ডার পাওয়া যায়নি! গ্রাহক অর্ডার করলে এখানে প্রদর্শিত হবে।</td>
+        <td colspan="7" class="p-8 text-center text-slate-400 font-semibold">No orders found in this view.</td>
       </tr>
     `;
     return;
   }
 
-  tbody.innerHTML = adminOrders.map((o, idx) => `
-    <tr class="hover:bg-slate-50 transition-colors">
-      <td class="p-3.5 font-bold text-blue-900 font-brand">#${o.orderId || `ASBI-${idx + 1}`}</td>
-      <td class="p-3.5">
-        <div class="font-bold text-slate-800">${o.customer ? o.customer.name : 'গ্রাহক'}</div>
-        <div class="text-[11px] text-slate-500 font-brand">${o.customer ? o.customer.phone : ''}</div>
-      </td>
-      <td class="p-3.5 max-w-xs text-slate-600">
-        <div>${o.customer ? o.customer.address : ''}</div>
-        <div class="text-[10px] text-slate-400 font-semibold">${o.customer && o.customer.area === 'dhaka_outside' ? 'ঢাকার বাইরে (৳120)' : 'ঢাকা সিটির ভেতরে (৳60)'}</div>
-      </td>
-      <td class="p-3.5">
-        ${(o.items || []).map(i => `
-          <div class="text-[11px] font-medium text-slate-700 truncate max-w-[180px]">
-            • ${i.name} (${i.size}) x ${i.quantity}
-          </div>
-        `).join('')}
-      </td>
-      <td class="p-3.5">
-        <span class="inline-flex items-center gap-1 font-bold text-xs ${o.transactionId ? 'text-purple-700 bg-purple-50 px-2 py-0.5 rounded-lg border border-purple-200' : 'text-emerald-800 bg-emerald-50 px-2 py-0.5 rounded-lg border border-emerald-200'}">
-          ${o.paymentMethod || 'ক্যাশ অন ডেলিভারি'}
-        </span>
-        ${o.transactionId ? `
-          <div class="text-[10px] text-slate-500 font-brand mt-0.5 font-semibold">TrxID: ${o.transactionId}</div>
-        ` : ''}
-      </td>
-      <td class="p-3.5 font-bold text-emerald-700 text-xs sm:text-sm font-brand">
-        ৳${toBanglaNum(o.totalAmount)}
-      </td>
-      <td class="p-3.5">
-        <select onchange="changeOrderStatus(${idx}, this.value)" class="text-[11px] font-bold py-1 px-2 rounded-lg border border-slate-200 bg-white text-slate-700 focus:outline-none">
-          <option value="Pending" ${o.status === 'Pending' ? 'selected' : ''}>অপেক্ষমান (Pending)</option>
-          <option value="Processing" ${o.status === 'Processing' ? 'selected' : ''}>প্রক্রিয়াধীন (Processing)</option>
-          <option value="Delivered" ${o.status === 'Delivered' ? 'selected' : ''}>ডেলিভার্ড (Delivered)</option>
-          <option value="Cancelled" ${o.status === 'Cancelled' ? 'selected' : ''}>বাতিল (Cancelled)</option>
-        </select>
-      </td>
-    </tr>
-  `).join('');
+  tbody.innerHTML = filtered.map((o, idx) => {
+    const currentCode = (o.statusCode || 'pending').toLowerCase();
+    const dateFormatted = o.createdAt ? new Date(o.createdAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' }) : 'Recent';
+    const isInsideDhaka = !o.customer || o.customer.area !== 'dhaka_outside';
+
+    return `
+      <tr class="hover:bg-slate-50 transition-colors">
+        <td class="p-3.5 font-bold text-blue-900">
+          <div>#${o.orderId || `ORD-${idx + 1}`}</div>
+          <div class="text-[10px] text-slate-400 font-normal">${dateFormatted}</div>
+        </td>
+        <td class="p-3.5">
+          <div class="font-bold text-slate-800">${o.customer ? o.customer.name : 'Customer'}</div>
+          <div class="text-[11px] text-slate-500">${o.customer ? o.customer.phone : ''}</div>
+        </td>
+        <td class="p-3.5 max-w-xs text-slate-600">
+          <div>${o.customer ? o.customer.address : ''}</div>
+          <div class="text-[10px] text-slate-400 font-semibold">${isInsideDhaka ? 'Inside Dhaka (৳60)' : 'Outside Dhaka (৳120)'}</div>
+        </td>
+        <td class="p-3.5">
+          ${(o.items || []).map(i => `
+            <div class="text-[11px] font-medium text-slate-700 truncate max-w-[180px]">
+              • ${i.name} (${i.size || 'Std'}) x ${i.quantity || 1}
+            </div>
+          `).join('')}
+        </td>
+        <td class="p-3.5">
+          <span class="inline-flex items-center gap-1 font-bold text-xs ${o.transactionId ? 'text-purple-700 bg-purple-50 px-2 py-0.5 rounded-lg border border-purple-200' : 'text-emerald-800 bg-emerald-50 px-2 py-0.5 rounded-lg border border-emerald-200'}">
+            ${o.paymentMethod || 'Cash on Delivery'}
+          </span>
+          ${o.transactionId ? `
+            <div class="text-[10px] text-slate-500 mt-0.5 font-mono font-semibold">TrxID: ${o.transactionId}</div>
+          ` : ''}
+        </td>
+        <td class="p-3.5 font-bold text-emerald-700 text-xs sm:text-sm">
+          ৳${formatNumber(o.totalAmount)}
+        </td>
+        <td class="p-3.5">
+          <select onchange="updateLiveOrderStatus('${o.orderId || idx}', this.value)" class="text-[11px] font-bold py-1 px-2 rounded-lg border border-slate-200 bg-white text-slate-700 focus:outline-none">
+            <option value="pending" ${currentCode === 'pending' ? 'selected' : ''}>Pending</option>
+            <option value="processing" ${currentCode === 'processing' ? 'selected' : ''}>Processing</option>
+            <option value="delivered" ${currentCode === 'delivered' ? 'selected' : ''}>Delivered</option>
+            <option value="cancelled" ${currentCode === 'cancelled' ? 'selected' : ''}>Cancelled</option>
+          </select>
+        </td>
+      </tr>
+    `;
+  }).join('');
 }
 
-function changeOrderStatus(orderIndex, newStatus) {
-  if (adminOrders[orderIndex]) {
-    adminOrders[orderIndex].status = newStatus;
+async function updateLiveOrderStatus(orderIdentifier, newStatus) {
+  // Update local
+  const target = adminOrders.find(o => o.orderId === orderIdentifier) || adminOrders[orderIdentifier];
+  if (target) {
+    target.statusCode = newStatus;
+    target.status = cleanStatusDisplay(newStatus);
     saveAdminOrders();
     renderAdminOrdersTable();
     updateDashboardStats();
+
+    // Sync to backend API if orderId exists
+    if (target.orderId) {
+      try {
+        await fetch(`/api/admin/orders/${encodeURIComponent(target.orderId)}/status`, {
+          method: 'PATCH',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ statusCode: newStatus, statusText: target.status })
+        });
+      } catch (e) {
+        console.warn('[Admin] Server status sync offline:', e);
+      }
+    }
   }
 }
 
 function clearDemoOrders() {
-  if (confirm("আপনি কি নিশ্চিতভাবে সব অর্ডার হিস্টোরি মুছে ফেলতে চান?")) {
+  if (confirm("Are you sure you want to clear the local order history?")) {
     adminOrders = [];
     saveAdminOrders();
     renderAdminOrdersTable();
@@ -483,7 +558,7 @@ function clearDemoOrders() {
 }
 
 // ==========================================
-// ৮. কাস্টমার রিভিউ পরিচালনা (Customer Reviews)
+// 8. Customer Reviews Management
 // ==========================================
 function renderAdminReviewsList() {
   const container = document.getElementById('adminReviewsList');
@@ -493,13 +568,13 @@ function renderAdminReviewsList() {
   adminProducts.forEach(p => {
     if (p.reviews && p.reviews.length > 0) {
       p.reviews.forEach((r, idx) => {
-        allReviews.push({ ...r, productId: p.id, productTitle: p.banglaName, reviewIndex: idx });
+        allReviews.push({ ...r, productId: p.id, productTitle: p.name || p.banglaName, reviewIndex: idx });
       });
     }
   });
 
   if (allReviews.length === 0) {
-    container.innerHTML = `<div class="text-center py-8 text-slate-400">কোনো রিভিউ নেই।</div>`;
+    container.innerHTML = `<div class="text-center py-8 text-slate-400 font-semibold">No customer reviews yet.</div>`;
     return;
   }
 
@@ -507,16 +582,16 @@ function renderAdminReviewsList() {
     <div class="p-4 bg-slate-50 rounded-xl border border-slate-200 flex items-start justify-between gap-4">
       <div>
         <div class="flex items-center gap-2 mb-1">
-          <span class="font-bold text-xs text-slate-800">${r.name}</span>
+          <span class="font-bold text-xs text-slate-800">${r.name || 'Verified Buyer'}</span>
           <span class="text-amber-400 text-xs">${'★'.repeat(r.rating || 5)}</span>
-          <span class="text-[10px] text-slate-400 font-brand">${r.date || 'সম্প্রতি'}</span>
+          <span class="text-[10px] text-slate-400">${r.date || 'Recent'}</span>
         </div>
-        <p class="text-xs text-slate-600 mb-1.5 leading-relaxed">${r.comment}</p>
+        <p class="text-xs text-slate-600 mb-1.5 leading-relaxed">${r.comment || ''}</p>
         <span class="inline-block px-2 py-0.5 rounded bg-emerald-100 text-emerald-800 text-[10px] font-bold">
-          পণ্য: ${r.productTitle}
+          Product: ${r.productTitle}
         </span>
       </div>
-      <button onclick="deleteProductReview('${r.productId}', ${r.reviewIndex})" class="p-1.5 text-rose-500 hover:bg-rose-100 rounded-lg text-xs" title="রিভিউ মুছে ফেলুন">
+      <button onclick="deleteProductReview('${r.productId}', ${r.reviewIndex})" class="p-1.5 text-rose-500 hover:bg-rose-100 rounded-lg text-xs" title="Delete Review">
         🗑️
       </button>
     </div>
@@ -527,7 +602,7 @@ function deleteProductReview(productId, reviewIndex) {
   const product = adminProducts.find(p => p.id === productId);
   if (!product || !product.reviews) return;
 
-  if (confirm("আপনি কি নিশ্চিতভাবে এই রিভিউটি মুছে ফেলতে চান?")) {
+  if (confirm("Are you sure you want to delete this review?")) {
     product.reviews.splice(reviewIndex, 1);
     product.reviewsCount = Math.max(0, (product.reviewsCount || 1) - 1);
     saveAdminProducts();
@@ -535,7 +610,7 @@ function deleteProductReview(productId, reviewIndex) {
   }
 }
 
-// ইনিশিয়ালাইজেশন (নিরাপত্তা যাচাই সহ)
+// Initial check on DOM ready
 document.addEventListener('DOMContentLoaded', () => {
   checkAdminAuth();
 });

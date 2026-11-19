@@ -2442,15 +2442,6 @@ async function executeAutomatedGatewayPayment() {
     showGatewayError('Server connection error. Please try again.');
   }
 }
-      data.order.transactionId
-    );
-    currentGatewayOrderData = null;
-  } catch (err) {
-    document.getElementById('gatewayStepProcessing').classList.add('hidden');
-    document.getElementById('gatewayStepPin').classList.remove('hidden');
-    alert('Server connection error. Please try again.');
-  }
-}
 
 // অফিসিয়াল bKash / SSLCommerz পেমেন্ট রিডাইরেক্ট থেকে ফিরে এলে অর্ডার কনফার্মেশন দেখানো
 async function checkPaymentCallbackReturn() {
