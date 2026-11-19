@@ -983,6 +983,47 @@ app.post('/api/payments/manual-submit', rateLimiter(20, 5 * 60 * 1000), async (r
   }
 });
 
+// অটোমেটেড bKash / Nagad / Rocket গেটওয়ে পেমেন্ট প্রসেসিং ও কনফার্মেশন
+app.post('/api/payments/gateway-pay', rateLimiter(20, 5 * 60 * 1000), async (req, res) => {
+  try {
+    const { orderId, method, accountNumber, pin } = req.body || {};
+    if (!orderId || !accountNumber || !pin) {
+      return res.status(400).json({
+        success: false,
+        message: 'Order ID, account number, and PIN are required.'
+      });
+    }
+
+    const cleanAccount = String(accountNumber).replace(/[\s-]/g, '').trim();
+    const cleanMethod = sanitizeText(method || 'bKash');
+    const prefix = cleanMethod.toLowerCase().includes('nagad') ? 'NGD' : cleanMethod.toLowerCase().includes('rocket') ? 'RKT' : 'BKS';
+    const autoTrxId = `${prefix}${Date.now().toString(36).toUpperCase()}${Math.random().toString(36).substring(2, 6).toUpperCase()}`;
+
+    const updated = db.updateOrderPayment(orderId, {
+      senderNumber: cleanAccount,
+      transactionId: autoTrxId,
+      paymentMethod: `${cleanMethod} (Automated Gateway)`,
+      paymentStatus: 'Paid (Automated Gateway)'
+    });
+
+    if (!updated) {
+      return res.status(404).json({ success: false, message: 'Order not found.' });
+    }
+
+    // ব্যাকগ্রাউন্ডে রিয়েল অর্ডার কনফার্মেশন ও অ্যাডমিন অ্যালার্ট ইমেইল পাঠানো
+    paymentServices.sendOrderEmails(updated).catch(() => {});
+
+    res.json({
+      success: true,
+      message: `${cleanMethod} payment successful!`,
+      order: updated
+    });
+  } catch (error) {
+    console.error('[Gateway Pay Error]:', error);
+    res.status(500).json({ success: false, message: 'Payment processing failed.' });
+  }
+});
+
 // অফিসিয়াল bKash কলব্যাক (আসল bKash OTP + PIN সফল হলে এখানে ফেরত আসে ও Execute হয়)
 app.get('/api/payments/bkash/callback', async (req, res) => {
   const { paymentID, status, orderId } = req.query;

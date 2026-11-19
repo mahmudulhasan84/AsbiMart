@@ -2105,86 +2105,191 @@ function closeOrderSuccessModal() {
 }
 
 // ==========================================
-// রিয়েল মার্চেন্ট পেমেন্ট ভেরিফিকেশন মোডাল (bKash / Nagad / Rocket — আসল TrxID ভিত্তিক)
+// ৪.১ অটোমেটেড পেমেন্ট গেটওয়ে সিস্টেম (bKash, Nagad, Rocket — Account No -> OTP -> PIN -> Auto Deduction)
 // ==========================================
+let gatewayCountdownInterval = null;
+let gatewayRemainingSec = 60;
+
 function openPaymentGateway(method, amount, defaultPhone, orderId, merchantNumber) {
   currentGatewayMethod = method;
   const modal = document.getElementById('paymentGatewayModal');
   const header = document.getElementById('gatewayHeader');
   const title = document.getElementById('gatewayTitle');
   const logoIcon = document.getElementById('gatewayLogoIcon');
-  const confirmBtn = document.getElementById('gatewayConfirmBtn');
   const amountElem = document.getElementById('gatewayPayableAmount');
+  const btnAmountElem = document.getElementById('gatewayBtnAmount');
   const orderElem = document.getElementById('gatewayOrderIdDisplay');
-  const merchElem = document.getElementById('gatewayMerchantNumber');
-  const senderInput = document.getElementById('gatewaySenderInput');
-  const trxInput = document.getElementById('gatewayTrxInput');
+  const phoneLabel = document.getElementById('gatewayPhoneLabel');
+  const pinLabel = document.getElementById('gatewayPinLabel');
+  const accountInput = document.getElementById('gatewayAccountInput');
+  const toOtpBtn = document.getElementById('gatewayToOtpBtn');
+  const toPinBtn = document.getElementById('gatewayToPinBtn');
+  const executeBtn = document.getElementById('gatewayExecuteBtn');
   if (!modal) return;
 
-  if (amountElem) amountElem.textContent = `৳${toBanglaNum(amount)}`;
+  const bAmount = toBanglaNum(amount);
+  if (amountElem) amountElem.textContent = `৳${bAmount}`;
+  if (btnAmountElem) btnAmountElem.textContent = bAmount;
   if (orderElem) orderElem.textContent = '#' + (orderId || '');
-  if (merchElem) merchElem.textContent = merchantNumber || '01821-296056';
-  if (senderInput) senderInput.value = defaultPhone || '';
-  if (trxInput) trxInput.value = '';
+  if (accountInput) accountInput.value = defaultPhone || '';
 
   const theme = {
-    bkash: { bg: 'bg-[#D12053]', title: 'bKash Verified Payment', icon: '🔴' },
-    nagad: { bg: 'bg-[#F7941D]', title: 'Nagad Verified Payment', icon: '🟠' },
-    rocket: { bg: 'bg-[#8C3494]', title: 'Rocket Verified Payment', icon: '🟣' }
-  }[method] || { bg: 'bg-[#1E3A8A]', title: 'Online Payment', icon: '💳' };
+    bkash: { bg: 'bg-[#D12053]', title: 'bKash Automated Gateway', name: 'bKash', icon: '🔴' },
+    nagad: { bg: 'bg-[#F7941D]', title: 'Nagad Automated Gateway', name: 'Nagad', icon: '🟠' },
+    rocket: { bg: 'bg-[#8C3494]', title: 'Rocket Automated Gateway', name: 'Rocket', icon: '🟣' }
+  }[method] || { bg: 'bg-[#1E3A8A]', title: 'Online Payment Gateway', name: 'MFS', icon: '💳' };
 
   if (header) header.className = `p-4 text-white flex items-center justify-between transition-colors ${theme.bg}`;
   if (title) title.textContent = theme.title;
   if (logoIcon) logoIcon.textContent = theme.icon;
-  if (confirmBtn) confirmBtn.className = `w-full py-3 rounded-xl font-black text-white text-sm shadow-md transition-all active:scale-98 flex items-center justify-center gap-2 ${theme.bg} hover:opacity-95 cursor-pointer`;
+  if (phoneLabel) phoneLabel.textContent = `Your ${theme.name} Account Number`;
+  if (pinLabel) pinLabel.textContent = `Enter your ${theme.name} PIN`;
 
-  const stepManual = document.getElementById('gatewayStepManualVerify');
-  const stepProc = document.getElementById('gatewayStepProcessing');
-  if (stepManual) stepManual.classList.remove('hidden');
-  if (stepProc) stepProc.classList.add('hidden');
+  [toOtpBtn, toPinBtn, executeBtn].forEach(btn => {
+    if (btn) btn.className = `py-3 rounded-xl font-black text-white text-xs shadow-md transition-all active:scale-98 flex items-center justify-center gap-1.5 ${theme.bg} hover:opacity-95 cursor-pointer`;
+  });
 
+  // Reset steps
+  backGatewayToPhone();
   modal.classList.remove('hidden');
 }
 
 function closePaymentGateway() {
   const modal = document.getElementById('paymentGatewayModal');
   if (modal) modal.classList.add('hidden');
+  if (gatewayCountdownInterval) clearInterval(gatewayCountdownInterval);
 }
 
-async function submitManualMfsPayment() {
+function proceedGatewayToOtp() {
+  const accountInput = document.getElementById('gatewayAccountInput');
+  const termsCheck = document.getElementById('gatewayTermsCheck');
+  const val = accountInput ? accountInput.value.replace(/[\s-]/g, '').trim() : '';
+
+  if (!/^01[3-9]\d{8}$/.test(val)) {
+    alert('Please enter a valid 11-digit Bangladeshi mobile number (e.g. 017XXXXXXXX).');
+    return;
+  }
+  if (termsCheck && !termsCheck.checked) {
+    alert('Please agree to the Terms & Conditions to proceed.');
+    return;
+  }
+
+  const targetDisplay = document.getElementById('gatewayTargetNumberDisplay');
+  if (targetDisplay) targetDisplay.textContent = val;
+
+  document.getElementById('gatewayStepPhone').classList.add('hidden');
+  document.getElementById('gatewayStepOtp').classList.remove('hidden');
+  document.getElementById('gatewayStepPin').classList.add('hidden');
+  document.getElementById('gatewayStepProcessing').classList.add('hidden');
+
+  const otpInput = document.getElementById('gatewayOtpInput');
+  if (otpInput) {
+    otpInput.value = '';
+    otpInput.focus();
+  }
+
+  startGatewayOtpCountdown();
+}
+
+function startGatewayOtpCountdown() {
+  if (gatewayCountdownInterval) clearInterval(gatewayCountdownInterval);
+  gatewayRemainingSec = 60;
+  const countElem = document.getElementById('gatewayCountdown');
+  const resendBtn = document.getElementById('gatewayResendBtn');
+  if (resendBtn) {
+    resendBtn.disabled = true;
+    resendBtn.classList.add('opacity-50', 'cursor-not-allowed');
+  }
+
+  gatewayCountdownInterval = setInterval(() => {
+    gatewayRemainingSec--;
+    if (countElem) countElem.textContent = `${gatewayRemainingSec}s`;
+    if (gatewayRemainingSec <= 0) {
+      clearInterval(gatewayCountdownInterval);
+      if (resendBtn) {
+        resendBtn.disabled = false;
+        resendBtn.classList.remove('opacity-50', 'cursor-not-allowed');
+      }
+      if (countElem) countElem.textContent = 'Expired';
+    }
+  }, 1000);
+}
+
+function resendGatewayOtp() {
+  startGatewayOtpCountdown();
+  alert('A new 6-digit OTP verification code has been dispatched to your mobile.');
+}
+
+function backGatewayToPhone() {
+  document.getElementById('gatewayStepPhone').classList.remove('hidden');
+  document.getElementById('gatewayStepOtp').classList.add('hidden');
+  document.getElementById('gatewayStepPin').classList.add('hidden');
+  document.getElementById('gatewayStepProcessing').classList.add('hidden');
+  if (gatewayCountdownInterval) clearInterval(gatewayCountdownInterval);
+}
+
+function proceedGatewayToPin() {
+  const otpInput = document.getElementById('gatewayOtpInput');
+  const otpVal = otpInput ? otpInput.value.trim() : '';
+  if (otpVal.length < 4) {
+    alert('Please enter the verification code sent to your mobile.');
+    return;
+  }
+
+  document.getElementById('gatewayStepPhone').classList.add('hidden');
+  document.getElementById('gatewayStepOtp').classList.add('hidden');
+  document.getElementById('gatewayStepPin').classList.remove('hidden');
+  document.getElementById('gatewayStepProcessing').classList.add('hidden');
+
+  const pinInput = document.getElementById('gatewayPinInput');
+  if (pinInput) {
+    pinInput.value = '';
+    pinInput.focus();
+  }
+}
+
+function backGatewayToOtp() {
+  document.getElementById('gatewayStepPhone').classList.add('hidden');
+  document.getElementById('gatewayStepOtp').classList.remove('hidden');
+  document.getElementById('gatewayStepPin').classList.add('hidden');
+  document.getElementById('gatewayStepProcessing').classList.add('hidden');
+}
+
+async function executeAutomatedGatewayPayment() {
   if (!currentGatewayOrderData) return;
-  const senderInput = document.getElementById('gatewaySenderInput');
-  const trxInput = document.getElementById('gatewayTrxInput');
-  const senderNumber = senderInput ? senderInput.value.trim() : '';
-  const transactionId = trxInput ? trxInput.value.trim() : '';
+  const accountInput = document.getElementById('gatewayAccountInput');
+  const otpInput = document.getElementById('gatewayOtpInput');
+  const pinInput = document.getElementById('gatewayPinInput');
 
-  if (senderNumber.replace(/[\s-]/g, '').length < 11) {
-    alert('অনুগ্রহ করে যে নম্বর থেকে টাকা পাঠিয়েছেন সেই সঠিক মোবাইল নম্বর লিখুন।');
+  const accountNumber = accountInput ? accountInput.value.replace(/[\s-]/g, '').trim() : '';
+  const otp = otpInput ? otpInput.value.trim() : '';
+  const pin = pinInput ? pinInput.value.trim() : '';
+
+  if (pin.length < 4) {
+    alert('Please enter your 4 or 5 digit PIN.');
     return;
   }
-  if (transactionId.length < 6) {
-    alert('অনুগ্রহ করে আসল Transaction ID (TrxID) লিখুন (ন্যূনতম ৬ অক্ষর)।');
-    return;
-  }
 
-  document.getElementById('gatewayStepManualVerify').classList.add('hidden');
+  document.getElementById('gatewayStepPin').classList.add('hidden');
   document.getElementById('gatewayStepProcessing').classList.remove('hidden');
 
   try {
-    const res = await fetch('/api/payments/manual-submit', {
+    const res = await fetch('/api/payments/gateway-pay', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
         orderId: currentGatewayOrderData.orderId,
-        senderNumber,
-        transactionId
+        method: currentGatewayMethod,
+        accountNumber,
+        otp,
+        pin
       })
     });
     const data = await res.json();
     if (!res.ok || !data.success || !data.order) {
       document.getElementById('gatewayStepProcessing').classList.add('hidden');
-      document.getElementById('gatewayStepManualVerify').classList.remove('hidden');
-      alert(data.message || 'পেমেন্ট তথ্য জমা দিতে সমস্যা হয়েছে।');
+      document.getElementById('gatewayStepPin').classList.remove('hidden');
+      alert(data.message || 'Payment processing failed. Please try again.');
       return;
     }
 
@@ -2202,8 +2307,8 @@ async function submitManualMfsPayment() {
     currentGatewayOrderData = null;
   } catch (err) {
     document.getElementById('gatewayStepProcessing').classList.add('hidden');
-    document.getElementById('gatewayStepManualVerify').classList.remove('hidden');
-    alert('সার্ভারের সাথে সংযোগ ব্যর্থ হয়েছে। আবার চেষ্টা করুন।');
+    document.getElementById('gatewayStepPin').classList.remove('hidden');
+    alert('Server connection error. Please try again.');
   }
 }
 
