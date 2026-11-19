@@ -531,6 +531,10 @@
               <p class="text-xs text-slate-500">Track, review, update delivery status, and verify gateway transactions</p>
             </div>
             <div class="flex items-center gap-2">
+              <button onclick="refreshAdminData()" class="px-3 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs rounded-xl shadow-xs transition-all flex items-center gap-1.5 active:scale-95">
+                <span>🔄</span>
+                <span>Sync Live Orders</span>
+              </button>
               <select id="adminOrderFilter" onchange="filterAdminOrders(this.value)" class="text-xs font-semibold py-2 px-3 bg-slate-50 border border-slate-200 rounded-xl text-slate-700 focus:outline-none">
                 <option value="all">All Orders</option>
                 <option value="pending">Pending</option>
@@ -651,7 +655,7 @@
   </div> <!-- /#adminMainApp -->
 
   <!-- Scripts -->
-  <script src="../js/products.js"></script>
-  <script src="../js/admin.js"></script>
+  <script src="../js/products.js?v=2.2"></script>
+  <script src="../js/admin.js?v=2.2"></script>
 </body>
 </html>

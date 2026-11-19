@@ -92,33 +92,44 @@ async function initAdminData() {
   renderAdminReviewsList();
 }
 
-async function fetchServerOrders() {
+async function fetchServerOrders(showNotice = false) {
   try {
-    const res = await fetch('/api/admin/orders');
+    const res = await fetch('/api/admin/orders?t=' + Date.now(), { cache: 'no-store' });
     if (res.ok) {
       const data = await res.json();
       if (data.success && Array.isArray(data.orders)) {
-        // Merge server orders with local orders by orderId
+        // Prioritize server orders from backend/data/orders.json
         const existingMap = new Map();
-        adminOrders.forEach(o => { if (o.orderId) existingMap.set(o.orderId, o); });
-        data.orders.forEach(o => { existingMap.set(o.orderId, o); });
+        data.orders.forEach(o => { if (o.orderId) existingMap.set(o.orderId, o); });
+        adminOrders.forEach(o => { if (o.orderId && !existingMap.has(o.orderId)) existingMap.set(o.orderId, o); });
         adminOrders = Array.from(existingMap.values()).sort((a, b) => new Date(b.createdAt || 0) - new Date(a.createdAt || 0));
         saveAdminOrders();
+        if (showNotice) {
+          alert(`Successfully synced ${data.orders.length} live orders directly from server database!`);
+        }
       }
     }
   } catch (e) {
-    // Graceful offline fallback
     console.warn('[Admin] Server orders sync offline, using local storage.');
   }
 }
 
 async function refreshAdminData() {
-  await fetchServerOrders();
+  await fetchServerOrders(true);
   updateDashboardStats();
   renderAdminProductsTable();
   renderAdminOrdersTable();
   renderAdminReviewsList();
 }
+
+// Auto-poll new orders from server every 8 seconds
+setInterval(async () => {
+  if (sessionStorage.getItem('asbi_admin_auth') === 'true') {
+    await fetchServerOrders(false);
+    updateDashboardStats();
+    renderAdminOrdersTable();
+  }
+}, 8000);
 
 function saveAdminProducts() {
   localStorage.setItem('asbi_products_custom', JSON.stringify(adminProducts));
