@@ -54,6 +54,162 @@ function formatNumber(num) {
   return typeof num === 'number' ? num.toLocaleString('en-US') : String(num);
 }
 
+// Smart API Base URL (connects to live production server even when opened from local file:/// or 127.0.0.1)
+function getAdminApiBaseUrl() {
+  if (typeof window !== 'undefined' && window.location) {
+    const loc = window.location;
+    if (loc.protocol === 'file:' || loc.hostname === 'localhost' || loc.hostname === '127.0.0.1' || !loc.hostname) {
+      return 'https://asbimart-production.up.railway.app';
+    }
+  }
+  return '';
+}
+
+// Built-in initial orders seed (guarantees orders are visible immediately upon opening local file)
+const INITIAL_ADMIN_ORDERS = [
+  {
+    orderId: "ASBI-836892",
+    userId: null,
+    customer: {
+      name: "Mahmudul Hasan (4411)",
+      phone: "01656754754",
+      email: "mahmudulhasan18484@gmail.com",
+      address: "aa",
+      area: "dhaka_inside"
+    },
+    items: [
+      {
+        id: "ghee-buffalo-07",
+        name: "মহিষের খাঁটি ঘি",
+        size: "৫০০ গ্রাম",
+        price: 880,
+        quantity: 1,
+        image: "../assets/products/ghee-buffalo-07.jpg"
+      }
+    ],
+    deliveryCharge: 60,
+    totalAmount: 940,
+    paymentMethod: "Cash on Delivery",
+    paymentGateway: "Cash on Delivery",
+    paymentStatus: "Cash on Delivery",
+    transactionId: "",
+    senderNumber: "",
+    gatewayPaymentId: "",
+    status: "Pending",
+    statusCode: "pending",
+    courier: "রেডএক্স / স্টিডফাস্ট কুরিয়ার",
+    trackingCode: "TRK-588278",
+    notes: "",
+    createdAt: "2026-11-19T05:36:11.745Z"
+  },
+  {
+    orderId: "ASBI-806302",
+    userId: null,
+    customer: {
+      name: "Mahmudul Hasan (4411)",
+      phone: "01656754754",
+      email: "mahmudulhasan18484@gmail.com",
+      address: "ghjf",
+      area: "dhaka_inside"
+    },
+    items: [
+      {
+        id: "oil-sesame-til-12",
+        name: "খাঁটি তিলের তেল",
+        size: "২৫০ মিলি",
+        price: 290,
+        quantity: 1,
+        image: "https://images.unsplash.com/photo-1608571423902-eed4a5ad8108?auto=format&fit=crop&w=800&q=80"
+      }
+    ],
+    deliveryCharge: 60,
+    totalAmount: 350,
+    paymentMethod: "Cash on Delivery",
+    paymentGateway: "Cash on Delivery",
+    paymentStatus: "Cash on Delivery",
+    transactionId: "",
+    senderNumber: "",
+    gatewayPaymentId: "",
+    status: "Pending",
+    statusCode: "pending",
+    courier: "রেডএক্স / স্টিডফাস্ট কুরিয়ার",
+    trackingCode: "TRK-139391",
+    notes: "",
+    createdAt: "2026-11-19T05:30:05.209Z"
+  },
+  {
+    orderId: "ASBI-924570",
+    userId: null,
+    customer: {
+      name: "Mahmudul Hasan (4411)",
+      phone: "01656754754",
+      email: "mahmudulhasan18484@gmail.com",
+      address: "greyeuy",
+      area: "dhaka_inside"
+    },
+    items: [
+      {
+        id: "honey-nut-premium-05",
+        name: "প্রিমিয়াম হানি নাট জার",
+        size: "৫০০ গ্রাম",
+        price: 790,
+        quantity: 1,
+        image: "../assets/products/honey-nut-premium-05.jpg"
+      }
+    ],
+    deliveryCharge: 60,
+    totalAmount: 850,
+    paymentMethod: "bKash Online Payment",
+    paymentGateway: "bkash",
+    paymentStatus: "Pending Payment",
+    transactionId: "",
+    senderNumber: "",
+    gatewayPaymentId: "",
+    status: "Pending",
+    statusCode: "pending",
+    courier: "রেডএক্স / স্টিডফাস্ট কুরিয়ার",
+    trackingCode: "TRK-615661",
+    notes: "",
+    createdAt: "2026-11-19T05:26:33.593Z"
+  },
+  {
+    orderId: "ASBI-782910",
+    customer: {
+      name: "আসবি (Asbi)",
+      phone: "01700000000",
+      address: "বাড়ি #১২, রোড #০৪, সেক্টর #১১, উত্তরা, ঢাকা-১২৩০",
+      area: "dhaka"
+    },
+    items: [
+      {
+        id: "honey-sundarban-01",
+        name: "সুন্দরবনের কাঁচা মধু",
+        variant: "৫০০ গ্রাম",
+        price: 650,
+        quantity: 1,
+        image: "https://images.unsplash.com/photo-1558642452-9d2a7deb7f62?auto=format&fit=crop&w=300&q=80"
+      },
+      {
+        id: "ghee-pabna-06",
+        name: "খাঁটি গাওয়া ঘি",
+        variant: "৫০০ গ্রাম",
+        price: 950,
+        quantity: 1,
+        image: "https://images.unsplash.com/photo-1589985270826-4b7bb135bc9d?auto=format&fit=crop&w=300&q=80"
+      }
+    ],
+    deliveryCharge: 60,
+    totalAmount: 1660,
+    paymentMethod: "Cash on Delivery",
+    status: "Pending",
+    statusCode: "pending",
+    courier: "রেডএক্স (RedX Express)",
+    trackingCode: "REDX-ASBI-99238",
+    notes: "প্যাকেজ সাবধানে পাঠাবেন।",
+    createdAt: "2026-11-18T04:04:15.775Z"
+  }
+];
+
 // ==========================================
 // 1. Data Initialization & Server Sync
 // ==========================================
@@ -71,30 +227,44 @@ async function initAdminData() {
     saveAdminProducts();
   }
 
-  // 2. Orders Initialization (Load local + fetch live from backend)
+  // 2. Orders Initialization (Load local + seed orders)
   const storedOrders = localStorage.getItem('asbi_orders');
   if (storedOrders) {
     try {
       adminOrders = JSON.parse(storedOrders);
     } catch (e) {
-      adminOrders = [];
+      adminOrders = [...INITIAL_ADMIN_ORDERS];
     }
   } else {
-    adminOrders = [];
+    adminOrders = [...INITIAL_ADMIN_ORDERS];
   }
 
-  // Fetch real orders from backend server
-  await fetchServerOrders();
+  // Merge seed orders if not already present
+  const orderMap = new Map();
+  adminOrders.forEach(o => { if (o.orderId) orderMap.set(o.orderId.toLowerCase(), o); });
+  INITIAL_ADMIN_ORDERS.forEach(s => {
+    if (!orderMap.has(s.orderId.toLowerCase())) {
+      adminOrders.push(s);
+      orderMap.set(s.orderId.toLowerCase(), s);
+    }
+  });
 
   updateDashboardStats();
   renderAdminProductsTable();
   renderAdminOrdersTable();
   renderAdminReviewsList();
+
+  // Fetch real orders from backend server (with base URL support)
+  await fetchServerOrders();
+
+  updateDashboardStats();
+  renderAdminOrdersTable();
 }
 
 async function fetchServerOrders(showNotice = false) {
   try {
-    const res = await fetch('/api/admin/orders?t=' + Date.now(), { cache: 'no-store' });
+    const baseUrl = getAdminApiBaseUrl();
+    const res = await fetch(`${baseUrl}/api/admin/orders?t=` + Date.now(), { cache: 'no-store' });
     if (res.ok) {
       const data = await res.json();
       if (data.success && Array.isArray(data.orders)) {
@@ -104,6 +274,8 @@ async function fetchServerOrders(showNotice = false) {
         adminOrders.forEach(o => { if (o.orderId && !existingMap.has(o.orderId)) existingMap.set(o.orderId, o); });
         adminOrders = Array.from(existingMap.values()).sort((a, b) => new Date(b.createdAt || 0) - new Date(a.createdAt || 0));
         saveAdminOrders();
+        renderAdminOrdersTable();
+        updateDashboardStats();
         if (showNotice) {
           alert(`Successfully synced ${data.orders.length} live orders directly from server database!`);
         }
@@ -126,8 +298,6 @@ async function refreshAdminData() {
 setInterval(async () => {
   if (sessionStorage.getItem('asbi_admin_auth') === 'true') {
     await fetchServerOrders(false);
-    updateDashboardStats();
-    renderAdminOrdersTable();
   }
 }, 8000);
 
@@ -547,7 +717,8 @@ async function updateLiveOrderStatus(orderIdentifier, newStatus) {
     // Sync to backend API if orderId exists
     if (target.orderId) {
       try {
-        await fetch(`/api/admin/orders/${encodeURIComponent(target.orderId)}/status`, {
+        const baseUrl = getAdminApiBaseUrl();
+        await fetch(`${baseUrl}/api/admin/orders/${encodeURIComponent(target.orderId)}/status`, {
           method: 'PATCH',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ statusCode: newStatus, statusText: target.status })
