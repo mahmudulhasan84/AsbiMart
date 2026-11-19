@@ -1465,10 +1465,10 @@ app.get('/api/health', (req, res) => {
 app.use('/assets', express.static(path.join(frontendPath, 'assets'), { etag: true, maxAge: '7d' }));
 app.use(express.static(frontendPath, {
   etag: true,
-  maxAge: '1h',
+  maxAge: 0,
   setHeaders: (res, filePath) => {
-    if (filePath.endsWith('.html')) {
-      res.setHeader('Cache-Control', 'no-cache');
+    if (filePath.endsWith('.html') || filePath.endsWith('.js') || filePath.endsWith('.css')) {
+      res.setHeader('Cache-Control', 'no-cache, must-revalidate');
     }
   }
 }));
