@@ -1,0 +1,775 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>My Profile — AsbiMart</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@300;400;500;600;700&family=Plus+Jakarta+Sans:wght@600;700;800;900&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="stylesheet" href="css/responsive.css">
+</head>
+<body class="bg-[#F4ECE1] text-slate-800 antialiased min-h-screen flex flex-col font-brand">
+
+  <!-- Header -->
+  <header class="bg-[#F4ECE1] border-b border-[#E5DACB] py-4 shadow-sm sticky top-0 z-40">
+    <div class="asbi-container flex items-center justify-between">
+      <a href="index.html" class="flex items-center gap-3 group">
+        <div class="w-11 h-11 flex items-center justify-center flex-shrink-0">
+          <svg viewBox="0 0 100 100" class="w-full h-full" fill="none" style="shape-rendering: geometricPrecision;">
+            <defs>
+              <linearGradient id="prof_g" x1="28" y1="54" x2="76" y2="82" gradientUnits="userSpaceOnUse">
+                <stop offset="0%" stop-color="#10B981"/>
+                <stop offset="45%" stop-color="#10B981"/>
+                <stop offset="75%" stop-color="#F59E0B"/>
+                <stop offset="100%" stop-color="#FBBF24"/>
+              </linearGradient>
+            </defs>
+            <path d="M24 82L56 16C58 12 62 12 64 16L84 56" stroke="#1E3A8A" stroke-width="12" stroke-linecap="round" stroke-linejoin="round"/>
+            <path d="M28 54H52C60 54 64 60 76 82" stroke="url(#prof_g)" stroke-width="11" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </div>
+        <span class="font-brand font-black text-2xl sm:text-3xl text-[#1E3A8A] tracking-tight leading-none">
+          Asbi<span class="text-[#F59E0B]">Mart</span>
+        </span>
+      </a>
+
+      <div class="flex items-center gap-3">
+        <a href="index.html" class="flex items-center gap-1.5 text-xs md:text-sm font-bold text-[#1E3A8A] hover:text-amber-600 bg-white px-4 py-2 rounded-full border border-[#E5DACB] shadow-sm transition-all">
+          <svg class="w-4 h-4 stroke-current" fill="none" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"/></svg>
+          <span>Back to Home</span>
+        </a>
+        <button onclick="logoutUser()" class="flex items-center gap-1.5 text-xs md:text-sm font-bold text-rose-600 hover:bg-rose-50 bg-white px-4 py-2 rounded-full border border-rose-200 shadow-sm transition-all cursor-pointer">
+          <svg class="w-4 h-4 stroke-current" fill="none" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/></svg>
+          <span>Log Out</span>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- Main 2-Column Profile Dashboard -->
+  <main class="max-w-6xl mx-auto px-4 py-8 flex-grow w-full">
+    <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+
+      <!-- =======================================================
+           LEFT SIDEBAR: Compact User Card + Vertical Navigation Menu
+           (মোবাইলে এটিই প্রধান মেনু স্ক্রিন; অপশনে ক্লিক করলে আলাদা পেজ ওপেন হবে)
+           ======================================================= -->
+      <aside id="profileSidebar" class="lg:col-span-4 xl:col-span-3 space-y-4 lg:sticky lg:top-24 lg:block">
+        
+        <!-- Compact Profile Summary Card -->
+        <div class="bg-gradient-to-br from-[#1E3A8A] to-blue-900 rounded-3xl p-5 text-white shadow-lg text-center relative overflow-hidden">
+          <div class="absolute -right-8 -top-8 w-32 h-32 bg-white/5 rounded-full blur-xl pointer-events-none"></div>
+          
+          <!-- Profile Picture with Camera Edit Icon -->
+          <div class="relative inline-block mx-auto mb-3">
+            <div class="w-20 h-20 rounded-full ring-4 ring-white/25 overflow-hidden shadow-xl bg-white/15">
+              <img id="userAvatar" src="https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&w=300&q=80" class="w-full h-full object-cover" alt="User Profile" referrerpolicy="no-referrer">
+            </div>
+            <button 
+              type="button" 
+              onclick="openAvatarModal()" 
+              title="Change Profile Picture"
+              class="absolute -bottom-0.5 -right-0.5 w-7 h-7 rounded-full bg-amber-400 hover:bg-amber-500 text-slate-900 ring-2 ring-white shadow-md flex items-center justify-center transition-all hover:scale-110 cursor-pointer"
+            >
+              <svg class="w-3.5 h-3.5 stroke-current" fill="none" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.2" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"/>
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.2" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z"/>
+              </svg>
+            </button>
+          </div>
+
+          <h1 id="userName" class="text-lg font-black tracking-tight truncate">Customer</h1>
+          <p id="userPhone" class="text-xs text-blue-200 mt-0.5 truncate">—</p>
+          <span class="inline-block mt-2 px-2.5 py-0.5 bg-amber-400 text-slate-900 text-[10px] font-black rounded-full uppercase">Verified Member</span>
+        </div>
+
+        <!-- Left Sidebar Navigation Menu -->
+        <nav class="bg-white rounded-3xl p-2.5 shadow-sm border border-[#E5DACB] space-y-1">
+          <button type="button" data-tab="profile" onclick="switchProfileTab('profile', true)" class="sidebar-tab w-full flex items-center justify-between gap-2 px-3.5 py-3 rounded-2xl text-xs font-bold transition-all cursor-pointer text-left">
+            <div class="flex items-center gap-3">
+              <span class="w-8 h-8 rounded-xl bg-blue-50 text-[#1E3A8A] flex items-center justify-center text-sm flex-shrink-0">👤</span>
+              <span>My Profile</span>
+            </div>
+            <svg class="w-4 h-4 opacity-50 lg:hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 5l7 7-7 7"/></svg>
+          </button>
+
+          <button type="button" data-tab="orders" onclick="switchProfileTab('orders', true)" class="sidebar-tab w-full flex items-center justify-between gap-2 px-3.5 py-3 rounded-2xl text-xs font-bold transition-all cursor-pointer text-left">
+            <div class="flex items-center gap-3">
+              <span class="w-8 h-8 rounded-xl bg-amber-50 text-amber-700 flex items-center justify-center text-sm flex-shrink-0">📦</span>
+              <span>My Orders</span>
+            </div>
+            <div class="flex items-center gap-1.5">
+              <span id="orderCountBadge" class="px-2 py-0.5 bg-slate-100 text-slate-700 text-[10px] font-black rounded-full">0</span>
+              <svg class="w-4 h-4 opacity-50 lg:hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 5l7 7-7 7"/></svg>
+            </div>
+          </button>
+
+          <button type="button" data-tab="security" onclick="switchProfileTab('security', true)" class="sidebar-tab w-full flex items-center justify-between gap-2 px-3.5 py-3 rounded-2xl text-xs font-bold transition-all cursor-pointer text-left">
+            <div class="flex items-center gap-3">
+              <span class="w-8 h-8 rounded-xl bg-slate-100 text-slate-700 flex items-center justify-center text-sm flex-shrink-0">🔒</span>
+              <span>Account Security</span>
+            </div>
+            <svg class="w-4 h-4 opacity-50 lg:hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 5l7 7-7 7"/></svg>
+          </button>
+
+          <div class="pt-1.5 mt-1.5 border-t border-slate-100">
+            <button type="button" onclick="logoutUser()" class="w-full flex items-center gap-3 px-3.5 py-3 rounded-2xl text-xs font-bold text-rose-600 hover:bg-rose-50 transition-all cursor-pointer text-left">
+              <span class="w-8 h-8 rounded-xl bg-rose-50 text-rose-600 flex items-center justify-center text-sm flex-shrink-0">🚪</span>
+              <span>Log Out</span>
+            </button>
+          </div>
+        </nav>
+
+      </aside>
+
+      <!-- =======================================================
+           RIGHT CONTENT PANEL: Active Tab View
+           (মোবাইলে অপশনে ক্লিক করলে আলাদা ফুল পেজ হিসেবে ওপরে ওপেন হবে)
+           ======================================================= -->
+      <section id="profileContentSection" class="hidden lg:block lg:col-span-8 xl:col-span-9">
+
+        <!-- Mobile-only Dedicated Sub-page Back Bar -->
+        <div id="mobileDetailBackBar" class="lg:hidden mb-4 flex items-center justify-between bg-white px-4 py-3 rounded-2xl border border-[#E5DACB] shadow-2xs">
+          <button type="button" onclick="goBackToMobileMenu()" class="inline-flex items-center gap-2 text-xs font-black text-[#1E3A8A] hover:text-amber-600 cursor-pointer">
+            <svg class="w-4 h-4 stroke-current" fill="none" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M15 19l-7-7 7-7"/></svg>
+            <span>Back to Account</span>
+          </button>
+          <span id="mobileSubpageTitle" class="text-xs font-bold text-slate-500">My Profile</span>
+        </div>
+
+        <!-- 1. My Profile Panel (with integrated Edit Profile toggle at top) -->
+        <div id="tab-profile" class="profile-panel bg-white rounded-3xl p-6 sm:p-8 shadow-sm border border-[#E5DACB]">
+          <div class="flex items-center justify-between border-b border-slate-100 pb-4 mb-6">
+            <div>
+              <h2 class="text-xl font-black text-slate-900">My Profile</h2>
+              <p class="text-xs text-slate-400 mt-0.5">Your personal account & delivery information</p>
+            </div>
+            <button type="button" id="toggleEditProfileBtn" onclick="toggleProfileEditMode()" class="py-2 px-4 bg-blue-50 hover:bg-[#1E3A8A] text-[#1E3A8A] hover:text-white font-bold text-xs rounded-xl transition-all cursor-pointer">
+              ✏️ Edit Profile
+            </button>
+          </div>
+
+          <!-- Read-only View -->
+          <div id="profileReadOnlyView" class="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs">
+            <div class="bg-slate-50 p-4 rounded-2xl border border-slate-200/80">
+              <span class="text-slate-400 block font-semibold">Full Name</span>
+              <strong id="viewName" class="text-slate-900 text-sm mt-1 block">—</strong>
+            </div>
+            <div class="bg-slate-50 p-4 rounded-2xl border border-slate-200/80">
+              <span class="text-slate-400 block font-semibold">Phone Number</span>
+              <strong id="viewPhone" class="text-slate-900 text-sm mt-1 block">—</strong>
+            </div>
+            <div class="bg-slate-50 p-4 rounded-2xl border border-slate-200/80">
+              <span class="text-slate-400 block font-semibold">Email Address</span>
+              <strong id="viewEmail" class="text-slate-900 text-sm mt-1 block">—</strong>
+            </div>
+            <div class="bg-slate-50 p-4 rounded-2xl border border-slate-200/80">
+              <span class="text-slate-400 block font-semibold">Division</span>
+              <strong id="viewDivision" class="text-slate-900 text-sm mt-1 block">—</strong>
+            </div>
+            <div class="bg-slate-50 p-4 rounded-2xl border border-slate-200/80">
+              <span class="text-slate-400 block font-semibold">District</span>
+              <strong id="viewDistrict" class="text-slate-900 text-sm mt-1 block">—</strong>
+            </div>
+            <div class="bg-slate-50 p-4 rounded-2xl border border-slate-200/80">
+              <span class="text-slate-400 block font-semibold">Upazila / Thana</span>
+              <strong id="viewUpazila" class="text-slate-900 text-sm mt-1 block">—</strong>
+            </div>
+            <div class="sm:col-span-2 bg-slate-50 p-4 rounded-2xl border border-slate-200/80">
+              <span class="text-slate-400 block font-semibold">Full Delivery Address</span>
+              <strong id="viewAddress" class="text-slate-900 text-sm mt-1 block">—</strong>
+            </div>
+          </div>
+
+          <!-- Integrated Edit Profile Form (Toggled right inside My Profile) -->
+          <form id="profileEditFormView" onsubmit="handleProfileUpdate(event)" class="hidden grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div>
+              <label class="block text-xs font-bold text-slate-700 mb-1.5">Full Name</label>
+              <input type="text" id="editName" required class="w-full text-xs py-2.5 px-3.5 bg-slate-50 border border-slate-300 rounded-xl focus:outline-none focus:border-blue-900 focus:bg-white">
+            </div>
+            <div>
+              <label class="block text-xs font-bold text-slate-700 mb-1.5">Phone Number</label>
+              <input type="tel" id="editPhone" required class="w-full text-xs py-2.5 px-3.5 bg-slate-50 border border-slate-300 rounded-xl focus:outline-none focus:border-blue-900 focus:bg-white">
+            </div>
+            <div>
+              <label class="block text-xs font-bold text-slate-700 mb-1.5">Email Address</label>
+              <input type="email" id="editEmail" class="w-full text-xs py-2.5 px-3.5 bg-slate-50 border border-slate-300 rounded-xl focus:outline-none focus:border-blue-900 focus:bg-white">
+            </div>
+            <div>
+              <label class="block text-xs font-bold text-slate-700 mb-1.5">Division</label>
+              <select id="editDivision" required class="w-full text-xs py-2.5 px-3.5 bg-slate-50 border border-slate-300 rounded-xl focus:outline-none focus:border-blue-900 focus:bg-white"></select>
+            </div>
+            <div>
+              <label class="block text-xs font-bold text-slate-700 mb-1.5">District</label>
+              <select id="editDistrict" required class="w-full text-xs py-2.5 px-3.5 bg-slate-50 border border-slate-300 rounded-xl focus:outline-none focus:border-blue-900 focus:bg-white"></select>
+            </div>
+            <div>
+              <label class="block text-xs font-bold text-slate-700 mb-1.5">Upazila / Thana</label>
+              <select id="editUpazila" required class="w-full text-xs py-2.5 px-3.5 bg-slate-50 border border-slate-300 rounded-xl focus:outline-none focus:border-blue-900 focus:bg-white"></select>
+            </div>
+            <div class="sm:col-span-2">
+              <label class="block text-xs font-bold text-slate-700 mb-1.5">Full Delivery Address (House, Road, Village/Area)</label>
+              <textarea id="editAddress" rows="3" class="w-full text-xs py-2.5 px-3.5 bg-slate-50 border border-slate-300 rounded-xl focus:outline-none focus:border-blue-900 focus:bg-white"></textarea>
+            </div>
+            <div class="sm:col-span-2 flex justify-end gap-2 pt-2">
+              <button type="button" onclick="toggleProfileEditMode(false)" class="py-2.5 px-5 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-xs rounded-xl transition-all cursor-pointer">
+                Cancel
+              </button>
+              <button type="submit" class="py-2.5 px-6 bg-emerald-700 hover:bg-emerald-800 text-white font-bold text-xs rounded-xl shadow-md transition-all cursor-pointer">
+                Save Changes
+              </button>
+            </div>
+          </form>
+        </div>
+
+        <!-- 3. My Orders Panel -->
+        <div id="tab-orders" class="profile-panel hidden bg-white rounded-3xl p-6 sm:p-8 shadow-sm border border-[#E5DACB]">
+          <div class="flex items-center justify-between border-b border-slate-100 pb-4 mb-6">
+            <div>
+              <h2 class="text-xl font-black text-slate-900">My Orders</h2>
+              <p class="text-xs text-slate-400 mt-0.5">Track and review all your placed orders</p>
+            </div>
+            <span id="orderPanelCount" class="px-3 py-1 bg-blue-50 text-[#1E3A8A] text-xs font-bold rounded-full">0 Orders</span>
+          </div>
+
+          <div id="profileOrdersContainer" class="space-y-4">
+            <!-- Dynamically loaded -->
+          </div>
+        </div>
+
+        <!-- 4. Account Security Panel -->
+        <div id="tab-security" class="profile-panel hidden bg-white rounded-3xl p-6 sm:p-8 shadow-sm border border-[#E5DACB]">
+          <div class="border-b border-slate-100 pb-4 mb-6">
+            <h2 class="text-xl font-black text-slate-900">Account Security</h2>
+            <p class="text-xs text-slate-400 mt-0.5">Verify your old password before setting a new password</p>
+          </div>
+
+          <form onsubmit="handlePasswordChange(event)" class="space-y-5 max-w-xl">
+            <!-- Step 1: Old Password -->
+            <div>
+              <label class="block text-xs font-bold text-slate-700 mb-1.5">Old Password</label>
+              <div class="flex gap-2">
+                <input 
+                  type="password" 
+                  id="oldPasswordInput" 
+                  required 
+                  oninput="resetPasswordVerification()"
+                  placeholder="Enter your old password" 
+                  class="flex-grow text-xs py-2.5 px-3.5 bg-slate-50 border border-slate-300 rounded-xl focus:outline-none focus:border-blue-900 focus:bg-white"
+                >
+                <button 
+                  type="button" 
+                  id="verifyOldPassBtn"
+                  onclick="verifyOldPassword()" 
+                  class="py-2.5 px-5 bg-[#1E3A8A] hover:bg-blue-800 text-white font-bold text-xs rounded-xl shadow-sm transition-all cursor-pointer flex-shrink-0"
+                >
+                  Verify
+                </button>
+              </div>
+              <p id="oldPasswordStatus" class="text-[11px] font-bold mt-1.5 hidden"></p>
+            </div>
+
+            <!-- Step 2: New & Confirm Password (Locked until verified) -->
+            <div id="newPasswordGroup" class="grid grid-cols-1 sm:grid-cols-2 gap-4 opacity-50 pointer-events-none transition-all">
+              <div>
+                <label class="block text-xs font-bold text-slate-700 mb-1.5">New Password</label>
+                <input type="password" id="newPasswordInput" minlength="6" required disabled placeholder="Minimum 6 characters" class="w-full text-xs py-2.5 px-3.5 bg-slate-100 border border-slate-300 rounded-xl focus:outline-none focus:border-blue-900">
+              </div>
+              <div>
+                <label class="block text-xs font-bold text-slate-700 mb-1.5">Confirm New Password</label>
+                <input type="password" id="confirmPasswordInput" minlength="6" required disabled placeholder="Re-enter new password" class="w-full text-xs py-2.5 px-3.5 bg-slate-100 border border-slate-300 rounded-xl focus:outline-none focus:border-blue-900">
+              </div>
+            </div>
+
+            <div class="flex justify-end pt-1">
+              <button type="submit" id="updatePasswordBtn" disabled class="py-2.5 px-6 bg-slate-300 text-slate-500 font-bold text-xs rounded-xl transition-all cursor-not-allowed">
+                Update Password
+              </button>
+            </div>
+          </form>
+        </div>
+
+      </section>
+    </div>
+  </main>
+
+  <!-- Profile Picture Picker / Upload Modal -->
+  <div id="avatarModal" class="hidden fixed inset-0 z-50 bg-slate-950/60 backdrop-blur-sm flex items-center justify-center p-4">
+    <div class="bg-white rounded-3xl w-full max-w-md p-6 shadow-2xl border border-[#E5DACB] space-y-5">
+      <div class="flex items-center justify-between border-b border-slate-100 pb-3">
+        <h3 class="text-base font-black text-slate-900">Change Profile Picture</h3>
+        <button onclick="closeAvatarModal()" class="w-8 h-8 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-600 flex items-center justify-center cursor-pointer">✕</button>
+      </div>
+
+      <div class="p-4 bg-blue-50/60 rounded-2xl border border-dashed border-blue-300 text-center space-y-2">
+        <p class="text-xs font-bold text-[#1E3A8A]">Upload Photo From Your Device</p>
+        <input type="file" id="avatarFileInput" accept="image/*" onchange="handleAvatarFileUpload(event)" class="block w-full text-xs text-slate-600 file:mr-3 file:py-2 file:px-4 file:rounded-xl file:border-0 file:text-xs file:font-bold file:bg-[#1E3A8A] file:text-white hover:file:bg-blue-800 cursor-pointer">
+      </div>
+
+      <div>
+        <p class="text-xs font-bold text-slate-700 mb-2.5">Or Choose a Preset Avatar</p>
+        <div class="grid grid-cols-4 gap-3">
+          <button type="button" onclick="selectPresetAvatar('https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&w=300&q=80')" class="p-1 rounded-full border-2 border-transparent hover:border-[#1E3A8A] transition-all cursor-pointer">
+            <img src="https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&w=150&q=80" class="w-16 h-16 rounded-full object-cover mx-auto">
+          </button>
+          <button type="button" onclick="selectPresetAvatar('https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&w=300&q=80')" class="p-1 rounded-full border-2 border-transparent hover:border-[#1E3A8A] transition-all cursor-pointer">
+            <img src="https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&w=150&q=80" class="w-16 h-16 rounded-full object-cover mx-auto">
+          </button>
+          <button type="button" onclick="selectPresetAvatar('https://images.unsplash.com/photo-1570295999919-56ceb5ecca61?auto=format&fit=crop&w=300&q=80')" class="p-1 rounded-full border-2 border-transparent hover:border-[#1E3A8A] transition-all cursor-pointer">
+            <img src="https://images.unsplash.com/photo-1570295999919-56ceb5ecca61?auto=format&fit=crop&w=150&q=80" class="w-16 h-16 rounded-full object-cover mx-auto">
+          </button>
+          <button type="button" onclick="selectPresetAvatar('https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=300&q=80')" class="p-1 rounded-full border-2 border-transparent hover:border-[#1E3A8A] transition-all cursor-pointer">
+            <img src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=150&q=80" class="w-16 h-16 rounded-full object-cover mx-auto">
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <footer class="py-4 text-center text-xs text-slate-500 border-t border-[#E5DACB]">
+    © 2026 AsbiMart. All rights reserved.
+  </footer>
+
+  <script src="js/bd-locations.js"></script>
+  <script>
+    function normalizeDivision(val) {
+      if (!val) return 'Dhaka';
+      const map = {
+        'dhaka_north': 'Dhaka',
+        'dhaka': 'Dhaka',
+        'ঢাকা (Dhaka)': 'Dhaka',
+        'চট্টগ্রাম (Chattogram)': 'Chattogram',
+        'সিলেট (Sylhet)': 'Sylhet',
+        'রাজশাহী (Rajshahi)': 'Rajshahi',
+        'খুলনা (Khulna)': 'Khulna',
+        'বরিশাল (Barishal)': 'Barishal',
+        'রংপুর (Rangpur)': 'Rangpur',
+        'ময়মনসিংহ (Mymensingh)': 'Mymensingh'
+      };
+      return map[val] || (BD_LOCATIONS[val] ? val : 'Dhaka');
+    }
+
+    const TAB_TITLES = {
+      profile: 'My Profile',
+      orders: 'My Orders',
+      security: 'Account Security'
+    };
+
+    function isMobileLayout() {
+      return window.innerWidth < 1024;
+    }
+
+    function showMobileProfileMenu() {
+      const sidebar = document.getElementById('profileSidebar');
+      const content = document.getElementById('profileContentSection');
+      if (sidebar) sidebar.classList.remove('hidden');
+      if (content) content.classList.add('hidden');
+      document.querySelectorAll('.sidebar-tab').forEach(btn => {
+        btn.classList.remove('bg-[#1E3A8A]', 'text-white', 'shadow-md');
+        btn.classList.add('text-slate-700', 'hover:bg-slate-50');
+      });
+      window.scrollTo({ top: 0, behavior: 'instant' });
+    }
+
+    function goBackToMobileMenu() {
+      if (window.location.hash) {
+        history.pushState({}, '', window.location.pathname);
+      }
+      showMobileProfileMenu();
+    }
+
+    function switchProfileTab(tabName, fromUserClick = false) {
+      document.querySelectorAll('.profile-panel').forEach(p => p.classList.add('hidden'));
+      const activePanel = document.getElementById('tab-' + tabName);
+      if (activePanel) activePanel.classList.remove('hidden');
+
+      const titleEl = document.getElementById('mobileSubpageTitle');
+      if (titleEl) titleEl.textContent = TAB_TITLES[tabName] || 'Account';
+
+      document.querySelectorAll('.sidebar-tab').forEach(btn => {
+        if (btn.getAttribute('data-tab') === tabName) {
+          btn.classList.add('bg-[#1E3A8A]', 'text-white', 'shadow-md');
+          btn.classList.remove('text-slate-700', 'hover:bg-slate-50');
+        } else {
+          btn.classList.remove('bg-[#1E3A8A]', 'text-white', 'shadow-md');
+          btn.classList.add('text-slate-700', 'hover:bg-slate-50');
+        }
+      });
+
+      const sidebar = document.getElementById('profileSidebar');
+      const content = document.getElementById('profileContentSection');
+
+      if (isMobileLayout()) {
+        // মোবাইলে মেনু লুকিয়ে আলাদা ফুল পেজ হিসেবে বিস্তারিত ওপেন হবে
+        if (sidebar) sidebar.classList.add('hidden');
+        if (content) content.classList.remove('hidden');
+        if (fromUserClick && window.location.hash !== '#' + tabName) {
+          history.pushState({ tab: tabName }, '', '#' + tabName);
+        }
+        window.scrollTo({ top: 0, behavior: 'instant' });
+      } else {
+        // ডেস্কটপে বাম সাইডবার ও ডান প্যানেল পাশাপাশি দৃশ্যমান থাকবে
+        if (sidebar) sidebar.classList.remove('hidden');
+        if (content) content.classList.remove('hidden');
+      }
+    }
+
+    window.addEventListener('popstate', () => {
+      const hashTab = window.location.hash.replace('#', '');
+      if (isMobileLayout()) {
+        if (TAB_TITLES[hashTab]) {
+          switchProfileTab(hashTab, false);
+        } else {
+          showMobileProfileMenu();
+        }
+      } else {
+        switchProfileTab(TAB_TITLES[hashTab] ? hashTab : 'profile', false);
+      }
+    });
+
+    async function loadProfile() {
+      let user = null;
+      try { user = JSON.parse(localStorage.getItem('asbi_auth_user')); } catch (err) {}
+
+      if (!user || !user.loggedIn) {
+        window.location.href = 'login.html';
+        return;
+      }
+
+      const division = normalizeDivision(user.division || user.location || user.city);
+      const district = user.district || (BD_LOCATIONS[division] ? Object.keys(BD_LOCATIONS[division])[0] : '');
+      const upazila = user.upazila || (BD_LOCATIONS[division] && BD_LOCATIONS[division][district] ? BD_LOCATIONS[division][district][0] : '');
+
+      document.getElementById('userName').textContent = user.name || 'Customer';
+      document.getElementById('userPhone').textContent = user.phone || 'No phone set';
+      if (user.avatar) document.getElementById('userAvatar').src = user.avatar;
+
+      // Read-only My Profile panel
+      document.getElementById('viewName').textContent = user.name || 'Not set';
+      document.getElementById('viewPhone').textContent = user.phone || 'Not set';
+      document.getElementById('viewEmail').textContent = user.email || 'Not set';
+      document.getElementById('viewDivision').textContent = division || 'Not set';
+      document.getElementById('viewDistrict').textContent = district || 'Not set';
+      document.getElementById('viewUpazila').textContent = upazila || 'Not set';
+      document.getElementById('viewAddress').textContent = user.address || 'Not set';
+
+      // Edit Profile form + Cascading Location Dropdowns
+      document.getElementById('editName').value = user.name || '';
+      document.getElementById('editPhone').value = user.phone || '';
+      document.getElementById('editEmail').value = user.email || '';
+      document.getElementById('editAddress').value = user.address || '';
+      initCascadingLocation('editDivision', 'editDistrict', 'editUpazila', { division, district, upazila });
+
+      const hashTab = window.location.hash.replace('#', '');
+      if (isMobileLayout()) {
+        if (TAB_TITLES[hashTab]) {
+          switchProfileTab(hashTab, false);
+        } else {
+          showMobileProfileMenu();
+        }
+      } else {
+        switchProfileTab(TAB_TITLES[hashTab] ? hashTab : 'profile', false);
+      }
+      await loadUserOrders(user.phone);
+    }
+
+    async function loadUserOrders(phone) {
+      const container = document.getElementById('profileOrdersContainer');
+      const badge = document.getElementById('orderCountBadge');
+      const panelBadge = document.getElementById('orderPanelCount');
+      let orders = [];
+
+      if (phone) {
+        try {
+          const res = await fetch(`/api/orders/my-orders?phone=${encodeURIComponent(phone)}`);
+          const data = await res.json();
+          if (data.success && Array.isArray(data.orders)) orders = data.orders;
+        } catch (err) {}
+      }
+
+      try {
+        const localOrders = JSON.parse(localStorage.getItem('asbi_orders')) || [];
+        const existingIds = new Set(orders.map(o => o.orderId));
+        for (const lo of localOrders) {
+          if (!existingIds.has(lo.orderId)) orders.push(lo);
+        }
+      } catch (err) {}
+
+      if (badge) badge.textContent = orders.length;
+      if (panelBadge) panelBadge.textContent = `${orders.length} Order${orders.length === 1 ? '' : 's'}`;
+
+      if (orders.length === 0) {
+        container.innerHTML = `
+          <div class="text-center py-10 bg-slate-50 rounded-2xl border border-dashed border-slate-200 space-y-2">
+            <div class="text-3xl">🛍️</div>
+            <p class="text-sm font-bold text-slate-700">No orders yet</p>
+            <p class="text-xs text-slate-400">Browse our 100% pure organic products and place your first order.</p>
+            <a href="index.html" class="inline-block mt-2 py-2 px-5 bg-[#1E3A8A] text-white font-bold text-xs rounded-xl shadow-sm hover:bg-blue-800 transition-all">Shop Now</a>
+          </div>
+        `;
+        return;
+      }
+
+      container.innerHTML = orders.map(order => {
+        const itemsText = (order.items || []).map(i => `${i.name} (${i.variant || i.size || 'Standard'}) × ${i.quantity || 1}`).join(', ');
+        const dateStr = order.createdAt ? new Date(order.createdAt).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' }) : (order.date || 'Recent');
+        const statusLabel = order.statusCode === 'delivered' ? 'Delivered' : order.statusCode === 'shipped' ? 'On Delivery' : order.statusCode === 'processing' ? 'Processing' : 'Pending';
+        const statusColor = order.statusCode === 'delivered' ? 'bg-emerald-100 text-emerald-800' : order.statusCode === 'shipped' ? 'bg-amber-100 text-amber-800' : 'bg-blue-100 text-blue-800';
+        return `
+          <div class="p-4 bg-slate-50 rounded-2xl border border-slate-200 space-y-2">
+            <div class="flex items-center justify-between flex-wrap gap-2">
+              <div>
+                <span class="text-xs font-black text-blue-900 font-brand">#${order.orderId}</span>
+                <p class="text-[11px] text-slate-500">${dateStr}</p>
+              </div>
+              <span class="px-3 py-1 ${statusColor} text-xs font-bold rounded-full">${statusLabel}</span>
+            </div>
+            <div class="text-xs text-slate-700 pt-1">
+              <p class="font-bold">${itemsText || 'Organic Food Order'}</p>
+              <p class="text-emerald-700 font-black font-brand text-sm mt-0.5">৳${order.totalAmount || 0}</p>
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    async function syncUserToServer(user) {
+      const token = localStorage.getItem('asbi_auth_token');
+      if (!token) return;
+      try {
+        await fetch('/api/auth/profile', {
+          method: 'PUT',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': 'Bearer ' + token
+          },
+          body: JSON.stringify({
+            name: user.name,
+            email: user.email,
+            city: user.division,
+            division: user.division,
+            district: user.district,
+            upazila: user.upazila,
+            address: user.address,
+            avatar: user.avatar
+          })
+        });
+      } catch (err) {}
+    }
+
+    function toggleProfileEditMode(forceState) {
+      const readView = document.getElementById('profileReadOnlyView');
+      const editView = document.getElementById('profileEditFormView');
+      const btn = document.getElementById('toggleEditProfileBtn');
+      if (!readView || !editView) return;
+
+      const showEdit = typeof forceState === 'boolean' ? forceState : editView.classList.contains('hidden');
+      if (showEdit) {
+        readView.classList.add('hidden');
+        editView.classList.remove('hidden');
+        if (btn) btn.textContent = '✕ Close Edit';
+      } else {
+        editView.classList.add('hidden');
+        readView.classList.remove('hidden');
+        if (btn) btn.textContent = '✏️ Edit Profile';
+      }
+    }
+
+    async function handleProfileUpdate(e) {
+      e.preventDefault();
+      let user = JSON.parse(localStorage.getItem('asbi_auth_user')) || {};
+      user.name = document.getElementById('editName').value.trim();
+      user.phone = document.getElementById('editPhone').value.trim();
+      user.email = document.getElementById('editEmail').value.trim();
+      user.division = document.getElementById('editDivision').value;
+      user.district = document.getElementById('editDistrict').value;
+      user.upazila = document.getElementById('editUpazila').value;
+      user.location = user.division;
+      user.city = user.division;
+      user.address = document.getElementById('editAddress').value.trim();
+
+      localStorage.setItem('asbi_auth_user', JSON.stringify(user));
+      await syncUserToServer(user);
+
+      alert('Profile updated successfully!');
+      toggleProfileEditMode(false);
+      await loadProfile();
+    }
+
+    function openAvatarModal() {
+      document.getElementById('avatarModal').classList.remove('hidden');
+    }
+
+    function closeAvatarModal() {
+      document.getElementById('avatarModal').classList.add('hidden');
+    }
+
+    async function updateAvatarUrl(url) {
+      let user = JSON.parse(localStorage.getItem('asbi_auth_user')) || {};
+      user.avatar = url;
+      localStorage.setItem('asbi_auth_user', JSON.stringify(user));
+      document.getElementById('userAvatar').src = url;
+      await syncUserToServer(user);
+      closeAvatarModal();
+      alert('Profile picture updated!');
+    }
+
+    function selectPresetAvatar(url) {
+      updateAvatarUrl(url);
+    }
+
+    function handleAvatarFileUpload(e) {
+      const file = e.target.files[0];
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = function(evt) {
+        updateAvatarUrl(evt.target.result);
+      };
+      reader.readAsDataURL(file);
+    }
+
+    let isOldPasswordVerified = false;
+
+    function resetPasswordVerification() {
+      isOldPasswordVerified = false;
+      const group = document.getElementById('newPasswordGroup');
+      const newPass = document.getElementById('newPasswordInput');
+      const confirmPass = document.getElementById('confirmPasswordInput');
+      const btn = document.getElementById('updatePasswordBtn');
+      const status = document.getElementById('oldPasswordStatus');
+
+      if (group) group.classList.add('opacity-50', 'pointer-events-none');
+      if (newPass) { newPass.disabled = true; newPass.classList.replace('bg-slate-50', 'bg-slate-100'); }
+      if (confirmPass) { confirmPass.disabled = true; confirmPass.classList.replace('bg-slate-50', 'bg-slate-100'); }
+      if (btn) {
+        btn.disabled = true;
+        btn.className = 'py-2.5 px-6 bg-slate-300 text-slate-500 font-bold text-xs rounded-xl transition-all cursor-not-allowed';
+      }
+      if (status) status.classList.add('hidden');
+    }
+
+    function unlockNewPasswordFields() {
+      isOldPasswordVerified = true;
+      const group = document.getElementById('newPasswordGroup');
+      const newPass = document.getElementById('newPasswordInput');
+      const confirmPass = document.getElementById('confirmPasswordInput');
+      const btn = document.getElementById('updatePasswordBtn');
+      const status = document.getElementById('oldPasswordStatus');
+
+      if (group) group.classList.remove('opacity-50', 'pointer-events-none');
+      if (newPass) { newPass.disabled = false; newPass.classList.replace('bg-slate-100', 'bg-slate-50'); newPass.focus(); }
+      if (confirmPass) { confirmPass.disabled = false; confirmPass.classList.replace('bg-slate-100', 'bg-slate-50'); }
+      if (btn) {
+        btn.disabled = false;
+        btn.className = 'py-2.5 px-6 bg-emerald-700 hover:bg-emerald-800 text-white font-bold text-xs rounded-xl shadow-md transition-all cursor-pointer';
+      }
+      if (status) {
+        status.textContent = '✓ Old password verified! You can now set a new password.';
+        status.className = 'text-[11px] font-bold mt-1.5 text-emerald-700';
+      }
+    }
+
+    async function verifyOldPassword() {
+      const oldPassword = document.getElementById('oldPasswordInput').value;
+      const status = document.getElementById('oldPasswordStatus');
+      if (!oldPassword) {
+        status.textContent = 'Please enter your old password first.';
+        status.className = 'text-[11px] font-bold mt-1.5 text-rose-600';
+        return;
+      }
+
+      const token = localStorage.getItem('asbi_auth_token');
+      if (token) {
+        try {
+          const res = await fetch('/api/auth/verify-password', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': 'Bearer ' + token
+            },
+            body: JSON.stringify({ currentPassword: oldPassword })
+          });
+          const data = await res.json();
+          if (res.ok && data.success) {
+            unlockNewPasswordFields();
+          } else {
+            resetPasswordVerification();
+            status.textContent = '✕ ' + (data.message || 'Incorrect old password.');
+            status.className = 'text-[11px] font-bold mt-1.5 text-rose-600';
+          }
+          return;
+        } catch (err) {}
+      }
+
+      const user = JSON.parse(localStorage.getItem('asbi_auth_user')) || {};
+      const expected = user.localPassword || 'asbi123';
+      if (oldPassword === expected) {
+        unlockNewPasswordFields();
+      } else {
+        resetPasswordVerification();
+        status.textContent = '✕ Incorrect old password. Please try again.';
+        status.className = 'text-[11px] font-bold mt-1.5 text-rose-600';
+      }
+    }
+
+    async function handlePasswordChange(e) {
+      e.preventDefault();
+      if (!isOldPasswordVerified) {
+        alert('Please verify your old password first.');
+        return;
+      }
+      const oldPassword = document.getElementById('oldPasswordInput').value;
+      const p1 = document.getElementById('newPasswordInput').value;
+      const p2 = document.getElementById('confirmPasswordInput').value;
+      if (p1.length < 6) {
+        alert('New password must be at least 6 characters.');
+        return;
+      }
+      if (p1 !== p2) {
+        alert('New Password and Confirm New Password do not match!');
+        return;
+      }
+
+      const token = localStorage.getItem('asbi_auth_token');
+      if (token) {
+        try {
+          const res = await fetch('/api/auth/change-password', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': 'Bearer ' + token
+            },
+            body: JSON.stringify({ currentPassword: oldPassword, newPassword: p1 })
+          });
+          const data = await res.json();
+          if (!res.ok || !data.success) {
+            alert(data.message || 'Failed to update password.');
+            return;
+          }
+        } catch (err) {}
+      } else {
+        const user = JSON.parse(localStorage.getItem('asbi_auth_user')) || {};
+        user.localPassword = p1;
+        localStorage.setItem('asbi_auth_user', JSON.stringify(user));
+      }
+
+      alert('Password updated successfully!');
+      e.target.reset();
+      resetPasswordVerification();
+      switchProfileTab('profile');
+    }
+
+    function logoutUser() {
+      localStorage.removeItem('asbi_auth_user');
+      localStorage.removeItem('asbi_auth_token');
+      alert('You have been logged out.');
+      window.location.href = 'index.html';
+    }
+
+    document.addEventListener('DOMContentLoaded', loadProfile);
+  </script>
+</body>
+</html>

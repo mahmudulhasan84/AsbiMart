@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 80" fill="none">
+  <defs>
+    <linearGradient id="g_full_exact" x1="28" y1="50" x2="68" y2="76" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#10B981"/>
+      <stop offset="0.45" stop-color="#10B981"/>
+      <stop offset="0.75" stop-color="#F59E0B"/>
+      <stop offset="1" stop-color="#FBBF24"/>
+    </linearGradient>
+  </defs>
+  <g transform="translate(10, 2) scale(0.9)">
+    <path d="M24 76L50 16C51.5 12 55.5 12 57 16L74 52" stroke="#1E3A8A" stroke-width="11" stroke-linecap="round"/>
+    <path d="M28 50H48C54 50 58 56 68 76" stroke="url(#g_full_exact)" stroke-width="10" stroke-linecap="round" stroke-linejoin="round"/>
+  </g>
+  <text x="96" y="54" font-family="'Plus Jakarta Sans', system-ui, -apple-system, sans-serif" font-weight="900" font-size="36" letter-spacing="-1" fill="#1E3A8A">Asbi<tspan fill="#F59E0B">Mart</tspan></text>
+</svg>

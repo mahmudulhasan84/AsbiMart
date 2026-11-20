@@ -1,0 +1,351 @@
+@import url('https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@300;400;500;600;700&family=Noto+Serif+Bengali:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@500;600;700;800;900&display=swap');
+
+:root {
+  --asbi-navy: #1E3A8A;
+  --asbi-navy-dark: #0f172a;
+  --asbi-mint: #10B981;
+  --asbi-mint-dark: #059669;
+  --asbi-mint-light: #ECFDF5;
+  --asbi-gold: #F59E0B;
+  --asbi-gold-dark: #D97706;
+  --asbi-gold-light: #FFFBEB;
+  --asbi-offwhite: #F4ECE1;
+  --asbi-offwhite-border: #E5DACB;
+  --asbi-bg: #F4ECE1;
+  --asbi-text: #1E293B;
+  --asbi-dark-text: #0F172A;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  font-family: 'Plus Jakarta Sans', 'Hind Siliguri', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  background-color: var(--asbi-bg);
+  color: var(--asbi-text);
+  margin: 0;
+  padding: 0;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+}
+
+.font-brand {
+  font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+}
+
+.font-bangla-title {
+  font-family: 'Hind Siliguri', -apple-system, BlinkMacSystemFont, sans-serif;
+  font-weight: 800;
+  letter-spacing: normal;
+}
+
+/* অরিজিনাল ক্লাসিক বাংলা ওয়েব ফন্ট (সোলাইমানলিপি / কালপুরুষ / নোটো সেরিফ বেঙ্গলি) */
+.font-bangla-classic {
+  font-family: 'SolaimanLipi', 'Kalpurush', 'Noto Serif Bengali', 'Siyam Rupali', serif;
+  font-weight: 400;
+  letter-spacing: 0;
+  font-feature-settings: "kern" 1, "liga" 1;
+}
+
+/* কন্টেইনার লেআউট - আসবির নির্দেশনায় দুই পাশের অতিরিক্ত খালি জায়গা কমিয়ে আরও প্রশস্ত করা হয়েছে */
+.asbi-container {
+  width: 100%;
+  max-width: 1640px;
+  margin-left: auto;
+  margin-right: auto;
+  padding-left: 1rem;
+  padding-right: 1rem;
+}
+
+@media (min-width: 640px) {
+  .asbi-container {
+    padding-left: 1.5rem;
+    padding-right: 1.5rem;
+  }
+}
+
+@media (min-width: 1024px) {
+  .asbi-container {
+    padding-left: 2rem;
+    padding-right: 2rem;
+  }
+}
+
+/* ফিচার্ড ক্যাটাগরি স্লাইড আইটেম (৪-৫টি কার্ডে পুরো পেজ ভিউ) */
+.cat-slide-item {
+  flex: 0 0 calc((100% - 16px) / 2);
+  width: calc((100% - 16px) / 2);
+}
+
+@media (min-width: 640px) {
+  .cat-slide-item {
+    flex: 0 0 calc((100% - 32px) / 3);
+    width: calc((100% - 32px) / 3);
+  }
+}
+
+@media (min-width: 768px) {
+  .cat-slide-item {
+    flex: 0 0 calc((100% - 48px) / 4);
+    width: calc((100% - 48px) / 4);
+  }
+}
+
+@media (min-width: 1024px) {
+  .cat-slide-item {
+    flex: 0 0 calc((100% - 80px) / 5);
+    width: calc((100% - 80px) / 5);
+  }
+}
+
+/* স্ক্রোলবার কাস্টমাইজেশন */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: #F1F5F9;
+}
+::-webkit-scrollbar-thumb {
+  background: #CBD5E1;
+  border-radius: 4px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #94A3B8;
+}
+
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+/* ড্রপডাউন মেনু ট্রানজিশন */
+.nav-item-dropdown {
+  position: relative;
+}
+
+.dropdown-menu {
+  opacity: 0;
+  visibility: hidden;
+  transform: translateY(6px);
+  transition: all 0.18s cubic-bezier(0.16, 1, 0.3, 1);
+  pointer-events: none;
+  z-index: 100;
+}
+
+.nav-item-dropdown:hover .dropdown-menu,
+.nav-item-dropdown:focus-within .dropdown-menu,
+.nav-item-dropdown.active .dropdown-menu {
+  opacity: 1;
+  visibility: visible;
+  transform: translateY(0);
+  pointer-events: auto;
+}
+
+/* ক্যারোজেল স্লাইডার */
+.carousel-track {
+  display: flex;
+  transition: transform 0.6s cubic-bezier(0.25, 1, 0.5, 1);
+}
+
+.carousel-slide {
+  min-width: 100%;
+  flex-shrink: 0;
+}
+
+/* ২-কলাম অনুভূমিক প্রোডাক্ট কার্ড - প্রতিটি সারি ও কার্ডের মাপ সম্পূর্ণ সমান ও আকর্ষণীয় */
+.product-card-horizontal {
+  transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+  display: flex;
+  flex-direction: row;
+  overflow: hidden;
+  background: #ffffff;
+  border: 1px solid #E2E8F0;
+  border-radius: 1.25rem;
+  height: 235px;
+}
+
+.product-card-horizontal:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 16px 30px -8px rgba(15, 23, 42, 0.1), 0 6px 12px -3px rgba(15, 23, 42, 0.05);
+  border-color: #CBD5E1;
+}
+
+@media (max-width: 640px) {
+  .product-card-horizontal {
+    flex-direction: column;
+    height: auto;
+  }
+  .product-card-horizontal .card-img-col {
+    width: 100% !important;
+    height: 200px !important;
+  }
+}
+
+/* ভাসমান চ্যাট উইজেট */
+.floating-chat-btn {
+  box-shadow: 0 10px 25px -5px rgba(16, 185, 129, 0.4), 0 8px 10px -6px rgba(16, 185, 129, 0.2);
+  transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.floating-chat-btn:hover {
+  transform: scale(1.06);
+}
+
+.chat-box-popup {
+  box-shadow: 0 20px 40px -10px rgba(15, 23, 42, 0.25);
+  animation: slideUpFade 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@keyframes slideUpFade {
+  from {
+    opacity: 0;
+    transform: translateY(16px) scale(0.96);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+/* মোডাল ব্যাকড্রপ */
+.modal-backdrop {
+  background: rgba(15, 23, 42, 0.65);
+  backdrop-filter: blur(4px);
+}
+
+/* ==========================================================================
+   বেস্ট সেলার প্রোডাক্ট হোভার ভিডিও প্রিভিউ স্টাইল
+   ========================================================================== */
+.bestseller-hover-video {
+  opacity: 0;
+  transition: opacity 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+  pointer-events: none;
+  object-fit: cover;
+  will-change: opacity;
+}
+
+.product-card-horizontal.video-playing .bestseller-hover-video,
+.asbi-card-with-video.video-playing .bestseller-hover-video {
+  opacity: 1 !important;
+}
+
+.video-indicator-badge {
+  transition: all 0.25s ease-in-out;
+  user-select: none;
+}
+
+.product-card-horizontal.video-playing .video-indicator-badge,
+.asbi-card-with-video.video-playing .video-indicator-badge {
+  background-color: rgba(16, 185, 129, 0.95) !important;
+  color: #ffffff !important;
+  box-shadow: 0 4px 12px rgba(16, 185, 129, 0.4);
+}
+
+.video-pulse-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background-color: #ffffff;
+  display: inline-block;
+  animation: videoPulseAnim 1.4s infinite ease-in-out;
+}
+
+@keyframes videoPulseAnim {
+  0% { transform: scale(0.85); opacity: 0.7; }
+  50% { transform: scale(1.3); opacity: 1; }
+  100% { transform: scale(0.85); opacity: 0.7; }
+}
+
+/* ==============================================================
+   AsbiMart Promotional In-Feed Banners Animation & Styles
+   ============================================================== */
+@keyframes orderPulseWarm {
+    0%, 100% {
+        transform: scale(1);
+        background-color: #5A3512;
+        color: #FFFFFF;
+        box-shadow: 0 4px 12px rgba(90, 53, 18, 0.28);
+    }
+    50% {
+        transform: scale(1.07);
+        background-color: #F29C11;
+        color: #1A120B;
+        box-shadow: 0 0 0 8px rgba(242, 156, 17, 0.28), 0 10px 24px rgba(242, 156, 17, 0.45);
+    }
+}
+
+@keyframes orderPulseGreen {
+    0%, 100% {
+        transform: scale(1);
+        background-color: #00A86B;
+        color: #FFFFFF;
+        box-shadow: 0 4px 12px rgba(0, 168, 107, 0.28);
+    }
+    50% {
+        transform: scale(1.07);
+        background-color: #1B357E;
+        color: #FFFFFF;
+        box-shadow: 0 0 0 8px rgba(27, 53, 126, 0.24), 0 10px 24px rgba(27, 53, 126, 0.45);
+    }
+}
+
+@keyframes orderPulseNavy {
+    0%, 100% {
+        transform: scale(1);
+        background-color: #1B357E;
+        color: #FFFFFF;
+        box-shadow: 0 4px 14px rgba(27, 53, 126, 0.30);
+    }
+    50% {
+        transform: scale(1.07);
+        background-color: #F29C11;
+        color: #111827;
+        box-shadow: 0 0 0 8px rgba(242, 156, 17, 0.30), 0 10px 24px rgba(242, 156, 17, 0.48);
+    }
+}
+
+@keyframes sheenSweep {
+    0% { transform: translateX(-150%) skewX(-22deg); }
+    50%, 100% { transform: translateX(250%) skewX(-22deg); }
+}
+
+.order-btn-warm {
+    animation: orderPulseWarm 2.1s ease-in-out infinite;
+    position: relative;
+    overflow: hidden;
+}
+
+.order-btn-green {
+    animation: orderPulseGreen 2.1s ease-in-out infinite;
+    position: relative;
+    overflow: hidden;
+}
+
+.order-btn-navy {
+    animation: orderPulseNavy 2.1s ease-in-out infinite;
+    position: relative;
+    overflow: hidden;
+}
+
+.order-btn-sheen::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 45%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.52), transparent);
+    animation: sheenSweep 2.1s ease-in-out infinite;
+    pointer-events: none;
+}
+
+.text-asbi-navy { color: #1B357E !important; }
+.text-asbi-green { color: #00A86B !important; }
+.text-asbi-amber { color: #F29C11 !important; }
+
+

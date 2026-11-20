@@ -1,0 +1,318 @@
+/* ==========================================================================
+   AsbiMart (আসবিমার্ট) — ডেডিকেটেড মোবাইল ও রেসপন্সিভ স্টাইলশিট
+   Desktop লেআউট সম্পূর্ণ অক্ষুণ্ণ রেখে মোবাইল ও ট্যাবলেট স্ক্রিনের জন্য বিশেষায়িত
+   ========================================================================== */
+
+/* ডেস্কটপে মোবাইল বটম বার ও নেভ অ্যারো লুকানো থাকবে */
+.mobile-bottom-nav,
+.mobile-nav-arrow-btn {
+  display: none;
+}
+
+/* ==========================================================================
+   ট্যাবলেট ও মোবাইল ব্রেকপয়েন্ট (max-width: 1023px)
+   ========================================================================== */
+@media (max-width: 1023px) {
+  /* মোবাইল ও ট্যাবলেটে নেভিগেশন বারের প্রিভিয়াস ও নেক্সট অ্যারো বাটন দৃশ্যমান হবে */
+  .mobile-nav-arrow-btn {
+    display: inline-flex !important;
+  }
+
+  /* হিরো সেকশনের ২ নম্বর ছোট প্রোমো ব্যানার মোবাইলে/ছোট স্ক্রিনে লুকানো থাকবে */
+  .hero-promo-secondary {
+    display: none !important;
+  }
+
+  #carouselWrapper {
+    grid-column: span 1 / span 1 !important;
+  }
+}
+
+/* ==========================================================================
+   মোবাইল ডিভাইস লেআউট (max-width: 768px)
+   ========================================================================== */
+@media (max-width: 768px) {
+  body {
+    padding-bottom: 74px; /* বটম নেভিগেশন বারের জন্য নিরাপদ জায়গা */
+  }
+
+  .asbi-container {
+    padding-left: 0.65rem !important;
+    padding-right: 0.65rem !important;
+  }
+
+  /* ১. কমপ্যাক্ট হেডার ও লোগো */
+  #mainHeader .asbi-container {
+    padding-top: 0.6rem !important;
+    padding-bottom: 0.6rem !important;
+  }
+
+  #mainHeader svg {
+    max-width: 100%;
+  }
+
+  /* ২. হিরো ক্যারোজেল স্লাইডার (শুধু ১ নম্বর মূল স্লাইডার, মোবাইলে পরিমিত উচ্চতা) */
+  #carouselWrapper,
+  #carouselWrapper .carousel-slide {
+    height: 210px !important;
+    border-radius: 1.15rem !important;
+  }
+
+  #carouselWrapper h2 {
+    font-size: 1.35rem !important;
+    line-height: 1.2 !important;
+  }
+
+  #carouselWrapper .carousel-slide > div {
+    padding: 1rem 1.25rem !important;
+  }
+
+  /* ৩. ফিচার্ড ক্যাটাগরি মোবাইলে কমপ্যাক্ট */
+  #featuredCategoriesList .cat-slide-item {
+    min-width: 68px !important;
+    max-width: 76px !important;
+  }
+
+  #featuredCategoriesList .cat-slide-item h4 {
+    font-size: 10px !important;
+    margin-top: 0.3rem !important;
+    line-height: 1.15 !important;
+  }
+
+  /* ৪. Best Selling Products — মোবাইলেও এক সারিতে ২টি পণ্য (কমপ্যাক্ট ও ছোট আকারে) */
+  #topProductsGrid {
+    display: grid !important;
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+    gap: 0.55rem !important;
+  }
+
+  #topProductsGrid .product-card-horizontal {
+    flex-direction: column !important;
+    height: auto !important;
+    border-radius: 0.9rem !important;
+  }
+
+  #topProductsGrid .product-card-horizontal .card-img-col {
+    width: 100% !important;
+    height: 112px !important;
+  }
+
+  #topProductsGrid .product-card-horizontal .top-bestseller-badge {
+    top: 6px !important;
+    right: 6px !important;
+    font-size: 8px !important;
+    padding: 2px 6px !important;
+    gap: 2px !important;
+  }
+
+  #topProductsGrid .product-card-horizontal .top-bestseller-badge svg {
+    width: 9px !important;
+    height: 9px !important;
+  }
+
+  #topProductsGrid .product-card-horizontal > div:last-child {
+    width: 100% !important;
+    padding: 0.5rem !important;
+  }
+
+  #topProductsGrid .product-card-horizontal h3 {
+    font-size: 0.78rem !important;
+    line-height: 1.2 !important;
+  }
+
+  #topProductsGrid .product-card-horizontal select {
+    font-size: 9.5px !important;
+    padding: 0.2rem 0.3rem !important;
+  }
+
+  #topProductsGrid .product-card-horizontal .grid.grid-cols-2 {
+    gap: 0.25rem !important;
+    margin-top: 0.35rem !important;
+    padding-top: 0.35rem !important;
+  }
+
+  #topProductsGrid .product-card-horizontal .grid.grid-cols-2 button {
+    font-size: 9px !important;
+    padding: 0.32rem 0.15rem !important;
+    border-radius: 0.45rem !important;
+  }
+
+  #topProductsGrid .product-card-horizontal .grid.grid-cols-2 button svg {
+    width: 10px !important;
+    height: 10px !important;
+  }
+
+  /* ৫. Our Products (ক্যাটাগরি সারি) — মোবাইলেও এক সারিতে ৫টি পণ্য (নিখুঁত ছোট কার্ড) */
+  .asbi-five-col-grid {
+    display: grid !important;
+    grid-template-columns: repeat(5, minmax(0, 1fr)) !important;
+    gap: 0.3rem !important;
+  }
+
+  .asbi-five-col-grid > div {
+    border-radius: 0.65rem !important;
+  }
+
+  /* ৫-কলাম কার্ডের ছবি মোবাইলে কমপ্যাক্ট উচ্চতা */
+  .asbi-five-col-grid .asbi-card-img-wrap {
+    height: 68px !important;
+  }
+
+  .asbi-five-col-grid .asbi-card-img-wrap > div:first-of-type {
+    font-size: 7.5px !important;
+    padding: 1px 4px !important;
+    top: 3px !important;
+    left: 3px !important;
+  }
+
+  /* ৫-কলাম কার্ডের বডি ও টেক্সট */
+  .asbi-five-col-grid .asbi-card-body {
+    padding: 0.3rem 0.22rem !important;
+  }
+
+  .asbi-five-col-grid .asbi-card-body h3 {
+    font-size: 9px !important;
+    line-height: 1.15 !important;
+    -webkit-line-clamp: 1;
+  }
+
+  .asbi-five-col-grid .asbi-card-body .asbi-card-price {
+    font-size: 9.5px !important;
+    margin-top: 0.15rem !important;
+    gap: 2px !important;
+  }
+
+  .asbi-five-col-grid .asbi-card-body .asbi-card-price .line-through {
+    display: none !important; /* মোবাইলে ৫-কলামে পরিচ্ছন্নতার জন্য কাটা দাম লুকানো */
+  }
+
+  .asbi-five-col-grid .asbi-card-btn-wrap {
+    margin-top: 0.25rem !important;
+    padding-top: 0.25rem !important;
+  }
+
+  .asbi-five-col-grid .asbi-card-btn-wrap button {
+    font-size: 8px !important;
+    padding: 0.25rem 0.15rem !important;
+    border-radius: 0.4rem !important;
+    gap: 2px !important;
+  }
+
+  .asbi-five-col-grid .asbi-card-btn-wrap button svg {
+    width: 10px !important;
+    height: 10px !important;
+    flex-shrink: 0;
+  }
+
+  .asbi-five-col-grid .asbi-card-btn-wrap button span {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  /* ক্যাটাগরি হেডার মোবাইলে কমপ্যাক্ট */
+  .cat-row-block {
+    gap: 0.5rem !important;
+  }
+
+  #categoryRowsContainer {
+    gap: 1.75rem !important;
+  }
+
+  /* ৬. ফ্লোটিং চ্যাট বাটন বটম বারের ওপরে নিরাপদ দূরত্বে থাকবে */
+  .asbi-floating-chat-wrap {
+    bottom: 78px !important;
+    right: 12px !important;
+  }
+
+  .asbi-floating-chat-wrap .floating-chat-btn {
+    padding: 0.55rem 0.85rem !important;
+    font-size: 11px !important;
+  }
+
+  /* ==========================================================================
+     ৭. মোবাইল বটম নেভিগেশন বার (স্ক্রল করে নিচে নামলে স্মুথলি নিচে ভেসে উঠবে)
+     বামে: Home | মাঝে: Profile | ডানে: Search
+     ========================================================================== */
+  .mobile-bottom-nav {
+    display: flex;
+    align-items: center;
+    justify-content: space-around;
+    position: fixed;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 60;
+    height: 62px;
+    background: rgba(255, 255, 255, 0.96);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border-top: 1px solid #E5DACB;
+    box-shadow: 0 -6px 24px rgba(15, 23, 42, 0.12);
+    padding: 0 0.75rem;
+    transform: translateY(115%);
+    opacity: 0;
+    pointer-events: none;
+    transition: transform 0.28s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.25s ease;
+  }
+
+  .mobile-bottom-nav.visible {
+    transform: translateY(0);
+    opacity: 1;
+    pointer-events: auto;
+  }
+
+  .mobile-bottom-nav-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 2px;
+    min-width: 72px;
+    padding: 0.35rem 0.6rem;
+    border-radius: 0.9rem;
+    color: #334155;
+    font-size: 11px;
+    font-weight: 700;
+    transition: all 0.2s ease;
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    text-decoration: none;
+  }
+
+  .mobile-bottom-nav-item:active,
+  .mobile-bottom-nav-item:hover,
+  .mobile-bottom-nav-item.active {
+    color: #1E3A8A;
+    background: #EFF6FF;
+  }
+
+  .mobile-bottom-nav-item svg {
+    width: 21px;
+    height: 21px;
+  }
+}
+
+/* অতিরিক্ত ছোট স্ক্রিন (৩৮০px বা তার নিচে) — ৫-কলাম আরও নিখুঁত ফিট */
+@media (max-width: 420px) {
+  .asbi-five-col-grid {
+    gap: 0.2rem !important;
+  }
+
+  .asbi-five-col-grid .asbi-card-img-wrap {
+    height: 58px !important;
+  }
+
+  .asbi-five-col-grid .asbi-card-body h3 {
+    font-size: 8px !important;
+  }
+
+  .asbi-five-col-grid .asbi-card-body .asbi-card-price {
+    font-size: 8.5px !important;
+  }
+
+  .asbi-five-col-grid .asbi-card-btn-wrap button span {
+    display: none !important; /* অতি ছোট স্ক্রিনে ৫-কলামের বাটনে পরিষ্কার কার্ট আইকন থাকবে */
+  }
+}

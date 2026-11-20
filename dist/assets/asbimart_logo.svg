@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" fill="none">
+  <defs>
+    <!-- AsbiMart Official Logo (Option 2 - Mint to Gold Continuous Curve) -->
+    <linearGradient id="g_cv2" x1="28" y1="54" x2="76" y2="82" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#10B981"/>
+      <stop offset="0.45" stop-color="#10B981"/>
+      <stop offset="0.75" stop-color="#F59E0B"/>
+      <stop offset="1" stop-color="#FBBF24"/>
+    </linearGradient>
+  </defs>
+  <!-- Navy 'A' Stem -->
+  <path d="M24 82L56 16C58 12 62 12 64 16L84 56" stroke="#1E3A8A" stroke-width="12" stroke-linecap="round"/>
+  <!-- Single Continuous Stroke: Mint to Gold -->
+  <path d="M28 54H52C60 54 64 60 76 82" stroke="url(#g_cv2)" stroke-width="11" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>
