@@ -1108,7 +1108,8 @@ function renderTopProductsGrid() {
   const container = document.getElementById('topProductsGrid');
   if (!container) return;
 
-  const topProducts = PRODUCTS_DATA.filter(p => p.isBestSeller);
+  // আসবির নির্দেশ অনুযায়ী টপ বেস্ট সেলার সেকশনে নির্দিষ্ট ৪টি পণ্য দেখানো হবে
+  const topProducts = PRODUCTS_DATA.filter(p => p.isBestSeller).slice(0, 4);
   if (topProducts.length === 0) {
     container.innerHTML = `
       <div class="col-span-full py-12 text-center text-slate-500">
