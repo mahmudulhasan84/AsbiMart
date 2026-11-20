@@ -136,6 +136,25 @@ body {
   transition: all 0.18s cubic-bezier(0.16, 1, 0.3, 1);
   pointer-events: none;
   z-index: 100;
+  font-family: 'Hind Siliguri', 'Noto Sans Bengali', 'Kalpurush', sans-serif !important;
+}
+
+.dropdown-menu a {
+  font-family: 'Hind Siliguri', 'Noto Sans Bengali', 'Kalpurush', sans-serif !important;
+  font-size: 13.5px !important;
+  line-height: 1.6 !important;
+  font-weight: 500 !important;
+  letter-spacing: 0.01em !important;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.dropdown-menu a:hover {
+  font-weight: 600 !important;
+  color: #1E3A8A !important;
+  padding-left: 1.25rem !important;
+  background-color: #F8FAFC !important;
 }
 
 .nav-item-dropdown:hover .dropdown-menu,
@@ -234,16 +253,21 @@ body {
   opacity: 1 !important;
 }
 
-.video-indicator-badge {
-  transition: all 0.25s ease-in-out;
+.video-play-tap-btn {
+  transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
   user-select: none;
+  touch-action: manipulation;
 }
 
-.product-card-horizontal.video-playing .video-indicator-badge,
-.asbi-card-with-video.video-playing .video-indicator-badge {
-  background-color: rgba(16, 185, 129, 0.95) !important;
-  color: #ffffff !important;
-  box-shadow: 0 4px 12px rgba(16, 185, 129, 0.4);
+.product-card-horizontal.video-playing .video-play-tap-btn,
+.asbi-card-with-video.video-playing .video-play-tap-btn {
+  background-color: rgba(16, 185, 129, 0.9) !important;
+  border-color: rgba(255, 255, 255, 0.6) !important;
+  box-shadow: 0 4px 12px rgba(16, 185, 129, 0.5);
+}
+
+.video-indicator-badge {
+  display: none !important;
 }
 
 .video-pulse-dot {

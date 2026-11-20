@@ -312,10 +312,11 @@ function generateSingleProductCardHtml(product) {
             <source src="${product.video}" type="video/mp4">
             ${product.videoFallback ? `<source src="${product.videoFallback}" type="video/mp4">` : ''}
           </video>
-          <div class="video-indicator-badge absolute bottom-2 left-2 z-10 inline-flex items-center gap-1 bg-black/65 hover:bg-black/85 backdrop-blur-xs text-white text-[9px] font-bold px-2 py-0.5 rounded-full shadow border border-white/20 transition-all duration-300 cursor-pointer" title="ভিডিও প্রিভিউ">
-            <svg class="video-play-icon w-2.5 h-2.5 fill-current text-emerald-400 flex-shrink-0" viewBox="0 0 20 20"><path d="M4.5 3.5l11 6.5-11 6.5z"/></svg>
-            <span class="video-status-text font-bangla-title">ভিডিও</span>
-          </div>
+          <!-- পরিচ্ছন্ন ও ছিমছাম মোবাইল ট্যাপ বাটন (কোনো টেক্সট ছাড়া শুধু প্লে/পজ আইকন) -->
+          <button type="button" class="video-play-tap-btn absolute bottom-2.5 left-2.5 z-10 w-7 h-7 sm:w-8 sm:h-8 rounded-full bg-black/60 hover:bg-emerald-600 active:scale-90 text-white flex items-center justify-center shadow-md border border-white/30 backdrop-blur-xs transition-all cursor-pointer" title="ভিডিও প্রিভিউ দেখুন" aria-label="ভিডিও প্রিভিউ">
+            <svg class="video-play-icon w-3.5 h-3.5 fill-current text-white ml-0.5" viewBox="0 0 20 20"><path d="M4.5 3.5l11 6.5-11 6.5z"/></svg>
+            <svg class="video-pause-icon w-3.5 h-3.5 fill-current text-white hidden" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zM7 8a1 1 0 012 0v4a1 1 0 11-2 0V8zm5-1a1 1 0 00-1 1v4a1 1 0 102 0V8a1 1 0 00-1-1z" clip-rule="evenodd"/></svg>
+          </button>
         ` : ''}
         ${product.discountPercent ? `
           <div class="absolute top-2 left-2 z-10 bg-rose-600 text-white text-[10px] sm:text-[11px] font-black px-2 py-0.5 rounded-md shadow-md font-brand pointer-events-none">
@@ -1151,11 +1152,11 @@ function renderTopProductsGrid() {
               ${product.videoFallback ? `<source src="${product.videoFallback}" type="video/mp4">` : ''}
             </video>
 
-            <!-- ছোট ভিডিও ব্যাজ/ইন্ডিকেটর -->
-            <div class="video-indicator-badge absolute bottom-2 left-2 z-10 inline-flex items-center gap-1 bg-black/65 hover:bg-black/85 backdrop-blur-xs text-white text-[9px] sm:text-[10px] font-bold px-2 py-0.5 rounded-full shadow border border-white/20 transition-all duration-300 cursor-pointer" title="ক্লিক বা হোভার করে ভিডিও প্রিভিউ দেখুন">
-              <svg class="video-play-icon w-2.5 h-2.5 fill-current text-emerald-400 flex-shrink-0" viewBox="0 0 20 20"><path d="M4.5 3.5l11 6.5-11 6.5z"/></svg>
-              <span class="video-status-text font-bangla-title">ভিডিও</span>
-            </div>
+            <!-- পরিচ্ছন্ন ও ছিমছাম মোবাইল ট্যাপ বাটন (কোনো টেক্সট ছাড়া শুধু প্লে/পজ আইকন) -->
+            <button type="button" class="video-play-tap-btn absolute bottom-2.5 left-2.5 z-10 w-7 h-7 sm:w-8 sm:h-8 rounded-full bg-black/60 hover:bg-emerald-600 active:scale-90 text-white flex items-center justify-center shadow-md border border-white/30 backdrop-blur-xs transition-all cursor-pointer" title="ভিডিও প্রিভিউ দেখুন" aria-label="ভিডিও প্রিভিউ">
+              <svg class="video-play-icon w-3.5 h-3.5 fill-current text-white ml-0.5" viewBox="0 0 20 20"><path d="M4.5 3.5l11 6.5-11 6.5z"/></svg>
+              <svg class="video-pause-icon w-3.5 h-3.5 fill-current text-white hidden" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zM7 8a1 1 0 012 0v4a1 1 0 11-2 0V8zm5-1a1 1 0 00-1 1v4a1 1 0 102 0V8a1 1 0 00-1-1z" clip-rule="evenodd"/></svg>
+            </button>
           ` : ''}
           <!-- প্রোডাক্টের গায়ে সামান্য লাল হাইলাইট ডিসকাউন্ট ব্যাজ -->
           ${product.discountPercent ? `
@@ -1279,9 +1280,9 @@ function initBestsellerVideoHovers() {
     const video = card.querySelector('.bestseller-hover-video');
     if (!video) return;
 
-    const badge = card.querySelector('.video-indicator-badge');
-    const badgeText = card.querySelector('.video-status-text');
     const playIcon = card.querySelector('.video-play-icon');
+    const pauseIcon = card.querySelector('.video-pause-icon');
+    const tapBtn = card.querySelector('.video-play-tap-btn, .video-indicator-badge');
 
     let playPromise = null;
     let isPlaying = false;
@@ -1317,10 +1318,8 @@ function initBestsellerVideoHovers() {
       }
 
       card.classList.add('video-playing');
-      if (badgeText) {
-        badgeText.innerHTML = '<span class="video-pulse-dot mr-1"></span>চলছে...';
-      }
-      if (playIcon) playIcon.style.display = 'none';
+      if (playIcon) playIcon.classList.add('hidden');
+      if (pauseIcon) pauseIcon.classList.remove('hidden');
 
       try {
         playPromise = video.play();
@@ -1332,8 +1331,8 @@ function initBestsellerVideoHovers() {
             isPlaying = false;
             if (!card.matches(':hover') && !card.classList.contains('touch-active')) {
               card.classList.remove('video-playing');
-              if (badgeText) badgeText.textContent = 'ভিডিও';
-              if (playIcon) playIcon.style.display = 'inline-block';
+              if (playIcon) playIcon.classList.remove('hidden');
+              if (pauseIcon) pauseIcon.classList.add('hidden');
             }
           });
         } else {
@@ -1344,8 +1343,8 @@ function initBestsellerVideoHovers() {
         isPlaying = false;
         if (!card.matches(':hover') && !card.classList.contains('touch-active')) {
           card.classList.remove('video-playing');
-          if (badgeText) badgeText.textContent = 'ভিডিও';
-          if (playIcon) playIcon.style.display = 'inline-block';
+          if (playIcon) playIcon.classList.remove('hidden');
+          if (pauseIcon) pauseIcon.classList.add('hidden');
         }
       }
     };
@@ -1353,10 +1352,8 @@ function initBestsellerVideoHovers() {
     const stopPlaying = () => {
       card.classList.remove('video-playing');
       card.classList.remove('touch-active');
-      if (badgeText) {
-        badgeText.textContent = 'ভিডিও';
-      }
-      if (playIcon) playIcon.style.display = 'inline-block';
+      if (playIcon) playIcon.classList.remove('hidden');
+      if (pauseIcon) pauseIcon.classList.add('hidden');
 
       const doPauseAndReset = () => {
         try {
@@ -1378,18 +1375,18 @@ function initBestsellerVideoHovers() {
       }
     };
 
-    // Desktop hover: মাউস কার্সার কার্ড বা ছবির উপর আসলে রিয়েলিস্টিক ভিডিও চলবে
+    // Desktop hover: মাউস কার্সার কার্ড বা ছবির ওপর আসলে কোনো টেক্সট ছাড়াই শুধু পরিচ্ছন্ন ভিডিও চলবে
     card.addEventListener('mouseenter', startPlaying);
     card.addEventListener('mouseleave', stopPlaying);
 
-    // Mobile / Touch support: ভিডিও ব্যাজে ট্যাপ করলে ভিডিও টগল হবে
-    if (badge) {
+    // Mobile / Touch support: পরিচ্ছন্ন ছোট ট্যাপ বাটনে ক্লিক করলে প্লে/পজ হবে
+    if (tapBtn) {
       let lastTap = 0;
-      badge.addEventListener('click', (e) => {
+      tapBtn.addEventListener('click', (e) => {
         e.stopPropagation();
         e.preventDefault();
         const now = Date.now();
-        if (now - lastTap < 400) return;
+        if (now - lastTap < 350) return;
         lastTap = now;
 
         if (card.classList.contains('video-playing')) {
@@ -1425,10 +1422,10 @@ function openProductDetailPage(productId) {
   });
   document.querySelectorAll('.video-playing').forEach(el => {
     el.classList.remove('video-playing', 'touch-active');
-    const badgeText = el.querySelector('.video-status-text');
     const playIcon = el.querySelector('.video-play-icon');
-    if (badgeText) badgeText.textContent = 'ভিডিও';
-    if (playIcon) playIcon.style.display = 'inline-block';
+    const pauseIcon = el.querySelector('.video-pause-icon');
+    if (playIcon) playIcon.classList.remove('hidden');
+    if (pauseIcon) pauseIcon.classList.add('hidden');
   });
 
   currentDetailProduct = product;
