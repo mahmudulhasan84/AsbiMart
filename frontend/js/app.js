@@ -289,7 +289,7 @@ function generateSingleProductCardHtml(product) {
   const defaultVar = product.variants ? product.variants[0] : { price: 500, originalPrice: 600 };
   return `
     <div 
-      class="bg-white rounded-2xl sm:rounded-3xl border border-[#E5DACB] overflow-hidden shadow-2xs hover:shadow-xl hover:-translate-y-1.5 transition-all duration-300 flex flex-col justify-between group"
+      class="bg-white rounded-2xl sm:rounded-3xl border border-[#E5DACB] overflow-hidden shadow-2xs hover:shadow-xl hover:-translate-y-1.5 transition-all duration-300 flex flex-col justify-between group ${product.video ? 'asbi-card-with-video' : ''}"
     >
       <!-- উপরের দিকে লম্বাটে ও আকর্ষণীয় পণ্যের বড় ছবি -->
       <div onclick="openProductDetailPage('${product.id}')" class="asbi-card-img-wrap relative w-full h-48 sm:h-60 bg-slate-50 overflow-hidden cursor-pointer" title="${product.banglaName} - বিস্তারিত দেখতে ক্লিক করুন">
@@ -297,10 +297,28 @@ function generateSingleProductCardHtml(product) {
           src="${product.image}" 
           alt="${product.banglaName}" 
           loading="lazy"
-          class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-108"
+          class="bestseller-static-img w-full h-full object-cover transition-transform duration-700 group-hover:scale-108"
         />
+        ${product.video ? `
+          <!-- হোভার করলে রিয়েলিস্টিক ভিডিও প্লেব্যাক -->
+          <video 
+            class="bestseller-hover-video absolute inset-0 w-full h-full object-cover opacity-0 pointer-events-none transition-opacity duration-300"
+            muted 
+            loop 
+            playsinline 
+            preload="metadata"
+            data-video-src="${product.video}"
+          >
+            <source src="${product.video}" type="video/mp4">
+            ${product.videoFallback ? `<source src="${product.videoFallback}" type="video/mp4">` : ''}
+          </video>
+          <div class="video-indicator-badge absolute bottom-2 left-2 z-10 inline-flex items-center gap-1 bg-black/65 hover:bg-black/85 backdrop-blur-xs text-white text-[9px] font-bold px-2 py-0.5 rounded-full shadow border border-white/20 transition-all duration-300 cursor-pointer" title="ভিডিও প্রিভিউ">
+            <svg class="video-play-icon w-2.5 h-2.5 fill-current text-emerald-400 flex-shrink-0" viewBox="0 0 20 20"><path d="M4.5 3.5l11 6.5-11 6.5z"/></svg>
+            <span class="video-status-text font-bangla-title">ভিডিও</span>
+          </div>
+        ` : ''}
         ${product.discountPercent ? `
-          <div class="absolute top-2 left-2 bg-rose-600 text-white text-[10px] sm:text-[11px] font-black px-2 py-0.5 rounded-md shadow-md font-brand">
+          <div class="absolute top-2 left-2 z-10 bg-rose-600 text-white text-[10px] sm:text-[11px] font-black px-2 py-0.5 rounded-md shadow-md font-brand pointer-events-none">
             -${toBanglaNum(product.discountPercent)}%
           </div>
         ` : ''}
@@ -343,6 +361,126 @@ function generateSingleProductCardHtml(product) {
   `;
 }
 
+// ব্যানার 'এখনই অর্ডার করুন' বাটনের জন্য স্ক্রল হ্যান্ডলার
+function handleOrderClick(event) {
+  if (event) event.preventDefault();
+  const target = document.getElementById('ourProductsSection') || document.getElementById('topProductsSection');
+  if (target) {
+    target.scrollIntoView({ behavior: 'smooth' });
+  }
+}
+
+// AsbiMart প্রমোশনাল ব্যানার ২ HTML (আওয়ার প্রোডাক্টসের ২য় সারির পর)
+function getAsbiMartBanner2Html() {
+  return `
+    <div id="asbimart-banner-2" class="relative w-full rounded-2xl overflow-hidden shadow-lg border border-emerald-900/10 bg-gradient-to-l from-[#F5EFE6] via-[#F9F6F0] to-[#EAF5EE]">
+      <div class="grid grid-cols-12 items-center min-h-[250px] sm:min-h-[310px] md:min-h-[340px]">
+        <!-- Left: Multi-Product Package Composition (হানি নাট + সরিষার তেল + মধু + চা পাতা) -->
+        <div class="col-span-6 h-full p-2.5 sm:p-4 md:p-5 flex items-center justify-center">
+          <div class="grid grid-cols-2 grid-rows-2 gap-2 sm:gap-3 w-full h-[220px] sm:h-[275px] md:h-[300px]">
+            <div class="rounded-xl overflow-hidden shadow-md ring-2 ring-white/90">
+              <img src="https://images.unsplash.com/photo-1606923829579-0cb981a83e2e?auto=format&amp;fit=crop&amp;w=500&amp;q=85" onerror="this.src='https://placehold.co/400x300/E6F4EA/1B5E20?text=Honey+Nuts'" alt="মধুময় বাদাম ও হানি নাট" class="w-full h-full object-cover hover:scale-105 transition duration-500">
+            </div>
+            <div class="rounded-xl overflow-hidden shadow-md ring-2 ring-white/90">
+              <img src="https://images.unsplash.com/photo-1474979266404-7eaacbcd87c5?auto=format&amp;fit=crop&amp;w=500&amp;q=85" onerror="this.src='https://placehold.co/400x300/FFF4D2/8A5A00?text=Mustard+Oil'" alt="খাঁটি সরিষার তেল" class="w-full h-full object-cover hover:scale-105 transition duration-500">
+            </div>
+            <div class="rounded-xl overflow-hidden shadow-md ring-2 ring-white/90">
+              <img src="https://images.unsplash.com/photo-1558642452-9d2a7deb7f62?auto=format&amp;fit=crop&amp;w=500&amp;q=85" onerror="this.src='https://placehold.co/400x300/F9E3C0/7A3E0A?text=Natural+Honey'" alt="প্রাকৃতিক খাঁটি মধু" class="w-full h-full object-cover hover:scale-105 transition duration-500">
+            </div>
+            <div class="rounded-xl overflow-hidden shadow-md ring-2 ring-white/90">
+              <img src="https://images.unsplash.com/photo-1597318181409-cf64d0b5d8a2?auto=format&amp;fit=crop&amp;w=500&amp;q=85" onerror="this.src='https://placehold.co/400x300/DDF2E5/0B6E4F?text=Premium+Tea'" alt="প্রিমিয়াম অর্গানিক চা পাতা" class="w-full h-full object-cover hover:scale-105 transition duration-500">
+            </div>
+          </div>
+        </div>
+
+        <!-- Right: Exact Logo + Bold Highlightable Headline + Animated Button -->
+        <div class="col-span-6 p-4 sm:p-8 md:p-10 flex flex-col items-end text-right justify-center z-10">
+          <div class="mb-3 sm:mb-5">
+            <svg class="h-8 sm:h-11 md:h-12 w-auto" viewBox="0 0 285 72" fill="none" xmlns="http://www.w3.org/2000/svg" aria-label="AsbiMart">
+              <path d="M16 58L38 14L55 46" stroke="#1B357E" stroke-width="9.5" stroke-linecap="round" stroke-linejoin="round"></path>
+              <path d="M19 37H35C40.5 37 43.5 39.5 46.5 45L53 58" stroke="url(#asbiExactGrad2)" stroke-width="9.5" stroke-linecap="round" stroke-linejoin="round"></path>
+              <defs>
+                <linearGradient id="asbiExactGrad2" x1="19" y1="37" x2="53" y2="58" gradientUnits="userSpaceOnUse">
+                  <stop offset="0%" stop-color="#00A86B"></stop>
+                  <stop offset="48%" stop-color="#00A86B"></stop>
+                  <stop offset="100%" stop-color="#F6B21A"></stop>
+                </linearGradient>
+              </defs>
+              <text x="74" y="51" font-family="Montserrat, sans-serif" font-weight="800" font-size="40" letter-spacing="-0.8" fill="#1B357E">Asbi</text>
+              <text x="166" y="51" font-family="Montserrat, sans-serif" font-weight="800" font-size="40" letter-spacing="-0.8" fill="#F29C11">Mart</text>
+            </svg>
+          </div>
+
+          <h2 class="text-xl sm:text-3xl md:text-[40px] font-bold leading-[1.18] tracking-tight">
+            <span class="text-asbi-green">সুস্বাস্থ্য ও বিশুদ্ধতার</span><br>
+            <span class="text-asbi-navy">এক অনন্য মেলবন্ধন!</span>
+          </h2>
+
+          <div class="mt-4 sm:mt-7">
+            <a href="#order-now" onclick="handleOrderClick(event)" class="order-btn-green order-btn-sheen inline-flex items-center gap-2 px-4 sm:px-7 py-2 sm:py-3 rounded-full text-xs sm:text-base md:text-lg font-bold tracking-wide transition">
+              <span>এখনই অর্ডার করুন</span>
+            </a>
+          </div>
+        </div>
+      </div>
+    </div>
+  `;
+}
+
+// AsbiMart প্রমোশনাল ব্যানার ৩ HTML (আওয়ার প্রোডাক্টসের ৪র্থ সারির পর)
+function getAsbiMartBanner3Html() {
+  return `
+    <div id="asbimart-banner-3" class="relative w-full rounded-2xl overflow-hidden shadow-lg border border-blue-900/10 bg-gradient-to-r from-[#F5EFE6] via-[#FAF6EF] to-[#EDF2FA]">
+      <div class="grid grid-cols-12 items-center min-h-[250px] sm:min-h-[310px] md:min-h-[340px]">
+        <!-- Left: Exact Logo + Bold Highlightable Headline + Animated Button -->
+        <div class="col-span-6 p-4 sm:p-8 md:p-10 flex flex-col items-start justify-center z-10">
+          <div class="mb-3 sm:mb-5">
+            <svg class="h-8 sm:h-11 md:h-12 w-auto" viewBox="0 0 285 72" fill="none" xmlns="http://www.w3.org/2000/svg" aria-label="AsbiMart">
+              <path d="M16 58L38 14L55 46" stroke="#1B357E" stroke-width="9.5" stroke-linecap="round" stroke-linejoin="round"></path>
+              <path d="M19 37H35C40.5 37 43.5 39.5 46.5 45L53 58" stroke="url(#asbiExactGrad3)" stroke-width="9.5" stroke-linecap="round" stroke-linejoin="round"></path>
+              <defs>
+                <linearGradient id="asbiExactGrad3" x1="19" y1="37" x2="53" y2="58" gradientUnits="userSpaceOnUse">
+                  <stop offset="0%" stop-color="#00A86B"></stop>
+                  <stop offset="48%" stop-color="#00A86B"></stop>
+                  <stop offset="100%" stop-color="#F6B21A"></stop>
+                </linearGradient>
+              </defs>
+              <text x="74" y="51" font-family="Montserrat, sans-serif" font-weight="800" font-size="40" letter-spacing="-0.8" fill="#1B357E">Asbi</text>
+              <text x="166" y="51" font-family="Montserrat, sans-serif" font-weight="800" font-size="40" letter-spacing="-0.8" fill="#F29C11">Mart</text>
+            </svg>
+          </div>
+
+          <h2 class="text-xl sm:text-3xl md:text-[38px] font-bold leading-[1.2] tracking-tight text-slate-900">
+            <span class="text-asbi-navy">১০০% খাঁটি অর্গানিক</span><br>
+            <span class="text-asbi-amber">এখন আপনার দোরগোড়ায়!</span>
+          </h2>
+
+          <div class="mt-4 sm:mt-7">
+            <a href="#order-now" onclick="handleOrderClick(event)" class="order-btn-navy order-btn-sheen inline-flex items-center gap-2 px-4 sm:px-7 py-2 sm:py-3 rounded-full text-xs sm:text-base md:text-lg font-bold tracking-wide transition">
+              <span>এখনই অর্ডার করুন</span>
+            </a>
+          </div>
+        </div>
+
+        <!-- Right: 3-Column Vertical Package Strip (পেস্তা বাদাম + খাঁটি মধু + অর্গানিক চা) -->
+        <div class="col-span-6 h-full p-2.5 sm:p-4 md:p-5 flex items-center justify-center">
+          <div class="grid grid-cols-3 gap-2 sm:gap-3 w-full h-[220px] sm:h-[275px] md:h-[300px]">
+            <div class="rounded-xl overflow-hidden shadow-md ring-2 ring-white/90 translate-y-2">
+              <img src="https://images.unsplash.com/photo-1599599810769-bcde5a160d32?auto=format&amp;fit=crop&amp;w=450&amp;q=85" onerror="this.src='https://placehold.co/300x500/FFF0D6/7A3E0A?text=Pistachios'" alt="পেস্তা ও কাজু বাদাম" class="w-full h-full object-cover hover:scale-105 transition duration-500">
+            </div>
+            <div class="rounded-xl overflow-hidden shadow-lg ring-2 ring-amber-300/90 -translate-y-1">
+              <img src="https://images.unsplash.com/photo-1587049352846-4a222e784d38?auto=format&amp;fit=crop&amp;w=450&amp;q=85" onerror="this.src='https://placehold.co/300x500/F9E0B0/5A3512?text=Pure+Honey'" alt="খাঁটি মধু" class="w-full h-full object-cover hover:scale-105 transition duration-500">
+            </div>
+            <div class="rounded-xl overflow-hidden shadow-md ring-2 ring-white/90 translate-y-2">
+              <img src="https://images.unsplash.com/photo-1564890369478-c89ca6d9cde9?auto=format&amp;fit=crop&amp;w=450&amp;q=85" onerror="this.src='https://placehold.co/300x500/DCF2E4/14532D?text=Organic+Tea'" alt="অর্গানিক চা পাতা" class="w-full h-full object-cover hover:scale-105 transition duration-500">
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  `;
+}
+
 // মূল রেন্ডার ফাংশন
 function renderProductGrid(customProducts = null, bannerText = null) {
   const container = document.getElementById('categoryRowsContainer') || document.getElementById('ourProductsGrid');
@@ -377,16 +515,35 @@ function renderProductGrid(customProducts = null, bannerText = null) {
         ${customProducts.map(p => generateSingleProductCardHtml(p)).join('')}
       </div>
     `;
+    initBestsellerVideoHovers();
     return;
   }
 
   // ২. ডিফল্ট ভিউ: প্রতিটি ক্যাটাগরি উপরে-নিচে আলাদা সারি হিসেবে রেন্ডার হবে
   if (banner) banner.classList.add('hidden');
 
-  container.innerHTML = CATEGORY_DEFINITIONS.map(cat => {
+  container.innerHTML = CATEGORY_DEFINITIONS.map((cat, index) => {
     const catProducts = PRODUCTS_DATA.filter(cat.filter);
     const isExpanded = !!expandedCategories[cat.id];
     const displayProducts = isExpanded ? catProducts : catProducts.slice(0, 5);
+
+    // ২ সারি পর পর ব্যানার যুক্ত করার লজিক (ইন্টার-রো ব্যানার)
+    let interRowBanner = '';
+    if (index === 1) {
+      // ২য় সারির (Pure Oil & Ghee) পর ব্যানার ২
+      interRowBanner = `
+        <div class="pt-6 pb-2">
+          ${getAsbiMartBanner2Html()}
+        </div>
+      `;
+    } else if (index === 3) {
+      // ৪র্থ সারির (Organic Superfood) পর ব্যানার ৩
+      interRowBanner = `
+        <div class="pt-6 pb-2">
+          ${getAsbiMartBanner3Html()}
+        </div>
+      `;
+    }
 
     return `
       <div id="cat-section-${cat.id}" class="cat-row-block space-y-4 pt-2">
@@ -422,8 +579,10 @@ function renderProductGrid(customProducts = null, bannerText = null) {
           ${displayProducts.map(p => generateSingleProductCardHtml(p)).join('')}
         </div>
       </div>
+      ${interRowBanner}
     `;
   }).join('');
+  initBestsellerVideoHovers();
 }
 
 // ক্যাটাগরি এক্সপ্যান্ড বা কলাপ্স টগল
@@ -611,6 +770,7 @@ function renderCategoryPage(catId, sortBy = 'featured', customProducts = null, s
 
   // মেইন পেজের হুবহু ৫-কলাম কার্ড স্টাইলে প্রোডাক্ট রেন্ডার
   grid.innerHTML = productsToShow.map(p => generateSingleProductCardHtml(p)).join('');
+  initBestsellerVideoHovers();
 }
 
 function handleCategorySortChange(sortBy) {
@@ -942,13 +1102,13 @@ function filterByCategory(catId) {
 }
 
 // ==========================================
-// ৩.১. টপ প্রোডাক্টস ২-কলাম অনুভূমিক গ্রিড (ঠিক ৪টি বেস্ট সেলার পণ্য - ২x২ গ্রিড)
+// ৩.১. টপ প্রোডাক্টস ২-কলাম অনুভূমিক গ্রিড (সকল বেস্ট সেলার পণ্য)
 // ==========================================
 function renderTopProductsGrid() {
   const container = document.getElementById('topProductsGrid');
   if (!container) return;
 
-  const topProducts = PRODUCTS_DATA.filter(p => p.isBestSeller).slice(0, 4);
+  const topProducts = PRODUCTS_DATA.filter(p => p.isBestSeller);
   if (topProducts.length === 0) {
     container.innerHTML = `
       <div class="col-span-full py-12 text-center text-slate-500">
@@ -961,24 +1121,44 @@ function renderTopProductsGrid() {
   container.innerHTML = topProducts.map(product => {
     const defaultVar = product.variants[0];
     return `
-      <div class="product-card-horizontal relative">
+      <div class="product-card-horizontal relative group asbi-card-with-video">
         <!-- উপরের ডান কোনায় লোগোর ৩য় রঙ (মিন্ট গ্রিন #10B981) দিয়ে আকর্ষণীয় Best Seller সাইন -->
         <div class="top-bestseller-badge absolute top-2.5 right-2.5 z-10 inline-flex items-center gap-1 bg-[#10B981] text-white text-[10px] sm:text-[11px] font-black uppercase tracking-wider px-2.5 py-0.5 rounded-full shadow-md shadow-emerald-600/30 border border-emerald-300/60 font-brand pointer-events-none select-none">
           <svg class="w-3 h-3 fill-current text-amber-200 flex-shrink-0" viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/></svg>
           <span>Best Seller</span>
         </div>
 
-        <!-- বাম দিকের ৫০% অংশ: প্রোডাক্টের ইমেজ ও ডিসকাউন্ট (ক্লিক করলে বিস্তারিত পেজ খুলবে) -->
-        <div onclick="openProductDetailPage('${product.id}')" class="card-img-col w-1/2 relative bg-slate-50 overflow-hidden flex-shrink-0 cursor-pointer group" title="বিস্তারিত দেখতে ক্লিক করুন">
+        <!-- বাম দিকের ৫০% অংশ: প্রোডাক্টের ইমেজ, হোভার ভিডিও ও ডিসকাউন্ট (ক্লিক করলে বিস্তারিত পেজ খুলবে) -->
+        <div onclick="openProductDetailPage('${product.id}')" class="card-img-col w-1/2 relative bg-slate-50 overflow-hidden flex-shrink-0 cursor-pointer" title="বিস্তারিত দেখতে ক্লিক করুন">
           <img 
             src="${product.image}" 
             alt="${product.banglaName}" 
             loading="lazy"
-            class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+            class="bestseller-static-img w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
           />
+          ${product.video ? `
+            <!-- মাউস হোভার করলে অটোমেটিক ভিডিও চলার প্রিভিউ -->
+            <video 
+              class="bestseller-hover-video absolute inset-0 w-full h-full object-cover opacity-0 pointer-events-none transition-opacity duration-300"
+              muted 
+              loop 
+              playsinline 
+              preload="metadata"
+              data-video-src="${product.video}"
+            >
+              <source src="${product.video}" type="video/mp4">
+              ${product.videoFallback ? `<source src="${product.videoFallback}" type="video/mp4">` : ''}
+            </video>
+
+            <!-- ছোট ভিডিও ব্যাজ/ইন্ডিকেটর -->
+            <div class="video-indicator-badge absolute bottom-2 left-2 z-10 inline-flex items-center gap-1 bg-black/65 hover:bg-black/85 backdrop-blur-xs text-white text-[9px] sm:text-[10px] font-bold px-2 py-0.5 rounded-full shadow border border-white/20 transition-all duration-300 cursor-pointer" title="ক্লিক বা হোভার করে ভিডিও প্রিভিউ দেখুন">
+              <svg class="video-play-icon w-2.5 h-2.5 fill-current text-emerald-400 flex-shrink-0" viewBox="0 0 20 20"><path d="M4.5 3.5l11 6.5-11 6.5z"/></svg>
+              <span class="video-status-text font-bangla-title">ভিডিও</span>
+            </div>
+          ` : ''}
           <!-- প্রোডাক্টের গায়ে সামান্য লাল হাইলাইট ডিসকাউন্ট ব্যাজ -->
           ${product.discountPercent ? `
-            <div class="absolute top-2.5 left-2.5 bg-rose-600 text-white text-[11px] font-black px-2.5 py-0.5 rounded-md shadow-md font-brand">
+            <div class="absolute top-2.5 left-2.5 z-10 bg-rose-600 text-white text-[11px] font-black px-2.5 py-0.5 rounded-md shadow-md font-brand pointer-events-none">
               -${toBanglaNum(product.discountPercent)}%
             </div>
           ` : ''}
@@ -1035,6 +1215,8 @@ function renderTopProductsGrid() {
       </div>
     `;
   }).join('');
+
+  initBestsellerVideoHovers();
 }
 
 function changeTopProductPrice(productId) {
@@ -1085,6 +1267,142 @@ function addCardProductToCart(productId) {
 }
 
 // ==========================================
+// ৩.২. বেস্ট সেলার প্রোডাক্টের রিয়েলিস্টিক ভিডিও হোভার ও প্লেব্যাক হ্যান্ডলার
+// ==========================================
+function initBestsellerVideoHovers() {
+  const cards = document.querySelectorAll('#topProductsGrid .product-card-horizontal, .asbi-card-with-video');
+  cards.forEach(card => {
+    if (card.dataset.videoHoverInit === 'true') return;
+    card.dataset.videoHoverInit = 'true';
+
+    const video = card.querySelector('.bestseller-hover-video');
+    if (!video) return;
+
+    const badge = card.querySelector('.video-indicator-badge');
+    const badgeText = card.querySelector('.video-status-text');
+    const playIcon = card.querySelector('.video-play-icon');
+
+    let playPromise = null;
+    let isPlaying = false;
+    let resetTimer = null;
+
+    const markVideoReady = () => {
+      video.classList.add('video-ready');
+    };
+
+    if (video.readyState >= 2) {
+      markVideoReady();
+    } else {
+      video.addEventListener('loadeddata', markVideoReady, { once: true });
+      video.addEventListener('canplay', markVideoReady, { once: true });
+    }
+
+    const startPlaying = () => {
+      if (resetTimer) {
+        clearTimeout(resetTimer);
+        resetTimer = null;
+      }
+
+      video.muted = true;
+      video.playsInline = true;
+      video.loop = true;
+
+      // Lazy load video source on first interaction if needed
+      if (!video.src && video.dataset.videoSrc) {
+        const sources = video.querySelectorAll('source');
+        if (sources.length === 0) {
+          video.src = video.dataset.videoSrc;
+        }
+      }
+
+      card.classList.add('video-playing');
+      if (badgeText) {
+        badgeText.innerHTML = '<span class="video-pulse-dot mr-1"></span>চলছে...';
+      }
+      if (playIcon) playIcon.style.display = 'none';
+
+      try {
+        playPromise = video.play();
+        if (playPromise && typeof playPromise.then === 'function') {
+          playPromise.then(() => {
+            isPlaying = true;
+            markVideoReady();
+          }).catch(() => {
+            isPlaying = false;
+            if (!card.matches(':hover') && !card.classList.contains('touch-active')) {
+              card.classList.remove('video-playing');
+              if (badgeText) badgeText.textContent = 'ভিডিও';
+              if (playIcon) playIcon.style.display = 'inline-block';
+            }
+          });
+        } else {
+          isPlaying = true;
+          markVideoReady();
+        }
+      } catch (err) {
+        isPlaying = false;
+        if (!card.matches(':hover') && !card.classList.contains('touch-active')) {
+          card.classList.remove('video-playing');
+          if (badgeText) badgeText.textContent = 'ভিডিও';
+          if (playIcon) playIcon.style.display = 'inline-block';
+        }
+      }
+    };
+
+    const stopPlaying = () => {
+      card.classList.remove('video-playing');
+      card.classList.remove('touch-active');
+      if (badgeText) {
+        badgeText.textContent = 'ভিডিও';
+      }
+      if (playIcon) playIcon.style.display = 'inline-block';
+
+      const doPauseAndReset = () => {
+        try {
+          video.pause();
+          isPlaying = false;
+          if (resetTimer) clearTimeout(resetTimer);
+          resetTimer = setTimeout(() => {
+            if (!card.classList.contains('video-playing')) {
+              try { video.currentTime = 0; } catch (e) {}
+            }
+          }, 350);
+        } catch (e) {}
+      };
+
+      if (playPromise && typeof playPromise.then === 'function') {
+        playPromise.then(doPauseAndReset).catch(doPauseAndReset);
+      } else {
+        doPauseAndReset();
+      }
+    };
+
+    // Desktop hover: মাউস কার্সার কার্ড বা ছবির উপর আসলে রিয়েলিস্টিক ভিডিও চলবে
+    card.addEventListener('mouseenter', startPlaying);
+    card.addEventListener('mouseleave', stopPlaying);
+
+    // Mobile / Touch support: ভিডিও ব্যাজে ট্যাপ করলে ভিডিও টগল হবে
+    if (badge) {
+      let lastTap = 0;
+      badge.addEventListener('click', (e) => {
+        e.stopPropagation();
+        e.preventDefault();
+        const now = Date.now();
+        if (now - lastTap < 400) return;
+        lastTap = now;
+
+        if (card.classList.contains('video-playing')) {
+          stopPlaying();
+        } else {
+          card.classList.add('touch-active');
+          startPlaying();
+        }
+      });
+    }
+  });
+}
+
+// ==========================================
 // ৪. একক পণ্যের সম্পূর্ণ বিস্তারিত পেজ (Product Details Page)
 // ==========================================
 let currentDetailProduct = null;
@@ -1096,6 +1414,21 @@ let currentReviewRating = 5;
 function openProductDetailPage(productId) {
   const product = PRODUCTS_DATA.find(p => p.id === productId);
   if (!product) return;
+
+  // মোডাল খোলার সময় পেজের সমস্ত রানিং হোভার ভিডিও পজ ও রিসেট করা
+  document.querySelectorAll('.bestseller-hover-video').forEach(vid => {
+    try {
+      vid.pause();
+      vid.currentTime = 0;
+    } catch (e) {}
+  });
+  document.querySelectorAll('.video-playing').forEach(el => {
+    el.classList.remove('video-playing', 'touch-active');
+    const badgeText = el.querySelector('.video-status-text');
+    const playIcon = el.querySelector('.video-play-icon');
+    if (badgeText) badgeText.textContent = 'ভিডিও';
+    if (playIcon) playIcon.style.display = 'inline-block';
+  });
 
   currentDetailProduct = product;
   currentDetailVariantIndex = 0;
@@ -1147,6 +1480,11 @@ function closeProductDetailPage() {
   if (modal) {
     modal.classList.add('hidden');
   }
+  const mainVideo = document.getElementById('detailMainPreviewVideo');
+  if (mainVideo) {
+    mainVideo.pause();
+    mainVideo.currentTime = 0;
+  }
   document.body.classList.remove('overflow-hidden');
   currentDetailProduct = null;
 }
@@ -1154,16 +1492,43 @@ function closeProductDetailPage() {
 function selectDetailThumbnail(imgUrl) {
   currentDetailActiveImage = imgUrl;
   const mainImg = document.getElementById('detailMainPreviewImg');
+  const mainVideo = document.getElementById('detailMainPreviewVideo');
+  if (mainVideo) {
+    mainVideo.pause();
+    mainVideo.classList.add('hidden');
+  }
   if (mainImg) {
     mainImg.src = imgUrl;
+    mainImg.classList.remove('hidden');
   }
-  document.querySelectorAll('.detail-thumbnail-btn').forEach(btn => {
+  document.querySelectorAll('.detail-thumbnail-btn[data-src]').forEach(btn => {
     if (btn.getAttribute('data-src') === imgUrl) {
-      btn.className = 'detail-thumbnail-btn w-16 h-16 sm:w-20 sm:h-20 rounded-xl overflow-hidden border-2 border-emerald-600 ring-2 ring-emerald-300 shadow-sm transition-all flex-shrink-0 cursor-pointer bg-slate-50';
+      btn.className = 'detail-thumbnail-btn w-16 h-16 sm:w-20 sm:h-20 rounded-2xl overflow-hidden border-2 border-emerald-600 ring-2 ring-emerald-300 shadow-sm transition-all flex-shrink-0 cursor-pointer bg-slate-50';
     } else {
-      btn.className = 'detail-thumbnail-btn w-16 h-16 sm:w-20 sm:h-20 rounded-xl overflow-hidden border-2 border-slate-200 hover:border-slate-400 opacity-70 hover:opacity-100 transition-all flex-shrink-0 cursor-pointer bg-slate-50';
+      btn.className = 'detail-thumbnail-btn w-16 h-16 sm:w-20 sm:h-20 rounded-2xl overflow-hidden border-2 border-slate-200 hover:border-slate-400 opacity-70 hover:opacity-100 transition-all flex-shrink-0 cursor-pointer bg-slate-50';
     }
   });
+  const videoBtn = document.getElementById('detailVideoThumbBtn');
+  if (videoBtn) {
+    videoBtn.className = 'detail-thumbnail-btn relative w-16 h-16 sm:w-20 sm:h-20 rounded-2xl overflow-hidden border-2 border-slate-700 bg-slate-900 text-white flex flex-col items-center justify-center gap-1 opacity-80 hover:opacity-100 shadow-sm transition-all flex-shrink-0 cursor-pointer group';
+  }
+}
+
+function selectDetailVideo(videoSrc) {
+  const mainImg = document.getElementById('detailMainPreviewImg');
+  const mainVideo = document.getElementById('detailMainPreviewVideo');
+  if (mainImg && mainVideo) {
+    mainImg.classList.add('hidden');
+    mainVideo.classList.remove('hidden');
+    mainVideo.play().catch(() => {});
+  }
+  document.querySelectorAll('.detail-thumbnail-btn[data-src]').forEach(btn => {
+    btn.className = 'detail-thumbnail-btn w-16 h-16 sm:w-20 sm:h-20 rounded-2xl overflow-hidden border-2 border-slate-200 hover:border-slate-400 opacity-70 hover:opacity-100 transition-all flex-shrink-0 cursor-pointer bg-slate-50';
+  });
+  const videoBtn = document.getElementById('detailVideoThumbBtn');
+  if (videoBtn) {
+    videoBtn.className = 'detail-thumbnail-btn relative w-16 h-16 sm:w-20 sm:h-20 rounded-2xl overflow-hidden border-2 border-emerald-500 ring-2 ring-emerald-300 shadow-md transition-all flex-shrink-0 cursor-pointer bg-slate-900 text-white flex flex-col items-center justify-center gap-1';
+  }
 }
 
 function selectDetailVariant(index) {
@@ -1359,6 +1724,20 @@ function renderProductDetailView() {
       
       <!-- ১. বাম সাইডের অপশন/ভ্যারিয়েন্ট থাম্বনেইল (মোবাইলে অনুভূমিক, ডেক্সটপে সুন্দর উল্লম্ব স্ট্যাক) -->
       <div class="lg:col-span-2 order-2 lg:order-1 flex lg:flex-col gap-2.5 overflow-x-auto lg:overflow-y-auto max-h-[480px] pb-2 lg:pb-0 scrollbar-thin">
+        ${p.video ? `
+          <button 
+            type="button" 
+            onclick="selectDetailVideo('${p.video}')"
+            id="detailVideoThumbBtn"
+            class="detail-thumbnail-btn relative w-16 h-16 sm:w-20 sm:h-20 rounded-2xl overflow-hidden border-2 border-emerald-500 bg-slate-900 text-white flex flex-col items-center justify-center gap-1 shadow-sm transition-all flex-shrink-0 cursor-pointer group"
+            title="ব্যবহারের ভিডিও দেখুন"
+          >
+            <div class="w-7 h-7 rounded-full bg-emerald-500 flex items-center justify-center text-white shadow group-hover:scale-110 transition-transform">
+              <svg class="w-3.5 h-3.5 fill-current ml-0.5" viewBox="0 0 20 20"><path d="M4.5 3.5l11 6.5-11 6.5z"/></svg>
+            </div>
+            <span class="text-[9px] font-black tracking-tight text-emerald-200">ভিডিও দেখুন</span>
+          </button>
+        ` : ''}
         ${gallery.map((imgUrl, i) => `
           <button 
             type="button" 
@@ -1381,6 +1760,18 @@ function renderProductDetailView() {
             alt="${p.banglaName}" 
             class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
           />
+          ${p.video ? `
+            <video 
+              id="detailMainPreviewVideo" 
+              class="hidden w-full h-full object-cover rounded-2xl sm:rounded-3xl" 
+              controls 
+              playsinline 
+              loop
+            >
+              <source src="${p.video}" type="video/mp4">
+              ${p.videoFallback ? `<source src="${p.videoFallback}" type="video/mp4">` : ''}
+            </video>
+          ` : ''}
           
           <!-- ডিসকাউন্ট ছাড়ের লাল ব্যাজ -->
           ${p.discountPercent ? `

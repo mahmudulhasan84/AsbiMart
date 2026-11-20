@@ -61,6 +61,8 @@ const PRODUCTS_DATA = [
     "rating": 5,
     "reviewsCount": 142,
     "discountPercent": 15,
+    "video": "../assets/videos/honey-sundarban-01.mp4",
+    "videoFallback": "https://assets.mixkit.co/videos/2801/2801-720.mp4",
     "image": "https://images.unsplash.com/photo-1558642452-9d2a7deb7f62?auto=format&fit=crop&w=800&q=80",
     "gallery": [
       "https://images.unsplash.com/photo-1558642452-9d2a7deb7f62?auto=format&fit=crop&w=800&q=80"
@@ -240,6 +242,8 @@ const PRODUCTS_DATA = [
     "rating": 5,
     "reviewsCount": 185,
     "discountPercent": 16,
+    "video": "../assets/videos/honey-nut-premium-05.mp4",
+    "videoFallback": "https://assets.mixkit.co/videos/43912/43912-720.mp4",
     "image": "../assets/products/honey-nut-premium-05.jpg",
     "gallery": [
       "../assets/products/honey-nut-premium-05.jpg"
@@ -283,6 +287,8 @@ const PRODUCTS_DATA = [
     "rating": 5,
     "reviewsCount": 198,
     "discountPercent": 12,
+    "video": "../assets/videos/ghee-pabna-06.mp4",
+    "videoFallback": "https://assets.mixkit.co/videos/45895/45895-720.mp4",
     "image": "https://images.unsplash.com/photo-1589985270826-4b7bb135bc9d?auto=format&fit=crop&w=800&q=80",
     "gallery": [
       "https://images.unsplash.com/photo-1589985270826-4b7bb135bc9d?auto=format&fit=crop&w=800&q=80"
@@ -412,6 +418,8 @@ const PRODUCTS_DATA = [
     "rating": 4.8,
     "reviewsCount": 115,
     "discountPercent": 10,
+    "video": "../assets/videos/oil-mustard-ghani-09.mp4",
+    "videoFallback": "https://assets.mixkit.co/videos/21529/21529-720.mp4",
     "image": "https://images.unsplash.com/photo-1474979266404-7eaacbcd87c5?auto=format&fit=crop&w=800&q=80",
     "gallery": [
       "https://images.unsplash.com/photo-1474979266404-7eaacbcd87c5?auto=format&fit=crop&w=800&q=80"
@@ -584,6 +592,8 @@ const PRODUCTS_DATA = [
     "rating": 4.9,
     "reviewsCount": 164,
     "discountPercent": 18,
+    "video": "../assets/videos/nuts-dryfruits-mix-13.mp4",
+    "videoFallback": "https://assets.mixkit.co/videos/43925/43925-360.mp4",
     "image": "https://images.unsplash.com/photo-1514537193821-ed4955693802?auto=format&fit=crop&w=800&q=80",
     "gallery": [
       "https://images.unsplash.com/photo-1514537193821-ed4955693802?auto=format&fit=crop&w=800&q=80"
@@ -1598,6 +1608,8 @@ const PRODUCTS_DATA = [
     "rating": 5,
     "reviewsCount": 110,
     "discountPercent": 20,
+    "video": "../assets/videos/combo-health-pack-37.mp4",
+    "videoFallback": "https://assets.mixkit.co/videos/3795/3795-720.mp4",
     "image": "../assets/products/combo-health-pack-37.jpg",
     "gallery": [
       "../assets/products/combo-health-pack-37.jpg"
@@ -1635,6 +1647,8 @@ const PRODUCTS_DATA = [
     "rating": 5,
     "reviewsCount": 94,
     "discountPercent": 18,
+    "video": "../assets/videos/combo-royal-nuts-38.mp4",
+    "videoFallback": "https://assets.mixkit.co/videos/3796/3796-720.mp4",
     "image": "../assets/products/combo-royal-nuts-38.jpg",
     "gallery": [
       "../assets/products/combo-royal-nuts-38.jpg"

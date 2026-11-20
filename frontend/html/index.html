@@ -28,7 +28,7 @@
   <link href="https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@300;400;500;600;700&family=Noto+Serif+Bengali:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@600;700;800;900&display=swap" rel="stylesheet">
   
   <!-- Custom CSS & Dedicated Mobile Responsive CSS -->
-  <link rel="stylesheet" href="../css/style.css">
+  <link rel="stylesheet" href="../css/style.css?v=2.3">
   <link rel="stylesheet" href="../css/responsive.css">
 </head>
 <body class="bg-[#F4ECE1] text-slate-800 antialiased">
@@ -611,6 +611,77 @@
     <!-- 2-Column Horizontal Best Selling Products Grid (প্রতি সারিতে ২টি করে কার্ড) -->
     <div id="topProductsGrid" class="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6">
       <!-- JS rendered -->
+    </div>
+  </section>
+
+  <!-- ==========================================================================
+       ৫.৫ আসবিমার্ট প্রমোশনাল ব্যানার ১ (বেস্ট সেলিং প্রোডাক্টসের ঠিক নিচে ও আওয়ার প্রোডাক্টসের শুরুতে)
+       ========================================================================== -->
+  <section id="bestsellerBottomBannerSection" class="asbi-container my-8 sm:my-10">
+    <!-- AsbiMart Banner (asbimart-banner-1) -->
+    <div id="asbimart-banner-1" class="relative w-full rounded-2xl overflow-hidden shadow-lg border border-amber-900/10 bg-gradient-to-r from-[#F5EFE6] via-[#F7F1E7] to-[#EFE5D5]">
+        <div class="grid grid-cols-12 items-center min-h-[250px] sm:min-h-[310px] md:min-h-[340px]">
+
+            <!-- Left: Exact Logo + Bold Highlightable Headline + Animated Button -->
+            <div class="col-span-6 p-4 sm:p-8 md:p-10 flex flex-col items-start justify-center z-10">
+                <!-- হুবহু অরিজিনাল AsbiMart লোগো (কোনো পরিবর্তন ছাড়া) -->
+                <div class="mb-3 sm:mb-5">
+                    <svg class="h-8 sm:h-11 md:h-12 w-auto" viewBox="0 0 285 72" fill="none" xmlns="http://www.w3.org/2000/svg" aria-label="AsbiMart">
+                        <!-- Blue Inverted-V of 'A' -->
+                        <path d="M16 58L38 14L55 46" stroke="#1B357E" stroke-width="9.5" stroke-linecap="round" stroke-linejoin="round"></path>
+                        <!-- Green-to-Amber Curved Crossbar -->
+                        <path d="M19 37H35C40.5 37 43.5 39.5 46.5 45L53 58" stroke="url(#asbiExactGrad1)" stroke-width="9.5" stroke-linecap="round" stroke-linejoin="round"></path>
+                        <defs>
+                            <linearGradient id="asbiExactGrad1" x1="19" y1="37" x2="53" y2="58" gradientUnits="userSpaceOnUse">
+                                <stop offset="0%" stop-color="#00A86B"></stop>
+                                <stop offset="48%" stop-color="#00A86B"></stop>
+                                <stop offset="100%" stop-color="#F6B21A"></stop>
+                            </linearGradient>
+                        </defs>
+                        <!-- Exact Montserrat Bold Wordmark -->
+                        <text x="74" y="51" font-family="Montserrat, sans-serif" font-weight="800" font-size="40" letter-spacing="-0.8" fill="#1B357E">Asbi</text>
+                        <text x="166" y="51" font-family="Montserrat, sans-serif" font-weight="800" font-size="40" letter-spacing="-0.8" fill="#F29C11">Mart</text>
+                    </svg>
+                </div>
+
+                <!-- Highlighted Bold Caption Only -->
+                <h2 class="text-xl sm:text-3xl md:text-[40px] font-bold leading-[1.18] tracking-tight text-slate-900">
+                    প্রকৃতির সেরা উপহার,<br>
+                    <span class="text-[#7A3E0A]">সুস্থ জীবনের অঙ্গীকার!</span>
+                </h2>
+
+                <!-- Continuously Highlighting Order Button -->
+                <div class="mt-4 sm:mt-7">
+                    <a href="#order-now" onclick="handleOrderClick(event)" class="order-btn-warm order-btn-sheen inline-flex items-center gap-2 px-4 sm:px-7 py-2 sm:py-3 rounded-full text-xs sm:text-base md:text-lg font-bold tracking-wide transition">
+                        <span>এখনই অর্ডার করুন</span>
+                    </a>
+                </div>
+            </div>
+
+            <!-- Right: Multi-Product Package Composition (মধু + তেল + বাদাম + চা পাতা) -->
+            <div class="col-span-6 h-full p-2.5 sm:p-4 md:p-5 flex items-center justify-center">
+                <div class="grid grid-cols-12 grid-rows-2 gap-2 sm:gap-3 w-full h-[220px] sm:h-[275px] md:h-[300px]">
+                    <!-- Main Featured Product: খাঁটি মধু -->
+                    <div class="col-span-7 row-span-2 rounded-xl overflow-hidden shadow-md ring-2 ring-white/80">
+                        <img src="https://images.unsplash.com/photo-1587049352846-4a222e784d38?auto=format&amp;fit=crop&amp;w=700&amp;q=85" onerror="this.src='https://placehold.co/600x600/F3DFC1/5A3512?text=Pure+Honey'" alt="খাঁটি মধু" class="w-full h-full object-cover hover:scale-105 transition duration-500">
+                    </div>
+                    <!-- Secondary Product 1: পেস্তা ও মিক্সড বাদাম -->
+                    <div class="col-span-5 row-span-1 rounded-xl overflow-hidden shadow-md ring-2 ring-white/80">
+                        <img src="https://images.unsplash.com/photo-1599599810769-bcde5a160d32?auto=format&amp;fit=crop&amp;w=500&amp;q=85" onerror="this.src='https://placehold.co/400x300/EFE4D2/5A3512?text=Pistachios+%26+Nuts'" alt="পেস্তা ও মিক্সড বাদাম" class="w-full h-full object-cover hover:scale-105 transition duration-500">
+                    </div>
+                    <!-- Secondary Product 2 & 3 Split: খাঁটি তেল + অর্গানিক চা পাতা -->
+                    <div class="col-span-5 row-span-1 grid grid-cols-2 gap-2 sm:gap-3">
+                        <div class="rounded-xl overflow-hidden shadow-md ring-2 ring-white/80">
+                            <img src="https://images.unsplash.com/photo-1474979266404-7eaacbcd87c5?auto=format&amp;fit=crop&amp;w=400&amp;q=85" onerror="this.src='https://placehold.co/300x300/F7E6A3/6B4F00?text=Pure+Oil'" alt="ঘানি ভাঙা খাঁটি তেল" class="w-full h-full object-cover hover:scale-105 transition duration-500">
+                        </div>
+                        <div class="rounded-xl overflow-hidden shadow-md ring-2 ring-white/80">
+                            <img src="https://images.unsplash.com/photo-1564890369478-c89ca6d9cde9?auto=format&amp;fit=crop&amp;w=400&amp;q=85" onerror="this.src='https://placehold.co/300x300/D9EFE0/14532D?text=Organic+Tea'" alt="অর্গানিক চা পাতা" class="w-full h-full object-cover hover:scale-105 transition duration-500">
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
     </div>
   </section>
 
@@ -1941,7 +2012,7 @@
   </nav>
 
   <!-- স্ক্রিপ্টস -->
-  <script src="../js/products.js?v=2.1"></script>
-  <script src="../js/app.js?v=2.1"></script>
+  <script src="../js/products.js?v=2.3"></script>
+  <script src="../js/app.js?v=2.3"></script>
 </body>
 </html>

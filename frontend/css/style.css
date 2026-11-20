@@ -217,3 +217,135 @@ body {
   background: rgba(15, 23, 42, 0.65);
   backdrop-filter: blur(4px);
 }
+
+/* ==========================================================================
+   বেস্ট সেলার প্রোডাক্ট হোভার ভিডিও প্রিভিউ স্টাইল
+   ========================================================================== */
+.bestseller-hover-video {
+  opacity: 0;
+  transition: opacity 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+  pointer-events: none;
+  object-fit: cover;
+  will-change: opacity;
+}
+
+.product-card-horizontal.video-playing .bestseller-hover-video,
+.asbi-card-with-video.video-playing .bestseller-hover-video {
+  opacity: 1 !important;
+}
+
+.video-indicator-badge {
+  transition: all 0.25s ease-in-out;
+  user-select: none;
+}
+
+.product-card-horizontal.video-playing .video-indicator-badge,
+.asbi-card-with-video.video-playing .video-indicator-badge {
+  background-color: rgba(16, 185, 129, 0.95) !important;
+  color: #ffffff !important;
+  box-shadow: 0 4px 12px rgba(16, 185, 129, 0.4);
+}
+
+.video-pulse-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background-color: #ffffff;
+  display: inline-block;
+  animation: videoPulseAnim 1.4s infinite ease-in-out;
+}
+
+@keyframes videoPulseAnim {
+  0% { transform: scale(0.85); opacity: 0.7; }
+  50% { transform: scale(1.3); opacity: 1; }
+  100% { transform: scale(0.85); opacity: 0.7; }
+}
+
+/* ==============================================================
+   AsbiMart Promotional In-Feed Banners Animation & Styles
+   ============================================================== */
+@keyframes orderPulseWarm {
+    0%, 100% {
+        transform: scale(1);
+        background-color: #5A3512;
+        color: #FFFFFF;
+        box-shadow: 0 4px 12px rgba(90, 53, 18, 0.28);
+    }
+    50% {
+        transform: scale(1.07);
+        background-color: #F29C11;
+        color: #1A120B;
+        box-shadow: 0 0 0 8px rgba(242, 156, 17, 0.28), 0 10px 24px rgba(242, 156, 17, 0.45);
+    }
+}
+
+@keyframes orderPulseGreen {
+    0%, 100% {
+        transform: scale(1);
+        background-color: #00A86B;
+        color: #FFFFFF;
+        box-shadow: 0 4px 12px rgba(0, 168, 107, 0.28);
+    }
+    50% {
+        transform: scale(1.07);
+        background-color: #1B357E;
+        color: #FFFFFF;
+        box-shadow: 0 0 0 8px rgba(27, 53, 126, 0.24), 0 10px 24px rgba(27, 53, 126, 0.45);
+    }
+}
+
+@keyframes orderPulseNavy {
+    0%, 100% {
+        transform: scale(1);
+        background-color: #1B357E;
+        color: #FFFFFF;
+        box-shadow: 0 4px 14px rgba(27, 53, 126, 0.30);
+    }
+    50% {
+        transform: scale(1.07);
+        background-color: #F29C11;
+        color: #111827;
+        box-shadow: 0 0 0 8px rgba(242, 156, 17, 0.30), 0 10px 24px rgba(242, 156, 17, 0.48);
+    }
+}
+
+@keyframes sheenSweep {
+    0% { transform: translateX(-150%) skewX(-22deg); }
+    50%, 100% { transform: translateX(250%) skewX(-22deg); }
+}
+
+.order-btn-warm {
+    animation: orderPulseWarm 2.1s ease-in-out infinite;
+    position: relative;
+    overflow: hidden;
+}
+
+.order-btn-green {
+    animation: orderPulseGreen 2.1s ease-in-out infinite;
+    position: relative;
+    overflow: hidden;
+}
+
+.order-btn-navy {
+    animation: orderPulseNavy 2.1s ease-in-out infinite;
+    position: relative;
+    overflow: hidden;
+}
+
+.order-btn-sheen::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 45%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.52), transparent);
+    animation: sheenSweep 2.1s ease-in-out infinite;
+    pointer-events: none;
+}
+
+.text-asbi-navy { color: #1B357E !important; }
+.text-asbi-green { color: #00A86B !important; }
+.text-asbi-amber { color: #F29C11 !important; }
+
+
