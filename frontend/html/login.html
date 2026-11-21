@@ -444,7 +444,7 @@
       if (btn) btn.textContent = isPass ? 'Hide' : 'Show';
     }
 
-    // Real Google / Facebook OAuth 2.0 Redirect
+    // Real Google / Facebook / Auth0 OAuth 2.0 Redirect
     function startRealOAuth(provider) {
       hideFeedback();
       if (provider === 'google') {
@@ -453,6 +453,10 @@
       }
       if (provider === 'facebook') {
         window.location.href = '/api/auth/facebook?returnTo=index.html';
+        return;
+      }
+      if (provider === 'auth0') {
+        window.location.href = '/api/auth/auth0?returnTo=index.html';
       }
     }
 

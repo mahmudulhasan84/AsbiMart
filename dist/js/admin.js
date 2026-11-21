@@ -3,9 +3,31 @@
 let adminProducts = [];
 let adminOrders = [];
 let currentOrderFilter = 'all';
+let sseConnection = null;
+let asbiBroadcastChannel = null;
 
 // ==========================================
-// 0. Admin Authentication & Security
+// 0. Security Helpers (XSS Sanitization & Auth Headers)
+// ==========================================
+function escapeHtml(str) {
+  if (str === null || str === undefined) return '';
+  return String(str)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;');
+}
+
+function getAdminAuthHeaders() {
+  const token = sessionStorage.getItem('asbi_admin_token');
+  const headers = { 'Content-Type': 'application/json' };
+  if (token) headers['Authorization'] = 'Bearer ' + token;
+  return headers;
+}
+
+// ==========================================
+// 0.1 Admin Authentication & Security
 // ==========================================
 function checkAdminAuth() {
   const isAuth = sessionStorage.getItem('asbi_admin_auth') === 'true';
@@ -16,34 +38,73 @@ function checkAdminAuth() {
     if (gate) gate.classList.add('hidden');
     if (mainApp) mainApp.classList.remove('hidden');
     initAdminData();
+    initRealtimeAdminSync();
   } else {
     if (gate) gate.classList.remove('hidden');
     if (mainApp) mainApp.classList.add('hidden');
+    closeSSEStream();
   }
 }
 
-function handleAdminLogin(e) {
+async function handleAdminLogin(e) {
   e.preventDefault();
   const idInput = document.getElementById('adminLoginId');
   const passInput = document.getElementById('adminLoginPass');
   const errElem = document.getElementById('adminLoginError');
+  const submitBtn = e.target.querySelector('button[type="submit"]');
 
-  const id = idInput ? idInput.value.trim() : '';
-  const pass = passInput ? passInput.value.trim() : '';
+  const username = idInput ? idInput.value.trim() : '';
+  const password = passInput ? passInput.value.trim() : '';
 
-  // Protected credentials: ID: asbi, Password: asbi123
-  if (id === 'asbi' && pass === 'asbi123') {
-    sessionStorage.setItem('asbi_admin_auth', 'true');
-    if (errElem) errElem.classList.add('hidden');
-    checkAdminAuth();
-  } else {
-    if (errElem) errElem.classList.remove('hidden');
+  if (submitBtn) {
+    submitBtn.disabled = true;
+    submitBtn.textContent = 'Verifying...';
+  }
+
+  try {
+    const baseUrl = getAdminApiBaseUrl();
+    const res = await fetch(`${baseUrl}/api/admin/login`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ username, password })
+    });
+    const data = await res.json();
+
+    if (res.ok && data.success && data.token) {
+      sessionStorage.setItem('asbi_admin_auth', 'true');
+      sessionStorage.setItem('asbi_admin_token', data.token);
+      if (errElem) errElem.classList.add('hidden');
+      checkAdminAuth();
+      return;
+    }
+
+    if (errElem) {
+      errElem.textContent = data.message || 'Invalid username or password.';
+      errElem.classList.remove('hidden');
+    }
+  } catch (err) {
+    // If backend is unreachable (e.g. offline local test), fallback to verified local credential
+    if (username === 'asbi' && password === 'asbi123') {
+      sessionStorage.setItem('asbi_admin_auth', 'true');
+      if (errElem) errElem.classList.add('hidden');
+      checkAdminAuth();
+    } else if (errElem) {
+      errElem.textContent = 'Connection error. Please check server status.';
+      errElem.classList.remove('hidden');
+    }
+  } finally {
+    if (submitBtn) {
+      submitBtn.disabled = false;
+      submitBtn.textContent = 'Sign In to Dashboard →';
+    }
   }
 }
 
 function handleAdminLogout() {
   if (confirm("Are you sure you want to sign out from the Admin Panel?")) {
     sessionStorage.removeItem('asbi_admin_auth');
+    sessionStorage.removeItem('asbi_admin_token');
+    closeSSEStream();
     checkAdminAuth();
   }
 }
@@ -264,7 +325,10 @@ async function initAdminData() {
 async function fetchServerOrders(showNotice = false) {
   try {
     const baseUrl = getAdminApiBaseUrl();
-    const res = await fetch(`${baseUrl}/api/admin/orders?t=` + Date.now(), { cache: 'no-store' });
+    const res = await fetch(`${baseUrl}/api/admin/orders?t=` + Date.now(), {
+      headers: getAdminAuthHeaders(),
+      cache: 'no-store'
+    });
     if (res.ok) {
       const data = await res.json();
       if (data.success && Array.isArray(data.orders)) {
@@ -280,10 +344,141 @@ async function fetchServerOrders(showNotice = false) {
           alert(`Successfully synced ${data.orders.length} live orders directly from server database!`);
         }
       }
+    } else if (res.status === 401 || res.status === 403) {
+      console.warn('[Admin] Admin session invalid or expired.');
     }
   } catch (e) {
     console.warn('[Admin] Server orders sync offline, using local storage.');
   }
+}
+
+// ==========================================
+// 1.1 Real-Time Instant Sync Engine (0ms Tab Sync + SSE Live Push)
+// ==========================================
+function initRealtimeAdminSync() {
+  // 1. Browser BroadcastChannel (Instant 0ms sync across tabs on same machine)
+  try {
+    if (typeof BroadcastChannel !== 'undefined' && !asbiBroadcastChannel) {
+      asbiBroadcastChannel = new BroadcastChannel('asbimart_sync');
+      asbiBroadcastChannel.onmessage = (event) => {
+        const msg = event.data;
+        if (!msg) return;
+        if (msg.type === 'NEW_ORDER' && msg.order) {
+          handleIncomingNewOrder(msg.order, 'Instant Tab Sync');
+        } else if (msg.type === 'ORDER_STATUS_UPDATED' && msg.order) {
+          handleIncomingOrderUpdate(msg.order);
+        }
+      };
+    }
+  } catch (e) {
+    console.warn('[Admin Sync] BroadcastChannel unavailable:', e);
+  }
+
+  // 2. Storage event listener (multi-tab localStorage sync fallback)
+  window.addEventListener('storage', (e) => {
+    if (e.key === 'asbi_orders') {
+      try {
+        const updated = JSON.parse(e.newValue || '[]');
+        if (Array.isArray(updated) && updated.length > adminOrders.length) {
+          adminOrders = updated;
+          renderAdminOrdersTable();
+          updateDashboardStats();
+        }
+      } catch (err) {}
+    }
+  });
+
+  // 3. Server-Sent Events (SSE) (Cross-device instant real-time push)
+  connectSSEStream();
+}
+
+function connectSSEStream() {
+  const token = sessionStorage.getItem('asbi_admin_token');
+  if (!token || sseConnection) return;
+
+  try {
+    const baseUrl = getAdminApiBaseUrl();
+    const sseUrl = `${baseUrl}/api/admin/orders/stream?token=${encodeURIComponent(token)}`;
+    sseConnection = new EventSource(sseUrl);
+
+    sseConnection.onmessage = (event) => {
+      try {
+        const msg = JSON.parse(event.data);
+        if (msg.type === 'NEW_ORDER' && msg.order) {
+          handleIncomingNewOrder(msg.order, 'Live Server Push');
+        } else if (msg.type === 'ORDER_STATUS_UPDATED' && msg.order) {
+          handleIncomingOrderUpdate(msg.order);
+        }
+      } catch (err) {}
+    };
+
+    sseConnection.onerror = () => {
+      if (sseConnection) {
+        sseConnection.close();
+        sseConnection = null;
+      }
+      // Reconnect after 5s if still logged in
+      setTimeout(() => {
+        if (sessionStorage.getItem('asbi_admin_auth') === 'true') {
+          connectSSEStream();
+        }
+      }, 5000);
+    };
+  } catch (e) {
+    console.warn('[Admin SSE] Connection failed, falling back to polling.');
+  }
+}
+
+function closeSSEStream() {
+  if (sseConnection) {
+    sseConnection.close();
+    sseConnection = null;
+  }
+}
+
+function handleIncomingNewOrder(order, source = 'Live') {
+  if (!order || !order.orderId) return;
+  const existingIdx = adminOrders.findIndex(o => o.orderId === order.orderId);
+  if (existingIdx !== -1) {
+    adminOrders[existingIdx] = order;
+  } else {
+    adminOrders.unshift(order);
+    showNewOrderToast(order, source);
+  }
+  saveAdminOrders();
+  renderAdminOrdersTable();
+  updateDashboardStats();
+}
+
+function handleIncomingOrderUpdate(order) {
+  if (!order || !order.orderId) return;
+  const idx = adminOrders.findIndex(o => o.orderId === order.orderId);
+  if (idx !== -1) {
+    adminOrders[idx] = { ...adminOrders[idx], ...order };
+    saveAdminOrders();
+    renderAdminOrdersTable();
+    updateDashboardStats();
+  }
+}
+
+function showNewOrderToast(order, source) {
+  const toast = document.createElement('div');
+  toast.className = 'fixed bottom-5 right-5 z-50 bg-gradient-to-r from-emerald-600 to-teal-700 text-white p-4 rounded-2xl shadow-2xl border border-emerald-400 flex items-center gap-3 animate-bounce';
+  toast.innerHTML = `
+    <span class="text-2xl">🔔</span>
+    <div>
+      <div class="font-black text-xs uppercase tracking-wider">New Order Received! (${escapeHtml(source)})</div>
+      <div class="text-xs font-bold font-brand">#${escapeHtml(order.orderId)} • ৳${formatNumber(order.totalAmount)}</div>
+      <div class="text-[11px] text-emerald-100">${escapeHtml(order.customer ? order.customer.name : 'Customer')} (${escapeHtml(order.customer ? order.customer.phone : '')})</div>
+    </div>
+  `;
+  document.body.appendChild(toast);
+  setTimeout(() => {
+    toast.classList.remove('animate-bounce');
+    toast.style.transition = 'opacity 0.5s ease';
+    toast.style.opacity = '0';
+    setTimeout(() => toast.remove(), 500);
+  }, 5000);
 }
 
 async function refreshAdminData() {
@@ -294,12 +489,12 @@ async function refreshAdminData() {
   renderAdminReviewsList();
 }
 
-// Auto-poll new orders from server every 8 seconds
+// Auto-poll new orders from server every 5 seconds as fallback heartbeat
 setInterval(async () => {
   if (sessionStorage.getItem('asbi_admin_auth') === 'true') {
     await fetchServerOrders(false);
   }
-}, 8000);
+}, 5000);
 
 function saveAdminProducts() {
   localStorage.setItem('asbi_products_custom', JSON.stringify(adminProducts));
@@ -662,37 +857,37 @@ function renderAdminOrdersTable() {
     return `
       <tr class="hover:bg-slate-50 transition-colors">
         <td class="p-3.5 font-bold text-blue-900">
-          <div>#${o.orderId || `ORD-${idx + 1}`}</div>
-          <div class="text-[10px] text-slate-400 font-normal">${dateFormatted}</div>
+          <div>#${escapeHtml(o.orderId || `ORD-${idx + 1}`)}</div>
+          <div class="text-[10px] text-slate-400 font-normal">${escapeHtml(dateFormatted)}</div>
         </td>
         <td class="p-3.5">
-          <div class="font-bold text-slate-800">${o.customer ? o.customer.name : 'Customer'}</div>
-          <div class="text-[11px] text-slate-500">${o.customer ? o.customer.phone : ''}</div>
+          <div class="font-bold text-slate-800">${escapeHtml(o.customer ? o.customer.name : 'Customer')}</div>
+          <div class="text-[11px] text-slate-500">${escapeHtml(o.customer ? o.customer.phone : '')}</div>
         </td>
         <td class="p-3.5 max-w-xs text-slate-600">
-          <div>${o.customer ? o.customer.address : ''}</div>
+          <div>${escapeHtml(o.customer ? o.customer.address : '')}</div>
           <div class="text-[10px] text-slate-400 font-semibold">${isInsideDhaka ? 'Inside Dhaka (৳60)' : 'Outside Dhaka (৳120)'}</div>
         </td>
         <td class="p-3.5">
           ${(o.items || []).map(i => `
             <div class="text-[11px] font-medium text-slate-700 truncate max-w-[180px]">
-              • ${i.name} (${i.size || 'Std'}) x ${i.quantity || 1}
+              • ${escapeHtml(i.name)} (${escapeHtml(i.size || 'Std')}) x ${Number(i.quantity) || 1}
             </div>
           `).join('')}
         </td>
         <td class="p-3.5">
           <span class="inline-flex items-center gap-1 font-bold text-xs ${o.transactionId ? 'text-purple-700 bg-purple-50 px-2 py-0.5 rounded-lg border border-purple-200' : 'text-emerald-800 bg-emerald-50 px-2 py-0.5 rounded-lg border border-emerald-200'}">
-            ${o.paymentMethod || 'Cash on Delivery'}
+            ${escapeHtml(o.paymentMethod || 'Cash on Delivery')}
           </span>
           ${o.transactionId ? `
-            <div class="text-[10px] text-slate-500 mt-0.5 font-mono font-semibold">TrxID: ${o.transactionId}</div>
+            <div class="text-[10px] text-slate-500 mt-0.5 font-mono font-semibold">TrxID: ${escapeHtml(o.transactionId)}</div>
           ` : ''}
         </td>
         <td class="p-3.5 font-bold text-emerald-700 text-xs sm:text-sm">
           ৳${formatNumber(o.totalAmount)}
         </td>
         <td class="p-3.5">
-          <select onchange="updateLiveOrderStatus('${o.orderId || idx}', this.value)" class="text-[11px] font-bold py-1 px-2 rounded-lg border border-slate-200 bg-white text-slate-700 focus:outline-none">
+          <select onchange="updateLiveOrderStatus('${escapeHtml(o.orderId || idx)}', this.value)" class="text-[11px] font-bold py-1 px-2 rounded-lg border border-slate-200 bg-white text-slate-700 focus:outline-none">
             <option value="pending" ${currentCode === 'pending' ? 'selected' : ''}>Pending</option>
             <option value="processing" ${currentCode === 'processing' ? 'selected' : ''}>Processing</option>
             <option value="delivered" ${currentCode === 'delivered' ? 'selected' : ''}>Delivered</option>
@@ -714,13 +909,20 @@ async function updateLiveOrderStatus(orderIdentifier, newStatus) {
     renderAdminOrdersTable();
     updateDashboardStats();
 
+    // Broadcast across tabs
+    if (asbiBroadcastChannel) {
+      try {
+        asbiBroadcastChannel.postMessage({ type: 'ORDER_STATUS_UPDATED', order: target });
+      } catch (e) {}
+    }
+
     // Sync to backend API if orderId exists
     if (target.orderId) {
       try {
         const baseUrl = getAdminApiBaseUrl();
         await fetch(`${baseUrl}/api/admin/orders/${encodeURIComponent(target.orderId)}/status`, {
           method: 'PATCH',
-          headers: { 'Content-Type': 'application/json' },
+          headers: getAdminAuthHeaders(),
           body: JSON.stringify({ statusCode: newStatus, statusText: target.status })
         });
       } catch (e) {
@@ -764,31 +966,42 @@ function renderAdminReviewsList() {
     <div class="p-4 bg-slate-50 rounded-xl border border-slate-200 flex items-start justify-between gap-4">
       <div>
         <div class="flex items-center gap-2 mb-1">
-          <span class="font-bold text-xs text-slate-800">${r.name || 'Verified Buyer'}</span>
+          <span class="font-bold text-xs text-slate-800">${escapeHtml(r.name || 'Verified Buyer')}</span>
           <span class="text-amber-400 text-xs">${'★'.repeat(r.rating || 5)}</span>
-          <span class="text-[10px] text-slate-400">${r.date || 'Recent'}</span>
+          <span class="text-[10px] text-slate-400">${escapeHtml(r.date || 'Recent')}</span>
         </div>
-        <p class="text-xs text-slate-600 mb-1.5 leading-relaxed">${r.comment || ''}</p>
+        <p class="text-xs text-slate-600 mb-1.5 leading-relaxed">${escapeHtml(r.comment || '')}</p>
         <span class="inline-block px-2 py-0.5 rounded bg-emerald-100 text-emerald-800 text-[10px] font-bold">
-          Product: ${r.productTitle}
+          Product: ${escapeHtml(r.productTitle)}
         </span>
       </div>
-      <button onclick="deleteProductReview('${r.productId}', ${r.reviewIndex})" class="p-1.5 text-rose-500 hover:bg-rose-100 rounded-lg text-xs" title="Delete Review">
+      <button onclick="deleteProductReview('${escapeHtml(r.productId)}', ${Number(r.reviewIndex) || 0})" class="p-1.5 text-rose-500 hover:bg-rose-100 rounded-lg text-xs cursor-pointer" title="Delete Review">
         🗑️
       </button>
     </div>
   `).join('');
 }
 
-function deleteProductReview(productId, reviewIndex) {
+async function deleteProductReview(productId, reviewIndex) {
   const product = adminProducts.find(p => p.id === productId);
   if (!product || !product.reviews) return;
 
+  const reviewToDelete = product.reviews[reviewIndex];
   if (confirm("Are you sure you want to delete this review?")) {
     product.reviews.splice(reviewIndex, 1);
     product.reviewsCount = Math.max(0, (product.reviewsCount || 1) - 1);
     saveAdminProducts();
     renderAdminReviewsList();
+
+    if (reviewToDelete && reviewToDelete.id) {
+      try {
+        const baseUrl = getAdminApiBaseUrl();
+        await fetch(`${baseUrl}/api/admin/reviews/${encodeURIComponent(reviewToDelete.id)}`, {
+          method: 'DELETE',
+          headers: getAdminAuthHeaders()
+        });
+      } catch (e) {}
+    }
   }
 }
 

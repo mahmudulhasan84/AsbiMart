@@ -64,4 +64,49 @@ if (fs.existsSync(htmlDir)) {
   }
 }
 
-console.log('✅ Build complete! dist directory ready with index.html, css, js, and assets.');
+// 3. Copy Cloudflare Pages Functions
+if (fs.existsSync(path.join(rootDir, 'functions'))) {
+  copyDir(path.join(rootDir, 'functions'), path.join(distDir, 'functions'));
+}
+
+// 4. Create Cloudflare Pages _routes.json
+const routesJson = {
+  version: 1,
+  include: ["/api/*"],
+  exclude: []
+};
+fs.writeFileSync(path.join(distDir, '_routes.json'), JSON.stringify(routesJson, null, 2), 'utf8');
+
+// 5. Create Cloudflare Pages _redirects (Clean 200 rewrites for single-page routing)
+const redirectsContent = `# Cloudflare Pages Clean Route Rewrites
+/admin          /admin.html          200
+/login          /login.html          200
+/profile        /profile.html        200
+/track-order    /track-order.html    200
+/category       /category.html       200
+/wishlist       /wishlist.html       200
+/contact        /contact.html        200
+/about          /index.html          200
+/faq            /faq.html            200
+/terms          /terms.html          200
+/privacy-policy /privacy-policy.html 200
+/return-policy  /return-policy.html  200
+/delivery-policy /delivery-policy.html 200
+`;
+fs.writeFileSync(path.join(distDir, '_redirects'), redirectsContent, 'utf8');
+
+// 6. Create Cloudflare Pages _headers (Security Headers)
+const headersContent = `/*
+  X-Content-Type-Options: nosniff
+  X-Frame-Options: SAMEORIGIN
+  X-XSS-Protection: 1; mode=block
+  Referrer-Policy: strict-origin-when-cross-origin
+/api/*
+  Cache-Control: no-store, no-cache, must-revalidate
+  Access-Control-Allow-Origin: *
+  Access-Control-Allow-Methods: GET, POST, PUT, PATCH, DELETE, OPTIONS
+  Access-Control-Allow-Headers: Content-Type, Authorization, X-Requested-With
+`;
+fs.writeFileSync(path.join(distDir, '_headers'), headersContent, 'utf8');
+
+console.log('✅ Build complete! dist ready with Pages Functions, _routes.json, _redirects, and _headers.');

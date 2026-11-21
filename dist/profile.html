@@ -473,18 +473,28 @@
       } else {
         switchProfileTab(TAB_TITLES[hashTab] ? hashTab : 'profile', false);
       }
-      await loadUserOrders(user.phone);
+      await loadUserOrders(user);
     }
 
-    async function loadUserOrders(phone) {
+    async function loadUserOrders(user) {
       const container = document.getElementById('profileOrdersContainer');
       const badge = document.getElementById('orderCountBadge');
       const panelBadge = document.getElementById('orderPanelCount');
       let orders = [];
 
-      if (phone) {
+      const phone = user && user.phone ? user.phone : '';
+      const email = user && user.email ? user.email : '';
+      const token = localStorage.getItem('asbi_auth_token');
+
+      if (phone || email || token) {
         try {
-          const res = await fetch(`/api/orders/my-orders?phone=${encodeURIComponent(phone)}`);
+          const queryParams = new URLSearchParams();
+          if (phone) queryParams.set('phone', phone);
+          if (email) queryParams.set('email', email);
+          const headers = {};
+          if (token) headers['Authorization'] = 'Bearer ' + token;
+
+          const res = await fetch(`/api/orders/my-orders?${queryParams.toString()}`, { headers });
           const data = await res.json();
           if (data.success && Array.isArray(data.orders)) orders = data.orders;
         } catch (err) {}

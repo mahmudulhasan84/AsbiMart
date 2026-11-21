@@ -165,6 +165,44 @@ function authenticateToken(req, res, next) {
   next();
 }
 
+// অ্যাডমিন অথেনটিকেশন মিডলওয়্যার (RBAC Admin Protection)
+function authenticateAdmin(req, res, next) {
+  const authHeader = req.headers['authorization'];
+  const token = (authHeader && authHeader.split(' ')[1]) || req.query.token;
+
+  if (!token) {
+    return res.status(401).json({
+      success: false,
+      message: 'অ্যাডমিন এক্সেস অনুমোদিত নয় (টোকেন অনুপস্থিত)।'
+    });
+  }
+
+  const payload = db.verifyToken(token);
+  if (!payload || payload.role !== 'admin') {
+    return res.status(403).json({
+      success: false,
+      message: 'অবৈধ অথবা মেয়াদোত্তীর্ণ অ্যাডমিন সেশন।'
+    });
+  }
+
+  req.admin = payload;
+  next();
+}
+
+// রিয়েল-টাইম অ্যাডমিন পুশ নোটিফিকেশন (Server-Sent Events)
+const sseAdminClients = new Set();
+
+function broadcastToAdminSSE(eventData) {
+  const data = `data: ${JSON.stringify(eventData)}\n\n`;
+  for (const client of sseAdminClients) {
+    try {
+      client.write(data);
+    } catch (e) {
+      sseAdminClients.delete(client);
+    }
+  }
+}
+
 // ==========================================
 // ৭. রিয়েল অথেনটিকেশন এপিআই (Email/Phone Login, Real OTP Signup, Real Google & Facebook OAuth 2.0)
 // ==========================================
@@ -582,6 +620,40 @@ app.get('/api/auth/facebook/callback', async (req, res) => {
   }
 });
 
+// ৭.১. রিয়েল Auth0 Universal Login রিডাইরেক্ট ও কলব্যাক
+app.get('/api/auth/auth0', (req, res) => {
+  const status = authServices.getAuthProvidersStatus(req);
+  if (!status.auth0) {
+    return res.redirect('/login.html?auth_error=auth0_not_configured');
+  }
+  const returnTo = req.query.returnTo || 'index.html';
+  const authUrl = authServices.buildAuth0Url(req, returnTo);
+  return res.redirect(authUrl);
+});
+
+app.get('/api/auth/auth0/callback', async (req, res) => {
+  try {
+    const { code, state, error } = req.query;
+    if (error) {
+      return res.redirect(`/login.html?auth_error=${encodeURIComponent('auth0_' + error)}`);
+    }
+
+    const stateData = authServices.verifyAndConsumeOAuthState(state, 'auth0');
+    if (!stateData || !code) {
+      return res.redirect('/login.html?auth_error=auth0_invalid_state');
+    }
+
+    const profile = await authServices.exchangeAuth0CodeForProfile(req, code);
+    const user = upsertOAuthUser(profile);
+    const token = db.generateToken({ id: user.id, phone: user.phone, email: user.email, name: user.name, role: user.role });
+
+    return renderOAuthSuccessPage(res, user, token, stateData.returnTo);
+  } catch (err) {
+    console.error('[Auth0 OAuth Callback Error]:', err.message);
+    return res.redirect('/login.html?auth_error=auth0_auth_failed');
+  }
+});
+
 // পুরোনো মক সোশ্যাল লগইন সম্পূর্ণ বন্ধ করা হলো
 app.post('/api/auth/social', (req, res) => {
   return res.status(410).json({
@@ -816,12 +888,12 @@ app.post('/api/products/:id/reviews', rateLimiter(15, 10 * 60 * 1000), (req, res
 });
 
 // অ্যাডমিন: সব রিভিউ দেখা ও ডিলিট করা
-app.get('/api/admin/reviews', (req, res) => {
+app.get('/api/admin/reviews', authenticateAdmin, (req, res) => {
   const reviews = db.getAllReviews();
   res.json({ success: true, count: reviews.length, reviews });
 });
 
-app.delete('/api/admin/reviews/:reviewId', (req, res) => {
+app.delete('/api/admin/reviews/:reviewId', authenticateAdmin, (req, res) => {
   const ok = db.deleteReview(req.params.reviewId);
   if (!ok) {
     return res.status(404).json({ success: false, message: 'রিভিউটি পাওয়া যায়নি।' });
@@ -1297,6 +1369,9 @@ app.post('/api/orders', rateLimiter(20, 5 * 60 * 1000), (req, res) => {
 
     console.log(`[নতুন অর্ডার সম্পন্ন]: ${newOrder.orderId} - গ্রাহক: ${newOrder.customer.name} (${newOrder.customer.phone}) - মোট: ৳${newOrder.totalAmount}`);
 
+    // অ্যাডমিন প্যানেলে ইনস্ট্যান্ট রিয়েল-টাইম পুশ নোটিফিকেশন পাঠানো (Zero Delay)
+    broadcastToAdminSSE({ type: 'NEW_ORDER', order: newOrder });
+
     // রিয়েল জিমেইল অর্ডার কনফার্মেশন ও অ্যাডমিন অ্যালার্ট ইমেইল পাঠানো
     paymentServices.sendOrderEmails(newOrder).catch(() => {});
 
@@ -1372,19 +1447,102 @@ app.get('/api/track/:orderId', (req, res) => {
   }
 });
 
+// ==========================================
+// ৯. অ্যাডমিন প্যানেল এপিআই (Admin Authentication, Orders & Real-time Stream)
+// ==========================================
+
+// অ্যাডমিন লগইন (RBAC Protected Admin Login)
+app.post('/api/admin/login', rateLimiter(15, 10 * 60 * 1000), (req, res) => {
+  const { username, password } = req.body;
+  const adminUser = process.env.ADMIN_USER || 'asbi';
+  const adminPass = process.env.ADMIN_PASS || 'asbi123';
+
+  if (!username || !password) {
+    return res.status(400).json({ success: false, message: 'ইউজারনেম ও পাসওয়ার্ড প্রদান করুন।' });
+  }
+
+  if (username === adminUser && password === adminPass) {
+    const token = db.generateToken({
+      id: 'admin_' + adminUser,
+      name: 'AsbiMart Super Admin',
+      role: 'admin',
+      isAdmin: true
+    });
+
+    console.log(`[Admin Login Success]: Admin user "${adminUser}" logged in.`);
+    return res.json({
+      success: true,
+      message: 'অ্যাডমিন হিসেবে সফলভাবে প্রবেশ করেছেন।',
+      token,
+      admin: {
+        username: adminUser,
+        role: 'admin'
+      }
+    });
+  }
+
+  console.warn(`[Admin Login Failed]: Invalid attempt for username "${username}".`);
+  return res.status(401).json({
+    success: false,
+    message: 'ভুল ইউজার আইডি অথবা পাসওয়ার্ড।'
+  });
+});
+
+// অ্যাডমিন রিয়েল-টাইম অর্ডার স্ট্রিম (Server-Sent Events)
+app.get('/api/admin/orders/stream', (req, res) => {
+  const token = req.query.token || (req.headers['authorization'] && req.headers['authorization'].split(' ')[1]);
+  if (!token) {
+    return res.status(401).json({ success: false, message: 'অ্যাডমিন টোকেন অনুপস্থিত।' });
+  }
+
+  const payload = db.verifyToken(token);
+  if (!payload || payload.role !== 'admin') {
+    return res.status(403).json({ success: false, message: 'অবৈধ অ্যাডমিন টোকেন।' });
+  }
+
+  res.setHeader('Content-Type', 'text/event-stream');
+  res.setHeader('Cache-Control', 'no-cache, no-transform');
+  res.setHeader('Connection', 'keep-alive');
+  res.setHeader('Access-Control-Allow-Origin', '*');
+  if (res.flushHeaders) res.flushHeaders();
+
+  sseAdminClients.add(res);
+
+  // Initial connection heartbeat
+  res.write(`data: ${JSON.stringify({ type: 'CONNECTED', timestamp: Date.now() })}\n\n`);
+
+  const keepAliveTimer = setInterval(() => {
+    try {
+      res.write(': keepalive\n\n');
+    } catch (e) {
+      clearInterval(keepAliveTimer);
+      sseAdminClients.delete(res);
+    }
+  }, 20000);
+
+  req.on('close', () => {
+    clearInterval(keepAliveTimer);
+    sseAdminClients.delete(res);
+  });
+});
+
 // অ্যাডমিন: সকল অর্ডার দেখা
-app.get('/api/admin/orders', (req, res) => {
+app.get('/api/admin/orders', authenticateAdmin, (req, res) => {
   const orders = db.getOrders();
   res.json({ success: true, count: orders.length, orders });
 });
 
 // অ্যাডমিন: অর্ডার স্ট্যাটাস আপডেট
-app.patch('/api/admin/orders/:orderId/status', (req, res) => {
+app.patch('/api/admin/orders/:orderId/status', authenticateAdmin, (req, res) => {
   const { statusCode, statusText, courier, trackingCode } = req.body;
   const updated = db.updateOrderStatus(req.params.orderId, statusCode, statusText, { courier, trackingCode });
   if (!updated) {
     return res.status(404).json({ success: false, message: 'অর্ডারটি পাওয়া যায়নি।' });
   }
+
+  // রিয়েল-টাইমে স্ট্যাটাস আপডেট ব্রডকাস্ট করা
+  broadcastToAdminSSE({ type: 'ORDER_STATUS_UPDATED', order: updated });
+
   res.json({ success: true, message: 'অর্ডার স্ট্যাটাস সফলভাবে আপডেট হয়েছে!', order: updated });
 });
 
@@ -1425,7 +1583,7 @@ app.post('/api/contact', rateLimiter(10, 10 * 60 * 1000), (req, res) => {
 });
 
 // অ্যাডমিন ড্যাশবোর্ড পরিসংখ্যান
-app.get('/api/admin/stats', (req, res) => {
+app.get('/api/admin/stats', authenticateAdmin, (req, res) => {
   const orders = db.getOrders();
   const users = db.getUsers();
   const products = db.getProducts();

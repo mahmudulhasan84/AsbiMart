@@ -190,6 +190,17 @@
         alert('No order found with this Order ID or Phone Number.');
       }
     }
+
+    // Auto-track on page load if query parameter present
+    document.addEventListener('DOMContentLoaded', () => {
+      const params = new URLSearchParams(window.location.search);
+      const queryVal = params.get('orderId') || params.get('order') || params.get('id') || params.get('phone');
+      if (queryVal) {
+        const input = document.getElementById('trackInput');
+        if (input) input.value = queryVal;
+        trackOrderSubmit();
+      }
+    });
   </script>
 </body>
 </html>

@@ -17,6 +17,7 @@ const FILES = {
   orders: path.join(DATA_DIR, 'orders.json'),
   messages: path.join(DATA_DIR, 'messages.json'),
   products: path.join(DATA_DIR, 'products.json'),
+  productsSeed: path.join(DATA_DIR, 'products.seed.json'),
   reviews: path.join(DATA_DIR, 'reviews.json'),
   carts: path.join(DATA_DIR, 'carts.json')
 };
@@ -215,16 +216,37 @@ const SEED_ORDERS = [
   }
 })();
 
+// Ensure products are seeded with all catalog products
+(function mergeSeedProducts() {
+  try {
+    const existing = readData('products');
+    if (!Array.isArray(existing) || existing.length === 0) {
+      const seedFile = FILES.productsSeed;
+      if (fs.existsSync(seedFile)) {
+        const raw = fs.readFileSync(seedFile, 'utf8');
+        const parsed = JSON.parse(raw || '[]');
+        if (Array.isArray(parsed) && parsed.length > 0) {
+          writeData('products', parsed);
+          console.log(`[DB] Successfully restored ${parsed.length} products from seed catalog.`);
+        }
+      }
+    }
+  } catch (err) {
+    console.error('[DB Products Init Error]:', err.message);
+  }
+})();
+
 ensureFileExists(FILES.messages, []);
 ensureFileExists(FILES.products, []);
 ensureFileExists(FILES.reviews, []);
 ensureFileExists(FILES.carts, []);
 
-// নিরাপদ পাঠ
+// নিরাপদ পাঠ (Prototype Pollution & Path Traversal Safe)
 function readData(key) {
   try {
+    if (!Object.prototype.hasOwnProperty.call(FILES, key)) return [];
     const file = FILES[key];
-    if (!fs.existsSync(file)) return [];
+    if (!file || !fs.existsSync(file)) return [];
     const content = fs.readFileSync(file, 'utf8');
     return JSON.parse(content || '[]');
   } catch (err) {
@@ -236,7 +258,9 @@ function readData(key) {
 // নিরাপদ লেখা (Atomic Write)
 function writeData(key, data) {
   try {
+    if (!Object.prototype.hasOwnProperty.call(FILES, key)) return false;
     const file = FILES[key];
+    if (!file) return false;
     const tempFile = `${file}.tmp`;
     fs.writeFileSync(tempFile, JSON.stringify(data, null, 2), 'utf8');
     fs.renameSync(tempFile, file);
@@ -443,10 +467,27 @@ const db = {
   },
 
   // পণ্য
-  getProducts: () => readData('products'),
+  getProducts: () => {
+    let prods = readData('products');
+    if (!Array.isArray(prods) || prods.length === 0) {
+      try {
+        const seedFile = FILES.productsSeed;
+        if (fs.existsSync(seedFile)) {
+          const raw = fs.readFileSync(seedFile, 'utf8');
+          const parsed = JSON.parse(raw || '[]');
+          if (Array.isArray(parsed) && parsed.length > 0) {
+            writeData('products', parsed);
+            return parsed;
+          }
+        }
+      } catch (e) {}
+    }
+    return prods || [];
+  },
   findProductById: (id) => {
-    const products = readData('products');
-    return products.find(p => p.id === id);
+    if (!id) return null;
+    const products = db.getProducts();
+    return products.find(p => p.id === id) || null;
   },
 
   // রিয়েল কাস্টমার রিভিউ (Persistent Reviews)

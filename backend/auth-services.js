@@ -38,8 +38,18 @@ function getSecret() {
 }
 
 function getBaseUrl(req) {
+  if (req) {
+    const proto = req.headers['x-forwarded-proto'] || req.protocol || 'https';
+    const host = req.headers['x-forwarded-host'] || req.get('host');
+    if (host && !host.includes('localhost') && !host.includes('127.0.0.1')) {
+      return `${proto}://${host}`;
+    }
+  }
   if (process.env.BASE_URL && process.env.BASE_URL.trim()) {
-    return process.env.BASE_URL.trim().replace(/\/+$/, '');
+    const b = process.env.BASE_URL.trim().replace(/\/+$/, '');
+    if (!b.includes('localhost') || process.env.NODE_ENV !== 'production') {
+      return b;
+    }
   }
   if (req) {
     const proto = req.headers['x-forwarded-proto'] || req.protocol || 'http';
@@ -59,18 +69,21 @@ function isConfigured(val) {
 
 function getAuthProvidersStatus(req) {
   const baseUrl = getBaseUrl(req);
+  const auth0 = isConfigured(process.env.AUTH0_DOMAIN) && isConfigured(process.env.AUTH0_CLIENT_ID);
   const google = isConfigured(process.env.GOOGLE_CLIENT_ID) && isConfigured(process.env.GOOGLE_CLIENT_SECRET);
   const facebook = isConfigured(process.env.FACEBOOK_APP_ID) && isConfigured(process.env.FACEBOOK_APP_SECRET);
   const emailOtp = isConfigured(process.env.SMTP_USER) && isConfigured(process.env.SMTP_PASS);
   const smsOtp = isConfigured(process.env.SMS_API_KEY) && isConfigured(process.env.SMS_API_URL);
 
   return {
+    auth0,
     google,
     facebook,
     emailOtp,
     smsOtp,
     baseUrl,
     callbacks: {
+      auth0: `${baseUrl}/api/auth/auth0/callback`,
       google: `${baseUrl}/api/auth/google/callback`,
       facebook: `${baseUrl}/api/auth/facebook/callback`
     }
@@ -471,6 +484,68 @@ function verifyAndConsumeOtpSession(sessionId, otpCode) {
   };
 }
 
+// ==========================================
+// ৩. রিয়েল Auth0 OAuth 2.0 / Universal Login লজিক
+// ==========================================
+function buildAuth0Url(req, returnTo = 'index.html') {
+  const domain = (process.env.AUTH0_DOMAIN || '').trim().replace(/^https?:\/\//, '').replace(/\/+$/, '');
+  const clientId = (process.env.AUTH0_CLIENT_ID || '').trim();
+  const redirectUri = `${getBaseUrl(req)}/api/auth/auth0/callback`;
+  const state = createOAuthState('auth0', returnTo);
+
+  const params = new URLSearchParams({
+    response_type: 'code',
+    client_id: clientId,
+    redirect_uri: redirectUri,
+    scope: 'openid profile email',
+    state
+  });
+
+  return `https://${domain}/authorize?${params.toString()}`;
+}
+
+async function exchangeAuth0CodeForProfile(req, code) {
+  const domain = (process.env.AUTH0_DOMAIN || '').trim().replace(/^https?:\/\//, '').replace(/\/+$/, '');
+  const clientId = (process.env.AUTH0_CLIENT_ID || '').trim();
+  const clientSecret = (process.env.AUTH0_CLIENT_SECRET || '').trim();
+  const redirectUri = `${getBaseUrl(req)}/api/auth/auth0/callback`;
+
+  const tokenRes = await fetch(`https://${domain}/oauth/token`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      grant_type: 'authorization_code',
+      client_id: clientId,
+      client_secret: clientSecret,
+      code,
+      redirect_uri: redirectUri
+    })
+  });
+
+  const tokenData = await tokenRes.json();
+  if (!tokenRes.ok || !tokenData.access_token) {
+    throw new Error(tokenData.error_description || tokenData.error || 'Auth0 token exchange failed');
+  }
+
+  const profileRes = await fetch(`https://${domain}/userinfo`, {
+    headers: { Authorization: `Bearer ${tokenData.access_token}` }
+  });
+
+  const profile = await profileRes.json();
+  if (!profileRes.ok || !profile.sub) {
+    throw new Error('Failed to retrieve user profile from Auth0');
+  }
+
+  return {
+    provider: 'auth0',
+    providerId: profile.sub,
+    email: profile.email || '',
+    name: profile.name || profile.nickname || 'Auth0 User',
+    avatar: profile.picture || 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&w=200&q=80',
+    emailVerified: !!profile.email_verified
+  };
+}
+
 module.exports = {
   getAuthProvidersStatus,
   verifyAndConsumeOAuthState,
@@ -478,6 +553,8 @@ module.exports = {
   exchangeGoogleCodeForProfile,
   buildFacebookAuthUrl,
   exchangeFacebookCodeForProfile,
+  buildAuth0Url,
+  exchangeAuth0CodeForProfile,
   createAndSendOtpSession,
   resendOtpForSession,
   verifyAndConsumeOtpSession

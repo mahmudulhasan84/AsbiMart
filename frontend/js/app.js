@@ -6,6 +6,52 @@ let currentCarouselIndex = 0;
 let carouselTimer = null;
 let checkoutProduct = null;
 
+// নিরাপত্তা ও এক্সএসএস ফিল্টারিং হেল্পার
+function escapeHtml(str) {
+  if (str === null || str === undefined) return '';
+  return String(str)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;');
+}
+
+// রিয়েল-টাইম ক্রস-ট্যাব সিঙ্ক্রোনাইজেশন (Zero Delay Auth, Cart, Orders Sync)
+if (typeof window !== 'undefined') {
+  try {
+    if (typeof BroadcastChannel !== 'undefined') {
+      const appSyncChannel = new BroadcastChannel('asbimart_sync');
+      appSyncChannel.onmessage = (event) => {
+        const msg = event.data;
+        if (!msg) return;
+        if (msg.type === 'AUTH_CHANGED') {
+          if (typeof updateAuthUI === 'function') updateAuthUI();
+          if (typeof syncCartFromServer === 'function') syncCartFromServer();
+        } else if (msg.type === 'CART_CHANGED') {
+          try {
+            cart = JSON.parse(localStorage.getItem('asbi_cart')) || [];
+            if (typeof updateBadges === 'function') updateBadges();
+            if (typeof renderCartModal === 'function') renderCartModal();
+          } catch (e) {}
+        }
+      };
+    }
+  } catch (e) {}
+
+  window.addEventListener('storage', (e) => {
+    if (e.key === 'asbi_auth_user') {
+      if (typeof updateAuthUI === 'function') updateAuthUI();
+    } else if (e.key === 'asbi_cart') {
+      try {
+        cart = JSON.parse(e.newValue || '[]');
+        if (typeof updateBadges === 'function') updateBadges();
+        if (typeof renderCartModal === 'function') renderCartModal();
+      } catch (err) {}
+    }
+  });
+}
+
 // ডিফল্ট আন্তর্জাতিক ও ইংরেজি সংখ্যা ফরম্যাটার
 function toBanglaNum(num) {
   if (num === null || num === undefined) return '';
@@ -1678,10 +1724,10 @@ function renderReviewsList() {
       <div class="flex items-center justify-between mb-1.5">
         <div class="flex items-center gap-2">
           <div class="w-7 h-7 rounded-full bg-emerald-100 text-emerald-800 font-bold text-xs flex items-center justify-center font-bangla-title">
-            ${r.name ? r.name.charAt(0) : 'ক'}
+            ${r.name ? escapeHtml(r.name.charAt(0)) : 'ক'}
           </div>
           <div>
-            <h5 class="text-xs font-bold text-slate-900">${r.name}</h5>
+            <h5 class="text-xs font-bold text-slate-900">${escapeHtml(r.name || 'সম্মানিত ক্রেতা')}</h5>
             <span class="text-[10px] text-emerald-600 font-semibold flex items-center gap-0.5">
               <span>✓</span> ভেরিফাইড ক্রেতা
             </span>
@@ -1689,11 +1735,11 @@ function renderReviewsList() {
         </div>
         <div class="text-right">
           <div class="text-amber-400 text-xs">${'★'.repeat(r.rating || 5)}${'☆'.repeat(5 - (r.rating || 5))}</div>
-          <span class="text-[10px] text-slate-400">${r.date || 'সম্প্রতি'}</span>
+          <span class="text-[10px] text-slate-400">${escapeHtml(r.date || 'সম্প্রতি')}</span>
         </div>
       </div>
       <p class="text-xs text-slate-700 leading-relaxed pl-9">
-        ${r.comment}
+        ${escapeHtml(r.comment || '')}
       </p>
     </div>
   `).join('');
@@ -2458,6 +2504,15 @@ function saveOrderLocallyOnly(order) {
   try { orders = JSON.parse(localStorage.getItem('asbi_orders')) || []; } catch (e) { orders = []; }
   orders.unshift(order);
   localStorage.setItem('asbi_orders', JSON.stringify(orders));
+
+  // Instant Real-Time Cross-Tab Notification to Admin Panel (0ms Delay)
+  try {
+    if (typeof BroadcastChannel !== 'undefined') {
+      const channel = new BroadcastChannel('asbimart_sync');
+      channel.postMessage({ type: 'NEW_ORDER', order });
+    }
+  } catch (e) {}
+
   if (!checkoutProduct) {
     cart = [];
     saveCart();
