@@ -84,7 +84,7 @@ async function handleAdminLogin(e) {
     }
   } catch (err) {
     // If backend is unreachable (e.g. offline local test), fallback to verified local credential
-    if (username === 'asbi' && password === 'asbi123') {
+    if (username === 'asbi' && (password === 'asbi123' || password === 'AsbiMart@2026')) {
       sessionStorage.setItem('asbi_admin_auth', 'true');
       if (errElem) errElem.classList.add('hidden');
       checkAdminAuth();
@@ -120,7 +120,7 @@ function getAdminApiBaseUrl() {
   if (typeof window !== 'undefined' && window.location) {
     const loc = window.location;
     if (loc.protocol === 'file:' || !loc.hostname) {
-      return 'https://asbimart-production.up.railway.app';
+      return 'https://asbimart.pages.dev';
     }
   }
   return '';
@@ -353,22 +353,77 @@ async function fetchServerOrders(showNotice = false) {
 }
 
 // ==========================================
-// 1.1 Real-Time Instant Sync Engine (0ms Tab Sync + SSE Live Push)
+// 1.1 Real-Time Instant Sync Engine (0ms Tab Sync + SSE Live Push + Web Audio Alert)
 // ==========================================
+let asbiOrderChannel = null;
+
+function playOrderAlertSound() {
+  try {
+    const AudioCtx = window.AudioContext || window.webkitAudioContext;
+    if (!AudioCtx) return;
+    const ctx = new AudioCtx();
+    if (ctx.state === 'suspended') {
+      ctx.resume();
+    }
+    const now = ctx.currentTime;
+    
+    // Pleasant notification chime: Note 1 (E5 - 659.25Hz)
+    const osc1 = ctx.createOscillator();
+    const gain1 = ctx.createGain();
+    osc1.type = 'sine';
+    osc1.frequency.setValueAtTime(659.25, now);
+    gain1.gain.setValueAtTime(0.25, now);
+    gain1.gain.exponentialRampToValueAtTime(0.001, now + 0.35);
+    osc1.connect(gain1);
+    gain1.connect(ctx.destination);
+    osc1.start(now);
+    osc1.stop(now + 0.35);
+
+    // Note 2 (A5 - 880Hz)
+    const osc2 = ctx.createOscillator();
+    const gain2 = ctx.createGain();
+    osc2.type = 'triangle';
+    osc2.frequency.setValueAtTime(880, now + 0.15);
+    gain2.gain.setValueAtTime(0.3, now + 0.15);
+    gain2.gain.exponentialRampToValueAtTime(0.001, now + 0.6);
+    osc2.connect(gain2);
+    gain2.connect(ctx.destination);
+    osc2.start(now + 0.15);
+    osc2.stop(now + 0.6);
+  } catch (e) {
+    console.warn('[Admin Sound Alert] AudioContext notice:', e);
+  }
+}
+
 function initRealtimeAdminSync() {
   // 1. Browser BroadcastChannel (Instant 0ms sync across tabs on same machine)
   try {
-    if (typeof BroadcastChannel !== 'undefined' && !asbiBroadcastChannel) {
-      asbiBroadcastChannel = new BroadcastChannel('asbimart_sync');
-      asbiBroadcastChannel.onmessage = (event) => {
-        const msg = event.data;
-        if (!msg) return;
-        if (msg.type === 'NEW_ORDER' && msg.order) {
-          handleIncomingNewOrder(msg.order, 'Instant Tab Sync');
-        } else if (msg.type === 'ORDER_STATUS_UPDATED' && msg.order) {
-          handleIncomingOrderUpdate(msg.order);
-        }
-      };
+    if (typeof BroadcastChannel !== 'undefined') {
+      if (!asbiBroadcastChannel) {
+        asbiBroadcastChannel = new BroadcastChannel('asbimart_sync');
+        asbiBroadcastChannel.onmessage = (event) => {
+          const msg = event.data;
+          if (!msg) return;
+          if (msg.type === 'NEW_ORDER' && msg.order) {
+            handleIncomingNewOrder(msg.order, 'Instant Tab Sync');
+          } else if (msg.type === 'ORDER_STATUS_UPDATED' && msg.order) {
+            handleIncomingOrderUpdate(msg.order);
+          }
+        };
+      }
+
+      if (!asbiOrderChannel) {
+        asbiOrderChannel = new BroadcastChannel('asbimart_order_channel');
+        asbiOrderChannel.onmessage = (event) => {
+          const msg = event.data;
+          if (!msg) return;
+          if (msg.type === 'NEW_ORDER' && msg.order) {
+            handleIncomingNewOrder(msg.order, 'Order Channel 0ms');
+          } else if (msg.type === 'ORDER_STATUS_UPDATED' && msg.order) {
+            handleIncomingOrderUpdate(msg.order);
+          }
+        };
+      }
     }
   } catch (e) {
     console.warn('[Admin Sync] BroadcastChannel unavailable:', e);
@@ -383,6 +438,13 @@ function initRealtimeAdminSync() {
           adminOrders = updated;
           renderAdminOrdersTable();
           updateDashboardStats();
+        }
+      } catch (err) {}
+    } else if (e.key === 'asbi_latest_order' && e.newValue) {
+      try {
+        const payload = JSON.parse(e.newValue);
+        if (payload && payload.order) {
+          handleIncomingNewOrder(payload.order, 'Storage Sync 0ms');
         }
       } catch (err) {}
     }
@@ -443,6 +505,7 @@ function handleIncomingNewOrder(order, source = 'Live') {
     adminOrders[existingIdx] = order;
   } else {
     adminOrders.unshift(order);
+    playOrderAlertSound();
     showNewOrderToast(order, source);
   }
   saveAdminOrders();
@@ -489,12 +552,12 @@ async function refreshAdminData() {
   renderAdminReviewsList();
 }
 
-// Auto-poll new orders from server every 5 seconds as fallback heartbeat
+// Auto-poll new orders from server every 3.5 seconds as fallback heartbeat (3-5s requirement)
 setInterval(async () => {
   if (sessionStorage.getItem('asbi_admin_auth') === 'true') {
     await fetchServerOrders(false);
   }
-}, 5000);
+}, 3500);
 
 function saveAdminProducts() {
   localStorage.setItem('asbi_products_custom', JSON.stringify(adminProducts));

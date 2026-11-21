@@ -2505,12 +2505,24 @@ function saveOrderLocallyOnly(order) {
   orders.unshift(order);
   localStorage.setItem('asbi_orders', JSON.stringify(orders));
 
-  // Instant Real-Time Cross-Tab Notification to Admin Panel (0ms Delay)
+  // Instant Real-Time Cross-Tab Notification to Admin Panel (0ms Delay via BroadcastChannel & LocalStorage)
   try {
     if (typeof BroadcastChannel !== 'undefined') {
-      const channel = new BroadcastChannel('asbimart_sync');
-      channel.postMessage({ type: 'NEW_ORDER', order });
+      const orderChan = new BroadcastChannel('asbimart_order_channel');
+      orderChan.postMessage({ type: 'NEW_ORDER', order });
+      setTimeout(() => { try { orderChan.close(); } catch (e) {} }, 1000);
+
+      const syncChan = new BroadcastChannel('asbimart_sync');
+      syncChan.postMessage({ type: 'NEW_ORDER', order });
+      setTimeout(() => { try { syncChan.close(); } catch (e) {} }, 1000);
     }
+  } catch (e) {}
+
+  try {
+    localStorage.setItem('asbi_latest_order', JSON.stringify({
+      order,
+      timestamp: Date.now()
+    }));
   } catch (e) {}
 
   if (!checkoutProduct) {

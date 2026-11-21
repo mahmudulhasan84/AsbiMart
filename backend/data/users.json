@@ -1,15 +1,17 @@
 [
   {
     "id": "user_asbi_demo",
-    "name": "Asbi Mahmud",
+    "name": "Asbi Mahmud Test",
     "phone": "01700000000",
     "email": "asbi@asbimart.com",
     "passwordHash": "dac753ad5cc0b4ffa20a7de96f42e7372c53af09c125a38af704d1d27f766747",
     "avatar": "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&w=200&q=80",
     "city": "Dhaka",
-    "address": "House #12, Road #04, Sector #11, Uttara, Dhaka-1230",
+    "address": "House 42, Road 7",
     "role": "customer",
-    "createdAt": "2026-11-17T16:44:09.649Z"
+    "createdAt": "2026-11-17T16:44:09.649Z",
+    "division": "Dhaka",
+    "updatedAt": "2026-11-21T06:17:16.302Z"
   },
   {
     "id": "usr_1794999907107_27",
