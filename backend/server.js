@@ -512,7 +512,10 @@ function renderOAuthSuccessPage(res, user, token, returnTo = '/index.html') {
   <script>
     try {
       localStorage.setItem('asbi_auth_token', ${serializedToken});
-      localStorage.setItem('asbi_auth_user', JSON.stringify(${serializedUser}));
+      localStorage.setItem('asbi_auth_user', ${JSON.stringify(serializedUser)});
+      if (typeof BroadcastChannel !== 'undefined') {
+        new BroadcastChannel('asbimart_sync').postMessage({ type: 'AUTH_CHANGED' });
+      }
     } catch (e) {}
     window.location.replace(${JSON.stringify(safeReturn)});
   </script>
@@ -1489,16 +1492,7 @@ app.post('/api/admin/login', rateLimiter(15, 10 * 60 * 1000), (req, res) => {
 });
 
 // অ্যাডমিন রিয়েল-টাইম অর্ডার স্ট্রিম (Server-Sent Events)
-app.get('/api/admin/orders/stream', (req, res) => {
-  const token = req.query.token || (req.headers['authorization'] && req.headers['authorization'].split(' ')[1]);
-  if (!token) {
-    return res.status(401).json({ success: false, message: 'অ্যাডমিন টোকেন অনুপস্থিত।' });
-  }
-
-  const payload = db.verifyToken(token);
-  if (!payload || payload.role !== 'admin') {
-    return res.status(403).json({ success: false, message: 'অবৈধ অ্যাডমিন টোকেন।' });
-  }
+app.get('/api/admin/orders/stream', authenticateAdmin, (req, res) => {
 
   res.setHeader('Content-Type', 'text/event-stream');
   res.setHeader('Cache-Control', 'no-cache, no-transform');

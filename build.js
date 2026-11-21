@@ -86,7 +86,7 @@ const redirectsContent = `# Cloudflare Pages Clean Route Rewrites
 /category       /category.html       200
 /wishlist       /wishlist.html       200
 /contact        /contact.html        200
-/about          /index.html          200
+/about          /about.html          200
 /faq            /faq.html            200
 /terms          /terms.html          200
 /privacy-policy /privacy-policy.html 200

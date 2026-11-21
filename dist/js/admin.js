@@ -115,11 +115,11 @@ function formatNumber(num) {
   return typeof num === 'number' ? num.toLocaleString('en-US') : String(num);
 }
 
-// Smart API Base URL (connects to live production server even when opened from local file:/// or 127.0.0.1)
+// Smart API Base URL (connects to live production server when opened from local file:/// directly)
 function getAdminApiBaseUrl() {
   if (typeof window !== 'undefined' && window.location) {
     const loc = window.location;
-    if (loc.protocol === 'file:' || loc.hostname === 'localhost' || loc.hostname === '127.0.0.1' || !loc.hostname) {
+    if (loc.protocol === 'file:' || !loc.hostname) {
       return 'https://asbimart-production.up.railway.app';
     }
   }

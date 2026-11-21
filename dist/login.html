@@ -112,14 +112,18 @@
           </div>
 
           <!-- Real OAuth 2.0 Social Buttons -->
-          <div class="grid grid-cols-2 gap-3">
-            <button type="button" onclick="startRealOAuth('google')" class="flex items-center justify-center gap-2 py-2.5 px-3 border border-slate-300 hover:border-[#1E3A8A] hover:bg-blue-50/40 rounded-xl text-xs font-bold text-slate-800 transition-all shadow-2xs cursor-pointer">
+          <div class="grid grid-cols-3 gap-2.5">
+            <button type="button" onclick="startRealOAuth('google')" class="flex items-center justify-center gap-1.5 py-2.5 px-2 border border-slate-300 hover:border-[#1E3A8A] hover:bg-blue-50/40 rounded-xl text-xs font-bold text-slate-800 transition-all shadow-2xs cursor-pointer">
               <svg class="w-4 h-4 flex-shrink-0" viewBox="0 0 24 24"><path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/><path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/><path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z"/><path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z"/></svg>
               <span>Google</span>
             </button>
-            <button type="button" onclick="startRealOAuth('facebook')" class="flex items-center justify-center gap-2 py-2.5 px-3 border border-slate-300 hover:border-[#1877F2] hover:bg-blue-50/40 rounded-xl text-xs font-bold text-slate-800 transition-all shadow-2xs cursor-pointer">
+            <button type="button" onclick="startRealOAuth('facebook')" class="flex items-center justify-center gap-1.5 py-2.5 px-2 border border-slate-300 hover:border-[#1877F2] hover:bg-blue-50/40 rounded-xl text-xs font-bold text-slate-800 transition-all shadow-2xs cursor-pointer">
               <svg class="w-4 h-4 fill-[#1877F2] flex-shrink-0" viewBox="0 0 24 24"><path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/></svg>
               <span>Facebook</span>
+            </button>
+            <button type="button" onclick="startRealOAuth('auth0')" class="flex items-center justify-center gap-1.5 py-2.5 px-2 border border-slate-300 hover:border-[#EB5424] hover:bg-orange-50/40 rounded-xl text-xs font-bold text-slate-800 transition-all shadow-2xs cursor-pointer" title="Login with Auth0">
+              <svg class="w-4 h-4 text-[#EB5424] flex-shrink-0" viewBox="0 0 24 24" fill="currentColor"><path d="M21.98 10.36a11.96 11.96 0 0 0-4.08-6.94A11.83 11.83 0 0 0 12 .5C8.8.5 5.86 1.8 3.73 4.07a11.9 11.9 0 0 0-3.62 7.74c-.45 4.1 1 8.2 3.96 11.08l6.32-6.32a3.02 3.02 0 0 1-.39-1.57c0-1.66 1.34-3 3-3s3 1.34 3 3a3.02 3.02 0 0 1-.39 1.57l6.32 6.32c1.92-1.87 3.12-4.38 3.38-7.07.25-2.6-.45-5.22-2.03-7.53z"/></svg>
+              <span>Auth0</span>
             </button>
           </div>
         </form>
@@ -267,14 +271,18 @@
               <div class="absolute inset-0 flex items-center"><div class="w-full border-t border-slate-200"></div></div>
               <span class="relative bg-white px-3 text-[11px] font-semibold text-slate-400">Or sign up instantly with</span>
             </div>
-            <div class="grid grid-cols-2 gap-3">
-              <button type="button" onclick="startRealOAuth('google')" class="flex items-center justify-center gap-2 py-2.5 px-3 border border-slate-300 hover:border-[#1E3A8A] hover:bg-blue-50/40 rounded-xl text-xs font-bold text-slate-800 transition-all shadow-2xs cursor-pointer">
+            <div class="grid grid-cols-3 gap-2.5">
+              <button type="button" onclick="startRealOAuth('google')" class="flex items-center justify-center gap-1.5 py-2.5 px-2 border border-slate-300 hover:border-[#1E3A8A] hover:bg-blue-50/40 rounded-xl text-xs font-bold text-slate-800 transition-all shadow-2xs cursor-pointer">
                 <svg class="w-4 h-4 flex-shrink-0" viewBox="0 0 24 24"><path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/><path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/><path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z"/><path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z"/></svg>
                 <span>Google</span>
               </button>
-              <button type="button" onclick="startRealOAuth('facebook')" class="flex items-center justify-center gap-2 py-2.5 px-3 border border-slate-300 hover:border-[#1877F2] hover:bg-blue-50/40 rounded-xl text-xs font-bold text-slate-800 transition-all shadow-2xs cursor-pointer">
+              <button type="button" onclick="startRealOAuth('facebook')" class="flex items-center justify-center gap-1.5 py-2.5 px-2 border border-slate-300 hover:border-[#1877F2] hover:bg-blue-50/40 rounded-xl text-xs font-bold text-slate-800 transition-all shadow-2xs cursor-pointer">
                 <svg class="w-4 h-4 fill-[#1877F2] flex-shrink-0" viewBox="0 0 24 24"><path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/></svg>
                 <span>Facebook</span>
+              </button>
+              <button type="button" onclick="startRealOAuth('auth0')" class="flex items-center justify-center gap-1.5 py-2.5 px-2 border border-slate-300 hover:border-[#EB5424] hover:bg-orange-50/40 rounded-xl text-xs font-bold text-slate-800 transition-all shadow-2xs cursor-pointer" title="Sign up with Auth0">
+                <svg class="w-4 h-4 text-[#EB5424] flex-shrink-0" viewBox="0 0 24 24" fill="currentColor"><path d="M21.98 10.36a11.96 11.96 0 0 0-4.08-6.94A11.83 11.83 0 0 0 12 .5C8.8.5 5.86 1.8 3.73 4.07a11.9 11.9 0 0 0-3.62 7.74c-.45 4.1 1 8.2 3.96 11.08l6.32-6.32a3.02 3.02 0 0 1-.39-1.57c0-1.66 1.34-3 3-3s3 1.34 3 3a3.02 3.02 0 0 1-.39 1.57l6.32 6.32c1.92-1.87 3.12-4.38 3.38-7.07.25-2.6-.45-5.22-2.03-7.53z"/></svg>
+                <span>Auth0</span>
               </button>
             </div>
           </form>
@@ -400,6 +408,10 @@
       if (!err) return;
 
       const messages = {
+        auth0_not_configured: '<strong>Auth0 Setup Required:</strong> Add <code>AUTH0_DOMAIN</code>, <code>AUTH0_CLIENT_ID</code>, and <code>AUTH0_CLIENT_SECRET</code> in <code>backend/.env</code> (Allowed Callback URL: <code>http://localhost:5000/api/auth/auth0/callback</code>), then restart the server.',
+        auth0_invalid_state: 'Auth0 login session expired or state mismatch. Please click Auth0 again.',
+        auth0_auth_failed: 'Could not complete Auth0 verification. Please check your Auth0 application settings and try again.',
+        auth0_access_denied: 'Auth0 sign-in was cancelled. You can sign in with another method.',
         google_not_configured: '<strong>Google Sign-In Setup Required:</strong> Add <code>GOOGLE_CLIENT_ID</code> and <code>GOOGLE_CLIENT_SECRET</code> in <code>backend/.env</code> (Redirect URI: <code>http://localhost:5000/api/auth/google/callback</code>), then restart the server.',
         facebook_not_configured: '<strong>Facebook Login Setup Required:</strong> Add <code>FACEBOOK_APP_ID</code> and <code>FACEBOOK_APP_SECRET</code> in <code>backend/.env</code> (Redirect URI: <code>http://localhost:5000/api/auth/facebook/callback</code>), then restart the server.',
         google_access_denied: 'Google sign-in was cancelled. You can select another account or sign in with your phone/email.',
@@ -447,16 +459,18 @@
     // Real Google / Facebook / Auth0 OAuth 2.0 Redirect
     function startRealOAuth(provider) {
       hideFeedback();
+      const params = new URLSearchParams(window.location.search);
+      const returnTo = encodeURIComponent(params.get('returnTo') || 'index.html');
       if (provider === 'google') {
-        window.location.href = '/api/auth/google?returnTo=index.html';
+        window.location.href = `/api/auth/google?returnTo=${returnTo}`;
         return;
       }
       if (provider === 'facebook') {
-        window.location.href = '/api/auth/facebook?returnTo=index.html';
+        window.location.href = `/api/auth/facebook?returnTo=${returnTo}`;
         return;
       }
       if (provider === 'auth0') {
-        window.location.href = '/api/auth/auth0?returnTo=index.html';
+        window.location.href = `/api/auth/auth0?returnTo=${returnTo}`;
       }
     }
 

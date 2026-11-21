@@ -3104,12 +3104,20 @@ function handleUserRegister(e) {
 
 function socialLogin(provider) {
   const key = String(provider || '').toLowerCase();
+  const currentPath = (typeof window !== 'undefined' && window.location && window.location.pathname) ? window.location.pathname.replace(/^\//, '') : 'index.html';
+  const query = (typeof window !== 'undefined' && window.location && window.location.search) ? window.location.search : '';
+  const returnTo = encodeURIComponent((currentPath || 'index.html') + query);
+
   if (key === 'google') {
-    window.location.href = '/api/auth/google?returnTo=index.html';
+    window.location.href = `/api/auth/google?returnTo=${returnTo}`;
     return;
   }
   if (key === 'facebook') {
-    window.location.href = '/api/auth/facebook?returnTo=index.html';
+    window.location.href = `/api/auth/facebook?returnTo=${returnTo}`;
+    return;
+  }
+  if (key === 'auth0') {
+    window.location.href = `/api/auth/auth0?returnTo=${returnTo}`;
     return;
   }
   window.location.href = 'login.html';

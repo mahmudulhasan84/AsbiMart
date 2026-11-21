@@ -1,6 +1,30 @@
-# AsbiMart — রিয়েল Google OAuth, Facebook OAuth ও Email/SMS OTP সেটআপ গাইড
+# AsbiMart — রিয়েল Auth0, Google OAuth, Facebook OAuth ও Email/SMS OTP সেটআপ গাইড
 
-আসবিমার্ট ব্যাকএন্ডে (`backend/auth-services.js` ও `backend/server.js`) সম্পূর্ণ রিয়েল OAuth 2.0 এবং OTP ভেরিফিকেশন ইঞ্জিন যুক্ত করা হয়েছে। এখন শুধু নিচের ফ্রি API কীগুলো `backend/.env` ফাইলে বসিয়ে সার্ভার রিস্টার্ট করলেই সবগুলো লাইভ কাজ করবে!
+আসবিমার্ট ব্যাকএন্ডে (`backend/auth-services.js` ও `backend/server.js`) সম্পূর্ণ রিয়েল OAuth 2.0 (Auth0, Google, Facebook) এবং OTP ভেরিফিকেশন ইঞ্জিন যুক্ত করা হয়েছে। এখন শুধু নিচের ফ্রি API কীগুলো `backend/.env` ফাইলে বসিয়ে সার্ভার রিস্টার্ট করলেই সবগুলো লাইভ কাজ করবে!
+
+---
+
+## ০. রিয়েল Auth0 Universal Login চালু করা (ফ্রি — ২ মিনিট)
+
+1. [Auth0 ড্যাশবোর্ড](https://manage.auth0.com/)-এ বিনামূল্যে একটি অ্যাকাউন্ট তৈরি করো অথবা সাইন ইন করো।
+2. **Applications → Applications → Create Application** ক্লিক করো:
+   - Name: `AsbiMart Web`
+   - Application Type: **Regular Web Application**
+3. অ্যাপ্লিকেশন তৈরির পর **Settings** ট্যাবে গিয়ে নিচের ফিল্ডগুলো কনফিগার করো:
+   - **Allowed Callback URLs:**
+     `http://localhost:5000/api/auth/auth0/callback, https://asbimart.pages.dev/api/auth/auth0/callback, https://asbimart-production.up.railway.app/api/auth/auth0/callback`
+   - **Allowed Logout URLs:**
+     `http://localhost:5000, https://asbimart.pages.dev, https://asbimart-production.up.railway.app`
+   - **Allowed Web Origins:**
+     `http://localhost:5000, https://asbimart.pages.dev, https://asbimart-production.up.railway.app`
+4. নিচে স্ক্রল করে **Save Changes** ক্লিক করো।
+5. একই পেজের ওপর থেকে **Domain**, **Client ID**, এবং **Client Secret** কপি করে `backend/.env` ফাইলে বসাও:
+   ```env
+   AUTH0_DOMAIN=তোমার_অ্যাথা_ডোমেন (যেমন: dev-xyz.us.auth0.com)
+   AUTH0_CLIENT_ID=তোমার_ক্লায়েন্ট_আইডি
+   AUTH0_CLIENT_SECRET=তোমার_ক্লায়েন্ট_সিক্রেট
+   ```
+6. সার্ভার রিস্টার্ট করলেই গ্রাহক সরাসরি Auth0 Universal Login দিয়ে সুরক্ষিতভাবে সাইন ইন করতে পারবেন!
 
 ---
 

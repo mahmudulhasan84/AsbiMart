@@ -216,18 +216,28 @@ const SEED_ORDERS = [
   }
 })();
 
+function findSeedProductsFile() {
+  const possiblePaths = [
+    path.join(__dirname, 'products.seed.json'),
+    FILES.productsSeed,
+    path.join(__dirname, 'data', 'products.seed.json'),
+    path.join(__dirname, '..', 'backend', 'products.seed.json')
+  ];
+  return possiblePaths.find(p => p && fs.existsSync(p));
+}
+
 // Ensure products are seeded with all catalog products
 (function mergeSeedProducts() {
   try {
     const existing = readData('products');
     if (!Array.isArray(existing) || existing.length === 0) {
-      const seedFile = FILES.productsSeed;
-      if (fs.existsSync(seedFile)) {
+      const seedFile = findSeedProductsFile();
+      if (seedFile) {
         const raw = fs.readFileSync(seedFile, 'utf8');
         const parsed = JSON.parse(raw || '[]');
         if (Array.isArray(parsed) && parsed.length > 0) {
           writeData('products', parsed);
-          console.log(`[DB] Successfully restored ${parsed.length} products from seed catalog.`);
+          console.log(`[DB] Successfully restored ${parsed.length} products from seed catalog: ${seedFile}`);
         }
       }
     }
@@ -471,8 +481,8 @@ const db = {
     let prods = readData('products');
     if (!Array.isArray(prods) || prods.length === 0) {
       try {
-        const seedFile = FILES.productsSeed;
-        if (fs.existsSync(seedFile)) {
+        const seedFile = findSeedProductsFile();
+        if (seedFile) {
           const raw = fs.readFileSync(seedFile, 'utf8');
           const parsed = JSON.parse(raw || '[]');
           if (Array.isArray(parsed) && parsed.length > 0) {
