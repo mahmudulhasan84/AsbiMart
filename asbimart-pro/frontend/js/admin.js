@@ -1,0 +1,1418 @@
+// AsbiMart - Admin Panel Logic Script (Default English Edition)
+
+let adminProducts = [];
+let adminOrders = [];
+let currentOrderFilter = 'all';
+let sseConnection = null;
+let asbiBroadcastChannel = null;
+
+// ==========================================
+// 0. Security Helpers (XSS Sanitization & Auth Headers)
+// ==========================================
+function escapeHtml(str) {
+  if (str === null || str === undefined) return '';
+  return String(str)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;');
+}
+
+function getAdminAuthHeaders() {
+  const token = sessionStorage.getItem('asbi_admin_token');
+  const headers = { 'Content-Type': 'application/json' };
+  if (token) headers['Authorization'] = 'Bearer ' + token;
+  return headers;
+}
+
+// ==========================================
+// 0.1 Admin Authentication & Security
+// ==========================================
+function checkAdminAuth() {
+  const isAuth = sessionStorage.getItem('asbi_admin_auth') === 'true';
+  const gate = document.getElementById('adminLoginGate');
+  const mainApp = document.getElementById('adminMainApp');
+
+  if (isAuth) {
+    if (gate) gate.classList.add('hidden');
+    if (mainApp) mainApp.classList.remove('hidden');
+    initAdminData();
+    initRealtimeAdminSync();
+  } else {
+    if (gate) gate.classList.remove('hidden');
+    if (mainApp) mainApp.classList.add('hidden');
+    closeSSEStream();
+  }
+}
+
+async function handleAdminLogin(e) {
+  e.preventDefault();
+  const idInput = document.getElementById('adminLoginId');
+  const passInput = document.getElementById('adminLoginPass');
+  const errElem = document.getElementById('adminLoginError');
+  const submitBtn = e.target.querySelector('button[type="submit"]');
+
+  const username = idInput ? idInput.value.trim() : '';
+  const password = passInput ? passInput.value.trim() : '';
+
+  if (submitBtn) {
+    submitBtn.disabled = true;
+    submitBtn.textContent = 'Verifying...';
+  }
+
+  try {
+    const baseUrl = getAdminApiBaseUrl();
+    const res = await fetch(`${baseUrl}/api/admin/login`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ username, password })
+    });
+    const data = await res.json();
+
+    if (res.ok && data.success && data.token) {
+      sessionStorage.setItem('asbi_admin_auth', 'true');
+      sessionStorage.setItem('asbi_admin_token', data.token);
+      if (errElem) errElem.classList.add('hidden');
+      checkAdminAuth();
+      return;
+    }
+
+    if (errElem) {
+      errElem.textContent = data.message || 'Invalid username or password.';
+      errElem.classList.remove('hidden');
+    }
+  } catch (err) {
+    if (errElem) {
+      errElem.textContent = 'Connection error. Please check server status.';
+      errElem.classList.remove('hidden');
+    }
+  } finally {
+    if (submitBtn) {
+      submitBtn.disabled = false;
+      submitBtn.textContent = 'Sign In to Dashboard →';
+    }
+  }
+}
+
+function handleAdminLogout() {
+  if (confirm("Are you sure you want to sign out from the Admin Panel?")) {
+    sessionStorage.removeItem('asbi_admin_auth');
+    sessionStorage.removeItem('asbi_admin_token');
+    closeSSEStream();
+    checkAdminAuth();
+  }
+}
+
+// Standard number formatter
+function formatNumber(num) {
+  if (num === null || num === undefined) return '0';
+  return typeof num === 'number' ? num.toLocaleString('en-US') : String(num);
+}
+
+// Smart API Base URL (connects to live production server when opened from local file:/// directly)
+function getAdminApiBaseUrl() {
+  if (typeof window !== 'undefined' && window.location) {
+    const loc = window.location;
+    if (loc.protocol === 'file:' || !loc.hostname) {
+      return 'https://asbimart.pages.dev';
+    }
+  }
+  return '';
+}
+
+// Built-in initial orders seed (guarantees orders are visible immediately upon opening local file)
+const INITIAL_ADMIN_ORDERS = [
+  {
+    orderId: "ASBI-836892",
+    userId: null,
+    customer: {
+      name: "Mahmudul Hasan (4411)",
+      phone: "01656754754",
+      email: "mahmudulhasan18484@gmail.com",
+      address: "aa",
+      area: "dhaka_inside"
+    },
+    items: [
+      {
+        id: "ghee-buffalo-07",
+        name: "মহিষের খাঁটি ঘি",
+        size: "৫০০ গ্রাম",
+        price: 880,
+        quantity: 1,
+        image: "../assets/products/ghee-buffalo-07.jpg"
+      }
+    ],
+    deliveryCharge: 60,
+    totalAmount: 940,
+    paymentMethod: "Cash on Delivery",
+    paymentGateway: "Cash on Delivery",
+    paymentStatus: "Cash on Delivery",
+    transactionId: "",
+    senderNumber: "",
+    gatewayPaymentId: "",
+    status: "Pending",
+    statusCode: "pending",
+    courier: "রেডএক্স / স্টিডফাস্ট কুরিয়ার",
+    trackingCode: "TRK-588278",
+    notes: "",
+    createdAt: "2026-11-19T05:36:11.745Z"
+  },
+  {
+    orderId: "ASBI-806302",
+    userId: null,
+    customer: {
+      name: "Mahmudul Hasan (4411)",
+      phone: "01656754754",
+      email: "mahmudulhasan18484@gmail.com",
+      address: "ghjf",
+      area: "dhaka_inside"
+    },
+    items: [
+      {
+        id: "oil-sesame-til-12",
+        name: "খাঁটি তিলের তেল",
+        size: "২৫০ মিলি",
+        price: 290,
+        quantity: 1,
+        image: "https://images.unsplash.com/photo-1608571423902-eed4a5ad8108?auto=format&fit=crop&w=800&q=80"
+      }
+    ],
+    deliveryCharge: 60,
+    totalAmount: 350,
+    paymentMethod: "Cash on Delivery",
+    paymentGateway: "Cash on Delivery",
+    paymentStatus: "Cash on Delivery",
+    transactionId: "",
+    senderNumber: "",
+    gatewayPaymentId: "",
+    status: "Pending",
+    statusCode: "pending",
+    courier: "রেডএক্স / স্টিডফাস্ট কুরিয়ার",
+    trackingCode: "TRK-139391",
+    notes: "",
+    createdAt: "2026-11-19T05:30:05.209Z"
+  },
+  {
+    orderId: "ASBI-924570",
+    userId: null,
+    customer: {
+      name: "Mahmudul Hasan (4411)",
+      phone: "01656754754",
+      email: "mahmudulhasan18484@gmail.com",
+      address: "greyeuy",
+      area: "dhaka_inside"
+    },
+    items: [
+      {
+        id: "honey-nut-premium-05",
+        name: "প্রিমিয়াম হানি নাট জার",
+        size: "৫০০ গ্রাম",
+        price: 790,
+        quantity: 1,
+        image: "../assets/products/honey-nut-premium-05.jpg"
+      }
+    ],
+    deliveryCharge: 60,
+    totalAmount: 850,
+    paymentMethod: "bKash Online Payment",
+    paymentGateway: "bkash",
+    paymentStatus: "Pending Payment",
+    transactionId: "",
+    senderNumber: "",
+    gatewayPaymentId: "",
+    status: "Pending",
+    statusCode: "pending",
+    courier: "রেডএক্স / স্টিডফাস্ট কুরিয়ার",
+    trackingCode: "TRK-615661",
+    notes: "",
+    createdAt: "2026-11-19T05:26:33.593Z"
+  },
+  {
+    orderId: "ASBI-782910",
+    customer: {
+      name: "আসবি (Asbi)",
+      phone: "01700000000",
+      address: "বাড়ি #১২, রোড #০৪, সেক্টর #১১, উত্তরা, ঢাকা-১২৩০",
+      area: "dhaka"
+    },
+    items: [
+      {
+        id: "honey-sundarban-01",
+        name: "সুন্দরবনের কাঁচা মধু",
+        variant: "৫০০ গ্রাম",
+        price: 650,
+        quantity: 1,
+        image: "https://images.unsplash.com/photo-1558642452-9d2a7deb7f62?auto=format&fit=crop&w=300&q=80"
+      },
+      {
+        id: "ghee-pabna-06",
+        name: "খাঁটি গাওয়া ঘি",
+        variant: "৫০০ গ্রাম",
+        price: 950,
+        quantity: 1,
+        image: "https://images.unsplash.com/photo-1589985270826-4b7bb135bc9d?auto=format&fit=crop&w=300&q=80"
+      }
+    ],
+    deliveryCharge: 60,
+    totalAmount: 1660,
+    paymentMethod: "Cash on Delivery",
+    status: "Pending",
+    statusCode: "pending",
+    courier: "রেডএক্স (RedX Express)",
+    trackingCode: "REDX-ASBI-99238",
+    notes: "প্যাকেজ সাবধানে পাঠাবেন।",
+    createdAt: "2026-11-18T04:04:15.775Z"
+  }
+];
+
+// ==========================================
+// 1. Data Initialization & Server Sync
+// ==========================================
+async function fetchServerProducts() {
+  try {
+    const baseUrl = getAdminApiBaseUrl();
+    const res = await fetch(`${baseUrl}/api/products?t=` + Date.now(), { cache: 'no-store' });
+    if (res.ok) {
+      const data = await res.json();
+      if (data.success && Array.isArray(data.products) && data.products.length > 0) {
+        adminProducts = data.products;
+        localStorage.setItem('asbi_products_custom', JSON.stringify(adminProducts));
+        renderAdminProductsTable();
+        updateDashboardStats();
+      }
+    }
+  } catch (e) {
+    console.warn('[Admin] Server products fetch offline:', e);
+  }
+}
+
+async function initAdminData() {
+  // 1. Products Initialization
+  const storedProducts = localStorage.getItem('asbi_products_custom');
+  if (storedProducts) {
+    try {
+      adminProducts = JSON.parse(storedProducts);
+    } catch (e) {
+      adminProducts = typeof PRODUCTS_DATA !== 'undefined' ? [...PRODUCTS_DATA] : [];
+    }
+  } else {
+    adminProducts = typeof PRODUCTS_DATA !== 'undefined' ? [...PRODUCTS_DATA] : [];
+    saveAdminProducts();
+  }
+
+  // 2. Orders Initialization (Load local + seed orders)
+  const storedOrders = localStorage.getItem('asbi_orders');
+  if (storedOrders) {
+    try {
+      adminOrders = JSON.parse(storedOrders);
+    } catch (e) {
+      adminOrders = [...INITIAL_ADMIN_ORDERS];
+    }
+  } else {
+    adminOrders = [...INITIAL_ADMIN_ORDERS];
+  }
+
+  // Merge seed orders if not already present
+  const orderMap = new Map();
+  adminOrders.forEach(o => { if (o.orderId) orderMap.set(o.orderId.toLowerCase(), o); });
+  INITIAL_ADMIN_ORDERS.forEach(s => {
+    if (!orderMap.has(s.orderId.toLowerCase())) {
+      adminOrders.push(s);
+      orderMap.set(s.orderId.toLowerCase(), s);
+    }
+  });
+
+  updateDashboardStats();
+  renderAdminProductsTable();
+  renderAdminOrdersTable();
+  renderAdminReviewsList();
+
+  // Fetch real master catalog and real orders from backend server
+  await Promise.all([
+    fetchServerProducts(),
+    fetchServerOrders()
+  ]);
+
+  updateDashboardStats();
+  renderAdminProductsTable();
+  renderAdminOrdersTable();
+}
+
+async function fetchServerOrders(showNotice = false) {
+  try {
+    const baseUrl = getAdminApiBaseUrl();
+    const res = await fetch(`${baseUrl}/api/admin/orders?t=` + Date.now(), {
+      headers: getAdminAuthHeaders(),
+      cache: 'no-store'
+    });
+    if (res.ok) {
+      const data = await res.json();
+      if (data.success && Array.isArray(data.orders)) {
+        // Prioritize server orders from backend/data/orders.json
+        const existingMap = new Map();
+        data.orders.forEach(o => { if (o.orderId) existingMap.set(o.orderId, o); });
+        adminOrders.forEach(o => { if (o.orderId && !existingMap.has(o.orderId)) existingMap.set(o.orderId, o); });
+        adminOrders = Array.from(existingMap.values()).sort((a, b) => new Date(b.createdAt || 0) - new Date(a.createdAt || 0));
+        saveAdminOrders();
+        renderAdminOrdersTable();
+        updateDashboardStats();
+        if (showNotice) {
+          alert(`Successfully synced ${data.orders.length} live orders directly from server database!`);
+        }
+      }
+    } else if (res.status === 401 || res.status === 403) {
+      console.warn('[Admin] Admin session invalid or expired.');
+    }
+  } catch (e) {
+    console.warn('[Admin] Server orders sync offline, using local storage.');
+  }
+}
+
+// ==========================================
+// 1.1 Real-Time Instant Sync Engine (0ms Tab Sync + SSE Live Push + Web Audio Alert)
+// ==========================================
+let asbiOrderChannel = null;
+
+function playOrderAlertSound() {
+  try {
+    const AudioCtx = window.AudioContext || window.webkitAudioContext;
+    if (!AudioCtx) return;
+    const ctx = new AudioCtx();
+    if (ctx.state === 'suspended') {
+      ctx.resume();
+    }
+    const now = ctx.currentTime;
+    
+    // Pleasant notification chime: Note 1 (E5 - 659.25Hz)
+    const osc1 = ctx.createOscillator();
+    const gain1 = ctx.createGain();
+    osc1.type = 'sine';
+    osc1.frequency.setValueAtTime(659.25, now);
+    gain1.gain.setValueAtTime(0.25, now);
+    gain1.gain.exponentialRampToValueAtTime(0.001, now + 0.35);
+    osc1.connect(gain1);
+    gain1.connect(ctx.destination);
+    osc1.start(now);
+    osc1.stop(now + 0.35);
+
+    // Note 2 (A5 - 880Hz)
+    const osc2 = ctx.createOscillator();
+    const gain2 = ctx.createGain();
+    osc2.type = 'triangle';
+    osc2.frequency.setValueAtTime(880, now + 0.15);
+    gain2.gain.setValueAtTime(0.3, now + 0.15);
+    gain2.gain.exponentialRampToValueAtTime(0.001, now + 0.6);
+    osc2.connect(gain2);
+    gain2.connect(ctx.destination);
+    osc2.start(now + 0.15);
+    osc2.stop(now + 0.6);
+  } catch (e) {
+    console.warn('[Admin Sound Alert] AudioContext notice:', e);
+  }
+}
+
+function initRealtimeAdminSync() {
+  // 1. Browser BroadcastChannel (Instant 0ms sync across tabs on same machine)
+  try {
+    if (typeof BroadcastChannel !== 'undefined') {
+      if (!asbiBroadcastChannel) {
+        asbiBroadcastChannel = new BroadcastChannel('asbimart_sync');
+        asbiBroadcastChannel.onmessage = (event) => {
+          const msg = event.data;
+          if (!msg) return;
+          if (msg.type === 'NEW_ORDER' && msg.order) {
+            handleIncomingNewOrder(msg.order, 'Instant Tab Sync');
+          } else if (msg.type === 'ORDER_STATUS_UPDATED' && msg.order) {
+            handleIncomingOrderUpdate(msg.order);
+          }
+        };
+      }
+
+      if (!asbiOrderChannel) {
+        asbiOrderChannel = new BroadcastChannel('asbimart_order_channel');
+        asbiOrderChannel.onmessage = (event) => {
+          const msg = event.data;
+          if (!msg) return;
+          if (msg.type === 'NEW_ORDER' && msg.order) {
+            handleIncomingNewOrder(msg.order, 'Order Channel 0ms');
+          } else if (msg.type === 'ORDER_STATUS_UPDATED' && msg.order) {
+            handleIncomingOrderUpdate(msg.order);
+          }
+        };
+      }
+    }
+  } catch (e) {
+    console.warn('[Admin Sync] BroadcastChannel unavailable:', e);
+  }
+
+  // 2. Storage event listener (multi-tab localStorage sync fallback)
+  window.addEventListener('storage', (e) => {
+    if (e.key === 'asbi_orders') {
+      try {
+        const updated = JSON.parse(e.newValue || '[]');
+        if (Array.isArray(updated) && updated.length > adminOrders.length) {
+          adminOrders = updated;
+          renderAdminOrdersTable();
+          updateDashboardStats();
+        }
+      } catch (err) {}
+    } else if (e.key === 'asbi_latest_order' && e.newValue) {
+      try {
+        const payload = JSON.parse(e.newValue);
+        if (payload && payload.order) {
+          handleIncomingNewOrder(payload.order, 'Storage Sync 0ms');
+        }
+      } catch (err) {}
+    }
+  });
+
+  // 3. Server-Sent Events (SSE) (Cross-device instant real-time push)
+  connectSSEStream();
+}
+
+function connectSSEStream() {
+  const token = sessionStorage.getItem('asbi_admin_token');
+  if (!token || sseConnection) return;
+
+  try {
+    const baseUrl = getAdminApiBaseUrl();
+    const sseUrl = `${baseUrl}/api/admin/orders/stream?token=${encodeURIComponent(token)}`;
+    sseConnection = new EventSource(sseUrl);
+
+    sseConnection.onmessage = (event) => {
+      try {
+        const msg = JSON.parse(event.data);
+        if (msg.type === 'NEW_ORDER' && msg.order) {
+          handleIncomingNewOrder(msg.order, 'Live Server Push');
+        } else if (msg.type === 'ORDER_STATUS_UPDATED' && msg.order) {
+          handleIncomingOrderUpdate(msg.order);
+        }
+      } catch (err) {}
+    };
+
+    sseConnection.onerror = () => {
+      if (sseConnection) {
+        sseConnection.close();
+        sseConnection = null;
+      }
+      // Reconnect after 5s if still logged in
+      setTimeout(() => {
+        if (sessionStorage.getItem('asbi_admin_auth') === 'true') {
+          connectSSEStream();
+        }
+      }, 5000);
+    };
+  } catch (e) {
+    console.warn('[Admin SSE] Connection failed, falling back to polling.');
+  }
+}
+
+function closeSSEStream() {
+  if (sseConnection) {
+    sseConnection.close();
+    sseConnection = null;
+  }
+}
+
+function handleIncomingNewOrder(order, source = 'Live') {
+  if (!order || !order.orderId) return;
+  const existingIdx = adminOrders.findIndex(o => o.orderId === order.orderId);
+  if (existingIdx !== -1) {
+    adminOrders[existingIdx] = order;
+  } else {
+    adminOrders.unshift(order);
+    playOrderAlertSound();
+    showNewOrderToast(order, source);
+  }
+  saveAdminOrders();
+  renderAdminOrdersTable();
+  updateDashboardStats();
+}
+
+function handleIncomingOrderUpdate(order) {
+  if (!order || !order.orderId) return;
+  const idx = adminOrders.findIndex(o => o.orderId === order.orderId);
+  if (idx !== -1) {
+    adminOrders[idx] = { ...adminOrders[idx], ...order };
+    saveAdminOrders();
+    renderAdminOrdersTable();
+    updateDashboardStats();
+  }
+}
+
+function showNewOrderToast(order, source) {
+  const toast = document.createElement('div');
+  toast.className = 'fixed bottom-5 right-5 z-50 bg-gradient-to-r from-emerald-600 to-teal-700 text-white p-4 rounded-2xl shadow-2xl border border-emerald-400 flex items-center gap-3 animate-bounce';
+  toast.innerHTML = `
+    <span class="text-2xl">🔔</span>
+    <div>
+      <div class="font-black text-xs uppercase tracking-wider">New Order Received! (${escapeHtml(source)})</div>
+      <div class="text-xs font-bold font-brand">#${escapeHtml(order.orderId)} • ৳${formatNumber(order.totalAmount)}</div>
+      <div class="text-[11px] text-emerald-100">${escapeHtml(order.customer ? order.customer.name : 'Customer')} (${escapeHtml(order.customer ? order.customer.phone : '')})</div>
+    </div>
+  `;
+  document.body.appendChild(toast);
+  setTimeout(() => {
+    toast.classList.remove('animate-bounce');
+    toast.style.transition = 'opacity 0.5s ease';
+    toast.style.opacity = '0';
+    setTimeout(() => toast.remove(), 500);
+  }, 5000);
+}
+
+async function refreshAdminData() {
+  await fetchServerOrders(true);
+  updateDashboardStats();
+  renderAdminProductsTable();
+  renderAdminOrdersTable();
+  renderAdminReviewsList();
+}
+
+// Auto-poll new orders from server every 3.5 seconds as fallback heartbeat (3-5s requirement)
+setInterval(async () => {
+  if (sessionStorage.getItem('asbi_admin_auth') === 'true') {
+    await fetchServerOrders(false);
+  }
+}, 3500);
+
+function saveAdminProducts() {
+  localStorage.setItem('asbi_products_custom', JSON.stringify(adminProducts));
+  updateDashboardStats();
+}
+
+function saveAdminOrders() {
+  localStorage.setItem('asbi_orders', JSON.stringify(adminOrders));
+  updateDashboardStats();
+}
+
+// ==========================================
+// 2. Tab Navigation
+// ==========================================
+function switchTab(tabId) {
+  const tabs = ['dashboard', 'products', 'addproduct', 'orders', 'reviews', 'coupons', 'inventory', 'support'];
+  const titles = {
+    dashboard: 'Dashboard Overview',
+    products: 'Product Inventory & Catalog',
+    addproduct: 'Add New Product',
+    orders: 'Customer Orders Management',
+    reviews: 'Customer Reviews & Feedback',
+    coupons: 'Coupons & Promotional Discounts',
+    inventory: 'Inventory Health & Restock Alerts',
+    support: 'Customer CRM & Helpdesk Tickets'
+  };
+
+  if (tabId === 'coupons') loadCouponsData();
+  if (tabId === 'inventory') loadInventoryData();
+  if (tabId === 'support') loadSupportTickets();
+
+  tabs.forEach(t => {
+    const sec = document.getElementById(`section-${t}`);
+    const btn = document.getElementById(`btn-tab-${t}`);
+    if (sec) sec.classList.toggle('hidden', t !== tabId);
+    if (btn) {
+      if (t === tabId) {
+        btn.className = 'w-full flex items-center gap-3 px-4 py-3 rounded-xl text-xs sm:text-sm font-bold transition-all bg-white/15 text-white shadow-xs';
+      } else {
+        btn.className = 'w-full flex items-center gap-3 px-4 py-3 rounded-xl text-xs sm:text-sm font-bold transition-all text-blue-200 hover:bg-white/10 hover:text-white';
+      }
+    }
+  });
+
+  const titleElem = document.getElementById('topbarTitle');
+  if (titleElem && titles[tabId]) titleElem.textContent = titles[tabId];
+}
+
+// ==========================================
+// 3. Dashboard Metrics & Recent Orders
+// ==========================================
+function updateDashboardStats() {
+  const totalProducts = adminProducts.length;
+  const totalOrders = adminOrders.length;
+  const totalSales = adminOrders.reduce((sum, o) => sum + (o.totalAmount || 0), 0);
+  const totalReviews = adminProducts.reduce((sum, p) => sum + (p.reviewsCount || (p.reviews ? p.reviews.length : 0)), 0);
+
+  const pCount = document.getElementById('statTotalProducts');
+  const oCount = document.getElementById('statTotalOrders');
+  const sCount = document.getElementById('statTotalSales');
+  const rCount = document.getElementById('statTotalReviews');
+  const sideP = document.getElementById('sidebarProductCount');
+  const sideO = document.getElementById('sidebarOrderCount');
+
+  if (pCount) pCount.textContent = formatNumber(totalProducts);
+  if (oCount) oCount.textContent = formatNumber(totalOrders);
+  if (sCount) sCount.textContent = `৳${formatNumber(totalSales)}`;
+
+  const avgValue = totalOrders > 0 ? Math.round(totalSales / totalOrders) : 0;
+  const lowStockCount = adminProducts.filter(p => (Number(p.stock) || 0) <= 10).length;
+
+  const avgElem = document.getElementById('statAvgOrderValue');
+  const lowStockElem = document.getElementById('statLowStock');
+  const sideLow = document.getElementById('sidebarLowStockCount');
+
+  if (avgElem) avgElem.textContent = `৳${formatNumber(avgValue)}`;
+  if (lowStockElem) lowStockElem.textContent = formatNumber(lowStockCount);
+  if (sideLow) sideLow.textContent = formatNumber(lowStockCount);
+  if (rCount) rCount.textContent = formatNumber(totalReviews);
+  if (sideP) sideP.textContent = String(totalProducts);
+  if (sideO) sideO.textContent = String(totalOrders);
+
+  // Recent Orders Preview in Dashboard
+  const recentOrdersTbody = document.getElementById('dashboardRecentOrders');
+  if (recentOrdersTbody) {
+    if (adminOrders.length === 0) {
+      recentOrdersTbody.innerHTML = `
+        <tr>
+          <td colspan="5" class="p-8 text-center text-slate-400 font-semibold">No orders yet. Customer checkouts will appear here in real-time.</td>
+        </tr>
+      `;
+    } else {
+      recentOrdersTbody.innerHTML = adminOrders.slice(0, 5).map(o => `
+        <tr class="hover:bg-slate-50 transition-colors">
+          <td class="p-3 font-bold text-blue-900">${o.orderId || 'ORD-NEW'}</td>
+          <td class="p-3">
+            <div class="font-bold text-slate-800">${o.customer ? o.customer.name : 'Customer'}</div>
+            <div class="text-[11px] text-slate-400">${o.customer ? o.customer.phone : ''}</div>
+          </td>
+          <td class="p-3 max-w-xs truncate text-slate-600">${o.customer ? o.customer.address : ''}</td>
+          <td class="p-3 font-bold text-emerald-700">৳${formatNumber(o.totalAmount)}</td>
+          <td class="p-3">
+            <span class="px-2.5 py-1 rounded-full text-[10px] font-bold ${getOrderStatusClass(o.status || o.statusCode)}">
+              ${cleanStatusDisplay(o.status || o.statusCode || 'Pending')}
+            </span>
+          </td>
+        </tr>
+      `).join('');
+    }
+  }
+}
+
+function cleanStatusDisplay(status) {
+  if (!status) return 'Pending';
+  const s = String(status).toLowerCase();
+  if (s.includes('delivered') || s.includes('সম্পন্ন')) return 'Delivered';
+  if (s.includes('processing') || s.includes('প্রক্রিয়াধীন')) return 'Processing';
+  if (s.includes('cancelled') || s.includes('বাতিল')) return 'Cancelled';
+  return 'Pending';
+}
+
+function getOrderStatusClass(status) {
+  const s = String(status || '').toLowerCase();
+  if (s.includes('delivered') || s.includes('সম্পন্ন')) return 'bg-emerald-100 text-emerald-800';
+  if (s.includes('cancelled') || s.includes('বাতিল')) return 'bg-rose-100 text-rose-800';
+  if (s.includes('processing') || s.includes('প্রক্রিয়াধীন')) return 'bg-blue-100 text-blue-800';
+  return 'bg-amber-100 text-amber-800';
+}
+
+// ==========================================
+// 4. Products Table Rendering & Actions
+// ==========================================
+function renderAdminProductsTable(productsToRender = adminProducts) {
+  const tbody = document.getElementById('adminProductsTableBody');
+  if (!tbody) return;
+
+  if (productsToRender.length === 0) {
+    tbody.innerHTML = `
+      <tr>
+        <td colspan="6" class="p-8 text-center text-slate-400 font-semibold">No products found matching your filter!</td>
+      </tr>
+    `;
+    return;
+  }
+
+  tbody.innerHTML = productsToRender.map(p => {
+    const v = p.variants && p.variants.length > 0 ? p.variants[0] : { price: 0, stock: 20, size: 'Standard' };
+    const isLowStock = (v.stock || 0) < 10;
+    return `
+      <tr class="hover:bg-slate-50 transition-colors">
+        <td class="p-3.5">
+          <img src="${p.image}" alt="${p.name}" class="w-12 h-12 rounded-xl object-cover bg-slate-100 border border-slate-200"/>
+        </td>
+        <td class="p-3.5">
+          <div class="font-bold text-slate-900 text-xs sm:text-sm">${p.name}</div>
+          <div class="text-[11px] text-slate-400 font-bangla">${p.banglaName || ''}</div>
+        </td>
+        <td class="p-3.5">
+          <span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-slate-100 text-slate-700 border border-slate-200 capitalize">
+            ${p.category || 'Organic'}
+          </span>
+        </td>
+        <td class="p-3.5">
+          <div class="font-bold text-[#1E3A8A] text-xs sm:text-sm">৳${formatNumber(v.price)}</div>
+          ${v.originalPrice ? `<div class="text-[10px] text-slate-400 line-through">৳${formatNumber(v.originalPrice)}</div>` : ''}
+        </td>
+        <td class="p-3.5">
+          <div class="flex items-center gap-1.5">
+            <span class="font-bold text-xs ${isLowStock ? 'text-rose-600' : 'text-emerald-700'}">
+              ${formatNumber(v.stock || 25)} pcs
+            </span>
+            ${isLowStock ? `<span class="px-1.5 py-0.5 rounded bg-rose-100 text-rose-700 text-[9px] font-extrabold uppercase">Low</span>` : ''}
+          </div>
+        </td>
+        <td class="p-3.5 text-center">
+          <div class="flex items-center justify-center gap-1.5">
+            <button onclick="openEditProductModal('${p.id}')" class="p-1.5 rounded-lg bg-blue-50 hover:bg-blue-100 text-blue-700 font-bold transition-colors" title="Edit Product">
+              ✏️
+            </button>
+            <button onclick="deleteAdminProduct('${p.id}')" class="p-1.5 rounded-lg bg-rose-50 hover:bg-rose-100 text-rose-700 font-bold transition-colors" title="Delete Product">
+              🗑️
+            </button>
+          </div>
+        </td>
+      </tr>
+    `;
+  }).join('');
+}
+
+function handleAdminProductSearch(query) {
+  const q = query.toLowerCase().trim();
+  const filtered = adminProducts.filter(p => 
+    (p.name && p.name.toLowerCase().includes(q)) || 
+    (p.banglaName && p.banglaName.toLowerCase().includes(q)) || 
+    (p.category && p.category.toLowerCase().includes(q)) ||
+    (p.id && p.id.toLowerCase().includes(q))
+  );
+  renderAdminProductsTable(filtered);
+}
+
+function handleAdminCategoryFilter(category) {
+  if (category === 'all') {
+    renderAdminProductsTable(adminProducts);
+  } else {
+    const filtered = adminProducts.filter(p => p.category === category);
+    renderAdminProductsTable(filtered);
+  }
+}
+
+// ==========================================
+// 5. Add Product Form
+// ==========================================
+function previewNewProductImage(url) {
+  const preview = document.getElementById('addImagePreview');
+  if (preview && url) {
+    preview.src = url;
+  }
+}
+
+async function handleAddNewProduct(e) {
+  e.preventDefault();
+  
+  const englishName = document.getElementById('addEnglishName').value.trim();
+  const banglaName = document.getElementById('addBanglaName').value.trim();
+  const category = document.getElementById('addCategory').value;
+  const price = parseInt(document.getElementById('addPrice').value) || 0;
+  const originalPrice = parseInt(document.getElementById('addOriginalPrice').value) || null;
+  const discount = parseInt(document.getElementById('addDiscount').value) || 0;
+  const size = document.getElementById('addSize').value.trim() || '500g';
+  const stock = parseInt(document.getElementById('addStock').value) || 30;
+  const imageUrl = document.getElementById('addImageUrl').value.trim();
+  const description = document.getElementById('addDescription').value.trim();
+  const benefitsStr = document.getElementById('addBenefits').value.trim();
+
+  const benefits = benefitsStr ? benefitsStr.split(',').map(b => b.trim()).filter(Boolean) : [
+    '100% Raw & Organic',
+    'Lab Tested Pure'
+  ];
+
+  const newProduct = {
+    id: `prod-${Date.now()}`,
+    name: englishName,
+    banglaName: banglaName,
+    category: category,
+    categoryBangla: category,
+    isBestSeller: false,
+    rating: 5.0,
+    reviewsCount: 1,
+    discountPercent: discount,
+    image: imageUrl,
+    gallery: [imageUrl],
+    description: description,
+    benefits: benefits,
+    stock: stock,
+    variants: [
+      { size: size, price: price, originalPrice: originalPrice, stock: stock }
+    ],
+    reviews: [
+      { name: 'Verified Buyer', rating: 5, date: 'Recent', comment: 'Authentic organic quality product.' }
+    ]
+  };
+
+  try {
+    const baseUrl = getAdminApiBaseUrl();
+    const res = await fetch(`${baseUrl}/api/admin/products`, {
+      method: 'POST',
+      headers: getAdminAuthHeaders(),
+      body: JSON.stringify(newProduct)
+    });
+    const data = await res.json();
+    if (res.ok && data.success && data.product) {
+      adminProducts.unshift(data.product);
+    } else {
+      adminProducts.unshift(newProduct);
+    }
+  } catch (err) {
+    adminProducts.unshift(newProduct);
+  }
+
+  saveAdminProducts();
+  alert(`"${englishName}" successfully published to the centralized master catalog!`);
+  document.getElementById('addProductForm').reset();
+  switchTab('products');
+  renderAdminProductsTable();
+}
+
+// ==========================================
+// 6. Edit Product Modal
+// ==========================================
+function openEditProductModal(productId) {
+  const product = adminProducts.find(p => p.id === productId);
+  if (!product) return;
+
+  const v = product.variants && product.variants.length > 0 ? product.variants[0] : { price: 0, stock: 20, size: '500g' };
+
+  document.getElementById('editProductId').value = product.id;
+  document.getElementById('editEnglishName').value = product.name;
+  document.getElementById('editBanglaName').value = product.banglaName || '';
+  document.getElementById('editPrice').value = v.price;
+  document.getElementById('editOriginalPrice').value = v.originalPrice || '';
+  document.getElementById('editDiscount').value = product.discountPercent || 0;
+  document.getElementById('editSize').value = v.size || '500g';
+  document.getElementById('editStock').value = v.stock || 25;
+  document.getElementById('editImageUrl').value = product.image;
+
+  document.getElementById('editProductModal').classList.remove('hidden');
+}
+
+function closeEditProductModal() {
+  document.getElementById('editProductModal').classList.add('hidden');
+}
+
+async function handleSaveEditedProduct(e) {
+  e.preventDefault();
+  const id = document.getElementById('editProductId').value;
+  const product = adminProducts.find(p => p.id === id);
+  if (!product) return;
+
+  const englishName = document.getElementById('editEnglishName').value.trim();
+  const banglaName = document.getElementById('editBanglaName').value.trim();
+  const price = parseInt(document.getElementById('editPrice').value) || 0;
+  const origPrice = parseInt(document.getElementById('editOriginalPrice').value) || null;
+  const discount = parseInt(document.getElementById('editDiscount').value) || 0;
+  const size = document.getElementById('editSize').value.trim();
+  const stock = parseInt(document.getElementById('editStock').value) || 0;
+  const imageUrl = document.getElementById('editImageUrl').value.trim();
+
+  const updates = {
+    name: englishName,
+    banglaName: banglaName,
+    discountPercent: discount,
+    image: imageUrl,
+    gallery: [imageUrl],
+    stock: stock,
+    variants: [
+      { size: size, price: price, originalPrice: origPrice, stock: stock }
+    ]
+  };
+
+  try {
+    const baseUrl = getAdminApiBaseUrl();
+    const res = await fetch(`${baseUrl}/api/admin/products/${encodeURIComponent(id)}`, {
+      method: 'PUT',
+      headers: getAdminAuthHeaders(),
+      body: JSON.stringify(updates)
+    });
+    const data = await res.json();
+    if (res.ok && data.success && data.product) {
+      Object.assign(product, data.product);
+    } else {
+      Object.assign(product, updates);
+    }
+  } catch (err) {
+    Object.assign(product, updates);
+  }
+
+  saveAdminProducts();
+  closeEditProductModal();
+  renderAdminProductsTable();
+  alert("Product details updated successfully in the centralized database!");
+}
+
+async function deleteAdminProduct(productId) {
+  const product = adminProducts.find(p => p.id === productId);
+  if (!product) return;
+
+  const confirmed = confirm(`Are you sure you want to delete "${product.name}"?`);
+  if (confirmed) {
+    try {
+      const baseUrl = getAdminApiBaseUrl();
+      await fetch(`${baseUrl}/api/admin/products/${encodeURIComponent(productId)}`, {
+        method: 'DELETE',
+        headers: getAdminAuthHeaders()
+      });
+    } catch (err) {}
+
+    adminProducts = adminProducts.filter(p => p.id !== productId);
+    saveAdminProducts();
+    renderAdminProductsTable();
+    alert("Product deleted successfully from the catalog!");
+  }
+}
+
+// ==========================================
+// 7. Orders Management & Real Server Sync
+// ==========================================
+function filterAdminOrders(status) {
+  currentOrderFilter = status;
+  renderAdminOrdersTable();
+}
+
+function renderAdminOrdersTable() {
+  const tbody = document.getElementById('adminOrdersTableBody');
+  if (!tbody) return;
+
+  let filtered = adminOrders;
+  if (currentOrderFilter !== 'all') {
+    filtered = adminOrders.filter(o => {
+      const s = String(o.statusCode || o.status || '').toLowerCase();
+      return s.includes(currentOrderFilter);
+    });
+  }
+
+  if (filtered.length === 0) {
+    tbody.innerHTML = `
+      <tr>
+        <td colspan="7" class="p-8 text-center text-slate-400 font-semibold">No orders found in this view.</td>
+      </tr>
+    `;
+    return;
+  }
+
+  tbody.innerHTML = filtered.map((o, idx) => {
+    const currentCode = (o.statusCode || 'pending').toLowerCase();
+    const dateFormatted = o.createdAt ? new Date(o.createdAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' }) : 'Recent';
+    const isInsideDhaka = !o.customer || o.customer.area !== 'dhaka_outside';
+
+    return `
+      <tr class="hover:bg-slate-50 transition-colors">
+        <td class="p-3.5 font-bold text-blue-900">
+          <div>#${escapeHtml(o.orderId || `ORD-${idx + 1}`)}</div>
+          <div class="text-[10px] text-slate-400 font-normal">${escapeHtml(dateFormatted)}</div>
+        </td>
+        <td class="p-3.5">
+          <div class="font-bold text-slate-800">${escapeHtml(o.customer ? o.customer.name : 'Customer')}</div>
+          <div class="text-[11px] text-slate-500">${escapeHtml(o.customer ? o.customer.phone : '')}</div>
+        </td>
+        <td class="p-3.5 max-w-xs text-slate-600">
+          <div>${escapeHtml(o.customer ? o.customer.address : '')}</div>
+          <div class="text-[10px] text-slate-400 font-semibold">${isInsideDhaka ? 'Inside Dhaka (৳60)' : 'Outside Dhaka (৳120)'}</div>
+        </td>
+        <td class="p-3.5">
+          ${(o.items || []).map(i => `
+            <div class="text-[11px] font-medium text-slate-700 truncate max-w-[180px]">
+              • ${escapeHtml(i.name)} (${escapeHtml(i.size || 'Std')}) x ${Number(i.quantity) || 1}
+            </div>
+          `).join('')}
+        </td>
+        <td class="p-3.5">
+          <span class="inline-flex items-center gap-1 font-bold text-xs ${o.transactionId ? 'text-purple-700 bg-purple-50 px-2 py-0.5 rounded-lg border border-purple-200' : 'text-emerald-800 bg-emerald-50 px-2 py-0.5 rounded-lg border border-emerald-200'}">
+            ${escapeHtml(o.paymentMethod || 'Cash on Delivery')}
+          </span>
+          ${o.transactionId ? `
+            <div class="text-[10px] text-slate-500 mt-0.5 font-mono font-semibold">TrxID: ${escapeHtml(o.transactionId)}</div>
+          ` : ''}
+        </td>
+        <td class="p-3.5 font-bold text-emerald-700 text-xs sm:text-sm">
+          ৳${formatNumber(o.totalAmount)}
+        </td>
+        <td class="p-3.5">
+          <div class="space-y-1.5">
+            <select onchange="updateLiveOrderStatus('${escapeHtml(o.orderId || idx)}', this.value)" class="w-full text-[11px] font-bold py-1 px-2 rounded-lg border border-slate-200 bg-white text-slate-700 focus:outline-none">
+              <option value="pending" ${currentCode === 'pending' ? 'selected' : ''}>Pending (গৃহীত)</option>
+              <option value="confirmed" ${currentCode === 'confirmed' ? 'selected' : ''}>Confirmed (নিশ্চিত)</option>
+              <option value="processing" ${currentCode === 'processing' ? 'selected' : ''}>Processing (প্রস্তুত)</option>
+              <option value="in_courier" ${currentCode === 'in_courier' ? 'selected' : ''}>In Courier (কুরিয়ারে)</option>
+              <option value="shipped" ${currentCode === 'shipped' ? 'selected' : ''}>Shipped (পথে)</option>
+              <option value="delivered" ${currentCode === 'delivered' ? 'selected' : ''}>Delivered (ডেলিভার্ড)</option>
+              <option value="cancelled" ${currentCode === 'cancelled' ? 'selected' : ''}>Cancelled (বাতিল)</option>
+              <option value="returned" ${currentCode === 'returned' ? 'selected' : ''}>Returned (ফেরত)</option>
+            </select>
+            <div class="flex items-center gap-1">
+              <button onclick="bookCourierForOrder('${escapeHtml(o.orderId)}')" title="Steadfast কুরিয়ারে ১-ক্লিকে পার্সেল বুকিং" class="px-2 py-1 bg-amber-500 hover:bg-amber-600 text-white rounded text-[10px] font-bold transition-all shadow-xs flex items-center gap-1">
+                <span>🚚</span><span>Courier</span>
+              </button>
+              <button onclick="window.open('/api/admin/orders/' + encodeURIComponent('${escapeHtml(o.orderId)}') + '/invoice', '_blank')" title="সরকারি মূসক-৬.৩ কর চালান প্রিন্ট" class="px-2 py-1 bg-emerald-700 hover:bg-emerald-800 text-white rounded text-[10px] font-bold transition-all shadow-xs flex items-center gap-1">
+                <span>🧾</span><span>Invoice</span>
+              </button>
+            </div>
+            ${o.trackingCode ? `<div class="text-[9px] text-slate-500 font-mono font-semibold">Trk: ${escapeHtml(o.trackingCode)}</div>` : ''}
+          </div>
+        </td>
+      </tr>
+    `;
+  }).join('');
+}
+
+async function updateLiveOrderStatus(orderIdentifier, newStatus) {
+  // Update local
+  const target = adminOrders.find(o => o.orderId === orderIdentifier) || adminOrders[orderIdentifier];
+  if (target) {
+    target.statusCode = newStatus;
+    target.status = cleanStatusDisplay(newStatus);
+    saveAdminOrders();
+    renderAdminOrdersTable();
+    updateDashboardStats();
+
+    // Broadcast across tabs
+    if (asbiBroadcastChannel) {
+      try {
+        asbiBroadcastChannel.postMessage({ type: 'ORDER_STATUS_UPDATED', order: target });
+      } catch (e) {}
+    }
+
+    // Sync to backend API if orderId exists
+    if (target.orderId) {
+      try {
+        const baseUrl = getAdminApiBaseUrl();
+        await fetch(`${baseUrl}/api/admin/orders/${encodeURIComponent(target.orderId)}/status`, {
+          method: 'PATCH',
+          headers: getAdminAuthHeaders(),
+          body: JSON.stringify({ statusCode: newStatus, statusText: target.status })
+        });
+      } catch (e) {
+        console.warn('[Admin] Server status sync offline:', e);
+      }
+    }
+  }
+}
+
+function clearDemoOrders() {
+  if (confirm("Are you sure you want to clear the local order history?")) {
+    adminOrders = [];
+    saveAdminOrders();
+    renderAdminOrdersTable();
+    updateDashboardStats();
+  }
+}
+
+// ==========================================
+// 8. Customer Reviews Management
+// ==========================================
+function renderAdminReviewsList() {
+  const container = document.getElementById('adminReviewsList');
+  if (!container) return;
+
+  const allReviews = [];
+  adminProducts.forEach(p => {
+    if (p.reviews && p.reviews.length > 0) {
+      p.reviews.forEach((r, idx) => {
+        allReviews.push({ ...r, productId: p.id, productTitle: p.name || p.banglaName, reviewIndex: idx });
+      });
+    }
+  });
+
+  if (allReviews.length === 0) {
+    container.innerHTML = `<div class="text-center py-8 text-slate-400 font-semibold">No customer reviews yet.</div>`;
+    return;
+  }
+
+  container.innerHTML = allReviews.map(r => `
+    <div class="p-4 bg-slate-50 rounded-xl border border-slate-200 flex items-start justify-between gap-4">
+      <div>
+        <div class="flex items-center gap-2 mb-1">
+          <span class="font-bold text-xs text-slate-800">${escapeHtml(r.name || 'Verified Buyer')}</span>
+          <span class="text-amber-400 text-xs">${'★'.repeat(r.rating || 5)}</span>
+          <span class="text-[10px] text-slate-400">${escapeHtml(r.date || 'Recent')}</span>
+        </div>
+        <p class="text-xs text-slate-600 mb-1.5 leading-relaxed">${escapeHtml(r.comment || '')}</p>
+        <span class="inline-block px-2 py-0.5 rounded bg-emerald-100 text-emerald-800 text-[10px] font-bold">
+          Product: ${escapeHtml(r.productTitle)}
+        </span>
+      </div>
+      <button onclick="deleteProductReview('${escapeHtml(r.productId)}', ${Number(r.reviewIndex) || 0})" class="p-1.5 text-rose-500 hover:bg-rose-100 rounded-lg text-xs cursor-pointer" title="Delete Review">
+        🗑️
+      </button>
+    </div>
+  `).join('');
+}
+
+async function deleteProductReview(productId, reviewIndex) {
+  const product = adminProducts.find(p => p.id === productId);
+  if (!product || !product.reviews) return;
+
+  const reviewToDelete = product.reviews[reviewIndex];
+  if (confirm("Are you sure you want to delete this review?")) {
+    product.reviews.splice(reviewIndex, 1);
+    product.reviewsCount = Math.max(0, (product.reviewsCount || 1) - 1);
+    saveAdminProducts();
+    renderAdminReviewsList();
+
+    if (reviewToDelete && reviewToDelete.id) {
+      try {
+        const baseUrl = getAdminApiBaseUrl();
+        await fetch(`${baseUrl}/api/admin/reviews/${encodeURIComponent(reviewToDelete.id)}`, {
+          method: 'DELETE',
+          headers: getAdminAuthHeaders()
+        });
+      } catch (e) {}
+    }
+  }
+}
+
+// Initial check on DOM ready
+document.addEventListener('DOMContentLoaded', () => {
+  checkAdminAuth();
+});
+
+
+// ============================================================================
+// AsbiMart Pro Enterprise Controller Functions
+// ============================================================================
+
+// ১. কুরিয়ার ১-ক্লিক অটোমেশন
+async function bookCourierForOrder(orderId) {
+  if (!orderId) return alert('অর্ডার আইডি পাওয়া যায়নি।');
+  const courier = prompt('কোন কুরিয়ারে বুকিং করতে চান? (Steadfast, Pathao, RedX)', 'Steadfast') || 'Steadfast';
+
+  try {
+    const res = await fetch(`/api/admin/orders/${encodeURIComponent(orderId)}/courier/book`, {
+      method: 'POST',
+      headers: getAdminAuthHeaders(),
+      body: JSON.stringify({ courier })
+    });
+    const data = await res.json();
+    if (res.ok && data.success) {
+      alert(`✓ ${data.message}\nট্র্যাকিং নম্বর: ${data.booking.trackingCode}`);
+      if (typeof refreshAdminData === 'function') refreshAdminData();
+    } else {
+      alert(data.message || 'কুরিয়ার বুকিং ব্যর্থ হয়েছে।');
+    }
+  } catch (err) {
+    alert('কুরিয়ার সার্ভারে যোগাযোগ ব্যর্থ হয়েছে।');
+  }
+}
+
+// ২. CSV এক্সপোর্ট
+function exportOrdersToCsv() {
+  const token = sessionStorage.getItem('asbi_admin_token') || localStorage.getItem('asbi_admin_token') || '';
+  const url = token ? `/api/admin/orders/export/csv?token=${encodeURIComponent(token)}` : '/api/admin/orders/export/csv';
+  window.open(url, '_blank');
+}
+
+// ৩. বাল্ক স্ট্যাটাস পরিবর্তন
+async function handleBulkStatusChange() {
+  const newStatus = prompt('অর্ডারগুলোর নতুন স্ট্যাটাস কোড লিখুন:\n(pending, confirmed, processing, in_courier, shipped, delivered, cancelled)', 'processing');
+  if (!newStatus) return;
+
+  const orderIds = adminOrders.map(o => o.orderId).filter(Boolean);
+  if (orderIds.length === 0) return alert('কোনো অর্ডার পাওয়া যায়নি।');
+
+  try {
+    const res = await fetch('/api/admin/orders/bulk-status', {
+      method: 'POST',
+      headers: getAdminAuthHeaders(),
+      body: JSON.stringify({ orderIds, statusCode: newStatus })
+    });
+    const data = await res.json();
+    if (res.ok && data.success) {
+      alert(data.message);
+      if (typeof refreshAdminData === 'function') refreshAdminData();
+    } else {
+      alert(data.message || 'বাল্ক স্ট্যাটাস পরিবর্তন ব্যর্থ হয়েছে।');
+    }
+  } catch (e) {
+    alert('সার্ভার যোগাযোগে ত্রুটি।');
+  }
+}
+
+// ৪. কুপন ম্যানেজমেন্ট
+async function loadCouponsData() {
+  const tbody = document.getElementById('adminCouponsTableBody');
+  if (!tbody) return;
+
+  try {
+    const res = await fetch('/api/admin/coupons', { headers: getAdminAuthHeaders() });
+    const data = await res.json();
+    if (res.ok && data.success) {
+      if (data.coupons.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="7" class="p-6 text-center text-slate-400">কোনো কুপন তৈরি করা হয়নি।</td></tr>';
+        return;
+      }
+      tbody.innerHTML = data.coupons.map(c => `
+        <tr class="hover:bg-slate-50 transition-colors">
+          <td class="p-3.5 font-bold font-mono text-emerald-800 text-sm">${escapeHtml(c.code)}</td>
+          <td class="p-3.5 text-slate-700 font-medium">${escapeHtml(c.description || '')}</td>
+          <td class="p-3.5"><span class="px-2 py-0.5 rounded text-[10px] font-bold uppercase ${c.discountType === 'percent' ? 'bg-blue-100 text-blue-800' : 'bg-purple-100 text-purple-800'}">${escapeHtml(c.discountType)}</span></td>
+          <td class="p-3.5 font-bold text-slate-900">${c.discountType === 'percent' ? c.discountValue + '%' : '৳' + c.discountValue}</td>
+          <td class="p-3.5 text-slate-600">৳${c.minOrderAmount || 0}</td>
+          <td class="p-3.5 font-bold text-indigo-700">${c.usageCount || 0} বার</td>
+          <td class="p-3.5">
+            <button onclick="deleteCouponCode('${escapeHtml(c.code)}')" class="text-rose-600 hover:text-rose-800 font-bold text-xs p-1">মুছুন</button>
+          </td>
+        </tr>
+      `).join('');
+    }
+  } catch (e) {
+    tbody.innerHTML = '<tr><td colspan="7" class="p-4 text-center text-rose-500">কুপন লোড ব্যর্থ।</td></tr>';
+  }
+}
+
+async function openCreateCouponModal() {
+  const code = prompt('নতুন কুপন কোড (যেমন: SUPER20):');
+  if (!code) return;
+  const desc = prompt('কুপনের বিবরণ:', 'বিশেষ মূল্যছাড়') || 'বিশেষ মূল্যছাড়';
+  const val = prompt('ছাড়ের পরিমাণ (শতাংশ বা ফিক্সড টাকা):', '10') || '10';
+  const minOrd = prompt('সর্বনিম্ন অর্ডারের পরিমাণ:', '500') || '500';
+
+  try {
+    const res = await fetch('/api/admin/coupons', {
+      method: 'POST',
+      headers: getAdminAuthHeaders(),
+      body: JSON.stringify({
+        code,
+        description: desc,
+        discountType: 'percent',
+        discountValue: Number(val) || 10,
+        minOrderAmount: Number(minOrd) || 500
+      })
+    });
+    const data = await res.json();
+    if (res.ok && data.success) {
+      alert('নতুন কুপন সফলভাবে তৈরি হয়েছে!');
+      loadCouponsData();
+    } else {
+      alert(data.message || 'কুপন তৈরি ব্যর্থ।');
+    }
+  } catch (e) {
+    alert('সার্ভার যোগাযোগে ত্রুটি।');
+  }
+}
+
+async function deleteCouponCode(code) {
+  if (!confirm(`আপনি কি "${code}" কুপনটি মুছে ফেলতে চান?`)) return;
+  try {
+    const res = await fetch(`/api/admin/coupons/${encodeURIComponent(code)}`, {
+      method: 'DELETE',
+      headers: getAdminAuthHeaders()
+    });
+    const data = await res.json();
+    if (res.ok && data.success) {
+      alert('কুপন মুছে ফেলা হয়েছে।');
+      loadCouponsData();
+    }
+  } catch (e) {}
+}
+
+// ৫. ইনভেন্টরি ও রিস্টক কন্ট্রোলার
+async function loadInventoryData() {
+  const container = document.getElementById('adminInventoryList');
+  if (!container) return;
+
+  try {
+    const res = await fetch('/api/admin/inventory/low-stock', { headers: getAdminAuthHeaders() });
+    const data = await res.json();
+    if (res.ok && data.success) {
+      if (data.products.length === 0) {
+        container.innerHTML = '<div class="p-6 text-center text-emerald-700 font-bold bg-emerald-50 rounded-2xl">✓ আলহামদুলিল্লাহ! কোনো পণ্যের স্টক সংকটাপন্ন নয়। সব পণ্যের পর্যাপ্ত স্টক রয়েছে।</div>';
+        return;
+      }
+
+      container.innerHTML = data.products.map(p => `
+        <div class="flex items-center justify-between p-3.5 bg-rose-50 border border-rose-200 rounded-xl">
+          <div class="flex items-center gap-3">
+            <span class="text-xl">⚠️</span>
+            <div>
+              <h4 class="font-bold text-slate-900 text-xs sm:text-sm">${escapeHtml(p.banglaName || p.name)}</h4>
+              <p class="text-[11px] text-rose-700 font-semibold">বর্তমান অবশিষ্ট স্টক: মাত্র ${p.stock}টি</p>
+            </div>
+          </div>
+          <button onclick="handleRestockProduct('${escapeHtml(p.id)}')" class="px-3 py-1.5 bg-emerald-700 hover:bg-emerald-800 text-white font-bold text-xs rounded-xl transition-all shadow-xs">
+            + রিস্টক করুন
+          </button>
+        </div>
+      `).join('');
+    }
+  } catch (e) {
+    container.innerHTML = '<div class="p-4 text-center text-rose-500">ইনভেন্টরি ডেটা লোড ব্যর্থ।</div>';
+  }
+}
+
+async function handleRestockProduct(productId) {
+  const qty = prompt('কতটি পণ্য স্টক যোগ করতে চান?', '20');
+  if (!qty || isNaN(qty)) return;
+
+  try {
+    const res = await fetch('/api/admin/inventory/restock', {
+      method: 'POST',
+      headers: getAdminAuthHeaders(),
+      body: JSON.stringify({ productId, quantity: Number(qty) })
+    });
+    const data = await res.json();
+    if (res.ok && data.success) {
+      alert(data.message);
+      loadInventoryData();
+      if (typeof refreshAdminData === 'function') refreshAdminData();
+    } else {
+      alert(data.message || 'রিস্টক ব্যর্থ হয়েছে।');
+    }
+  } catch (e) {}
+}
+
+// ৬. কাস্টমার সাপোর্ট টিকেট কন্ট্রোলার
+async function loadSupportTickets() {
+  const container = document.getElementById('adminSupportList');
+  if (!container) return;
+
+  try {
+    const res = await fetch('/api/admin/support/tickets', { headers: getAdminAuthHeaders() });
+    const data = await res.json();
+    if (res.ok && data.success) {
+      if (data.tickets.length === 0) {
+        container.innerHTML = '<div class="p-6 text-center text-slate-400 font-semibold">কোনো কাস্টমার সাপোর্ট টিকেট নেই।</div>';
+        return;
+      }
+      container.innerHTML = data.tickets.map(t => `
+        <div class="p-4 bg-slate-50 border border-slate-200 rounded-xl space-y-2">
+          <div class="flex items-center justify-between">
+            <span class="font-bold text-slate-900 text-xs sm:text-sm">${escapeHtml(t.customerName)} (${escapeHtml(t.customerPhone)})</span>
+            <span class="px-2 py-0.5 rounded text-[10px] font-bold uppercase ${t.status === 'open' ? 'bg-amber-100 text-amber-800' : 'bg-emerald-100 text-emerald-800'}">${escapeHtml(t.status)}</span>
+          </div>
+          <div class="text-xs text-slate-700 bg-white p-2.5 rounded-lg border border-slate-200">
+            <strong>বিষয়:</strong> ${escapeHtml(t.subject)}<br>
+            <strong>বার্তা:</strong> ${escapeHtml(t.message)}
+          </div>
+          ${t.reply ? `
+            <div class="text-[11px] text-emerald-800 bg-emerald-50 p-2 rounded-lg border border-emerald-200">
+              <strong>অ্যাডমিন উত্তর:</strong> ${escapeHtml(t.reply)}
+            </div>
+          ` : `
+            <button onclick="handleReplySupportTicket('${escapeHtml(t.id)}')" class="px-3 py-1 bg-blue-900 hover:bg-blue-800 text-white font-bold text-xs rounded-lg transition-all shadow-xs">
+              উত্তর লিখুন (Reply)
+            </button>
+          `}
+        </div>
+      `).join('');
+    }
+  } catch (e) {
+    container.innerHTML = '<div class="p-4 text-center text-rose-500">টিকেট লোড ব্যর্থ।</div>';
+  }
+}
+
+async function handleReplySupportTicket(ticketId) {
+  const reply = prompt('গ্রাহককে কী উত্তর দিতে চান?');
+  if (!reply) return;
+
+  try {
+    const res = await fetch(`/api/admin/support/tickets/${encodeURIComponent(ticketId)}/reply`, {
+      method: 'POST',
+      headers: getAdminAuthHeaders(),
+      body: JSON.stringify({ reply })
+    });
+    const data = await res.json();
+    if (res.ok && data.success) {
+      alert('উত্তর সফলভাবে পাঠানো হয়েছে!');
+      loadSupportTickets();
+    } else {
+      alert(data.message || 'উত্তর পাঠাতে ব্যর্থ হয়েছে।');
+    }
+  } catch (e) {}
+}

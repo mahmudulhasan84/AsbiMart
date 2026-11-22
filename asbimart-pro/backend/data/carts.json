@@ -1,0 +1,18 @@
+[
+  {
+    "userId": "user_asbi_demo",
+    "items": [
+      {
+        "productId": "honey-sundarban-01",
+        "variantIndex": 0,
+        "quantity": 2
+      },
+      {
+        "productId": "ghee-buffalo-07",
+        "variantIndex": 0,
+        "quantity": 1
+      }
+    ],
+    "updatedAt": "2026-11-22T09:33:18.626Z"
+  }
+]

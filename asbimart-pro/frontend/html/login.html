@@ -1,0 +1,753 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Sign In / Sign Up — AsbiMart</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@300;400;500;600;700&family=Plus+Jakarta+Sans:wght@600;700;800;900&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../css/style.css">
+  <link rel="stylesheet" href="../css/responsive.css">
+</head>
+<body class="bg-[#F4ECE1] text-slate-800 antialiased min-h-screen flex flex-col font-brand">
+
+  <!-- Header -->
+  <header class="bg-[#F4ECE1] border-b border-[#E5DACB] py-4 shadow-sm">
+    <div class="asbi-container flex items-center justify-between">
+      <a href="index.html" class="flex items-center gap-3 group">
+        <div class="w-11 h-11 flex items-center justify-center flex-shrink-0">
+          <svg viewBox="0 0 100 100" class="w-full h-full" fill="none" style="shape-rendering: geometricPrecision;">
+            <defs>
+              <linearGradient id="login_g" x1="28" y1="54" x2="76" y2="82" gradientUnits="userSpaceOnUse">
+                <stop offset="0%" stop-color="#10B981"/>
+                <stop offset="45%" stop-color="#10B981"/>
+                <stop offset="75%" stop-color="#F59E0B"/>
+                <stop offset="100%" stop-color="#FBBF24"/>
+              </linearGradient>
+            </defs>
+            <path d="M24 82L56 16C58 12 62 12 64 16L84 56" stroke="#1E3A8A" stroke-width="12" stroke-linecap="round" stroke-linejoin="round"/>
+            <path d="M28 54H52C60 54 64 60 76 82" stroke="url(#login_g)" stroke-width="11" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </div>
+        <span class="font-brand font-black text-2xl sm:text-3xl text-[#1E3A8A] tracking-tight leading-none">
+          Asbi<span class="text-[#F59E0B]">Mart</span>
+        </span>
+      </a>
+
+      <a href="index.html" class="flex items-center gap-2 text-xs sm:text-sm font-bold text-[#1E3A8A] hover:text-amber-600 bg-white px-4 py-2 rounded-full border border-[#E5DACB] shadow-sm transition-all">
+        <svg class="w-4 h-4 stroke-current" fill="none" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"/></svg>
+        <span>Back to Home</span>
+      </a>
+    </div>
+  </header>
+
+  <!-- Main Content -->
+  <main class="flex-grow flex items-center justify-center p-4 py-10">
+    <div class="bg-white rounded-3xl w-full max-w-lg shadow-2xl border border-[#E5DACB] overflow-hidden">
+
+      <!-- Top Header & Tabs -->
+      <div class="bg-gradient-to-r from-[#1E3A8A] to-blue-900 p-6 sm:p-8 text-white text-center">
+        <h1 class="text-2xl sm:text-3xl font-black tracking-tight">Welcome to Asbi<span class="text-[#F59E0B]">Mart</span></h1>
+        <p class="text-xs sm:text-sm text-blue-100 mt-1">Sign in securely with Google, Facebook, or your verified account</p>
+
+        <div class="grid grid-cols-2 gap-2 mt-6 bg-white/10 p-1.5 rounded-2xl backdrop-blur">
+          <button type="button" id="tabLoginBtn" onclick="switchPageTab('login')" class="py-2.5 text-xs font-black rounded-xl transition-all bg-white text-[#1E3A8A] shadow-md cursor-pointer">
+            Sign In
+          </button>
+          <button type="button" id="tabRegisterBtn" onclick="switchPageTab('register')" class="py-2.5 text-xs font-black rounded-xl transition-all text-white hover:bg-white/10 cursor-pointer">
+            Create Account
+          </button>
+        </div>
+      </div>
+
+      <!-- Forms Body -->
+      <div class="p-6 sm:p-8 space-y-4">
+
+        <!-- Inline Feedback Banner (Error / Success / Info) -->
+        <div id="authFeedbackBanner" class="hidden rounded-2xl p-3.5 text-xs font-semibold border leading-relaxed"></div>
+
+        <!-- ==============================================================
+             1. REAL SIGN IN FORM
+             ============================================================== -->
+        <form id="pageLoginForm" onsubmit="handleLoginPageSubmit(event)" class="space-y-4">
+          <div>
+            <label class="block text-xs font-bold text-slate-700 mb-1.5">Phone Number or Email / Gmail</label>
+            <input 
+              type="text" 
+              id="loginPageIdentifier" 
+              required 
+              autocomplete="username"
+              placeholder="e.g. 01821296056 or yourname@gmail.com" 
+              class="w-full text-xs py-3 px-4 bg-slate-50 border border-slate-300 rounded-xl focus:outline-none focus:border-[#1E3A8A] focus:bg-white transition-all font-brand"
+            />
+          </div>
+
+          <div>
+            <label class="block text-xs font-bold text-slate-700 mb-1.5">Password</label>
+            <div class="relative">
+              <input 
+                type="password" 
+                id="loginPagePassword" 
+                required 
+                autocomplete="current-password"
+                placeholder="Enter your password" 
+                class="w-full text-xs py-3 pl-4 pr-14 bg-slate-50 border border-slate-300 rounded-xl focus:outline-none focus:border-[#1E3A8A] focus:bg-white transition-all font-brand"
+              />
+              <button type="button" onclick="togglePassVisibility('loginPagePassword', this)" class="absolute right-3 top-1/2 -translate-y-1/2 text-xs font-bold text-slate-500 hover:text-[#1E3A8A] cursor-pointer">
+                Show
+              </button>
+            </div>
+          </div>
+
+          <button type="submit" id="loginSubmitBtn" class="w-full py-3.5 bg-gradient-to-r from-[#1E3A8A] to-blue-900 hover:opacity-95 text-white font-black text-sm rounded-xl shadow-lg transition-all active:scale-98 cursor-pointer">
+            Sign In
+          </button>
+
+          <!-- Divider -->
+          <div class="relative my-4 text-center">
+            <div class="absolute inset-0 flex items-center"><div class="w-full border-t border-slate-200"></div></div>
+            <span class="relative bg-white px-3 text-[11px] font-semibold text-slate-400">Or continue with real account</span>
+          </div>
+
+          <!-- Real OAuth 2.0 Social Buttons -->
+          <div class="grid grid-cols-3 gap-2.5">
+            <button type="button" onclick="startRealOAuth('google')" class="flex items-center justify-center gap-1.5 py-2.5 px-2 border border-slate-300 hover:border-[#1E3A8A] hover:bg-blue-50/40 rounded-xl text-xs font-bold text-slate-800 transition-all shadow-2xs cursor-pointer">
+              <svg class="w-4 h-4 flex-shrink-0" viewBox="0 0 24 24"><path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/><path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/><path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z"/><path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z"/></svg>
+              <span>Google</span>
+            </button>
+            <button type="button" onclick="startRealOAuth('facebook')" class="flex items-center justify-center gap-1.5 py-2.5 px-2 border border-slate-300 hover:border-[#1877F2] hover:bg-blue-50/40 rounded-xl text-xs font-bold text-slate-800 transition-all shadow-2xs cursor-pointer">
+              <svg class="w-4 h-4 fill-[#1877F2] flex-shrink-0" viewBox="0 0 24 24"><path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/></svg>
+              <span>Facebook</span>
+            </button>
+            <button type="button" onclick="startRealOAuth('auth0')" class="flex items-center justify-center gap-1.5 py-2.5 px-2 border border-slate-300 hover:border-[#EB5424] hover:bg-orange-50/40 rounded-xl text-xs font-bold text-slate-800 transition-all shadow-2xs cursor-pointer" title="Login with Auth0">
+              <svg class="w-4 h-4 text-[#EB5424] flex-shrink-0" viewBox="0 0 24 24" fill="currentColor"><path d="M21.98 10.36a11.96 11.96 0 0 0-4.08-6.94A11.83 11.83 0 0 0 12 .5C8.8.5 5.86 1.8 3.73 4.07a11.9 11.9 0 0 0-3.62 7.74c-.45 4.1 1 8.2 3.96 11.08l6.32-6.32a3.02 3.02 0 0 1-.39-1.57c0-1.66 1.34-3 3-3s3 1.34 3 3a3.02 3.02 0 0 1-.39 1.57l6.32 6.32c1.92-1.87 3.12-4.38 3.38-7.07.25-2.6-.45-5.22-2.03-7.53z"/></svg>
+              <span>Auth0</span>
+            </button>
+          </div>
+        </form>
+
+        <!-- ==============================================================
+             2. REAL 2-STEP OTP CREATE ACCOUNT FLOW
+             ============================================================== -->
+        <div id="pageRegisterContainer" class="hidden space-y-4">
+
+          <!-- Step 1: Account Details + OTP Channel Choice -->
+          <form id="registerStep1Form" onsubmit="handleSendRegistrationOtp(event)" class="space-y-3.5">
+            <div>
+              <label class="block text-xs font-bold text-slate-700 mb-1">Full Name</label>
+              <input 
+                type="text" 
+                id="regPageName" 
+                required 
+                placeholder="e.g. Asbi Mahmud" 
+                class="w-full text-xs py-2.5 px-3 bg-slate-50 border border-slate-300 rounded-xl focus:outline-none focus:border-[#1E3A8A] focus:bg-white transition-all font-brand"
+              />
+            </div>
+
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              <div>
+                <label class="block text-xs font-bold text-slate-700 mb-1">Phone Number (11 Digits)</label>
+                <input 
+                  type="tel" 
+                  id="regPagePhone" 
+                  required 
+                  placeholder="01XXXXXXXXX" 
+                  class="w-full text-xs py-2.5 px-3 bg-slate-50 border border-slate-300 rounded-xl focus:outline-none focus:border-[#1E3A8A] focus:bg-white transition-all font-brand"
+                />
+              </div>
+              <div>
+                <label class="block text-xs font-bold text-slate-700 mb-1">Email / Gmail Address</label>
+                <input 
+                  type="email" 
+                  id="regPageEmail" 
+                  required
+                  placeholder="yourname@gmail.com" 
+                  class="w-full text-xs py-2.5 px-3 bg-slate-50 border border-slate-300 rounded-xl focus:outline-none focus:border-[#1E3A8A] focus:bg-white transition-all font-brand"
+                />
+              </div>
+            </div>
+
+            <!-- OTP Delivery Channel Selection -->
+            <div class="p-3 bg-blue-50/60 border border-blue-200 rounded-2xl space-y-2">
+              <p class="text-[11px] font-black text-[#1E3A8A] uppercase tracking-wider">Where should we send your 6-digit OTP?</p>
+              <div class="grid grid-cols-2 gap-2">
+                <label class="flex items-center gap-2 p-2 bg-white rounded-xl border border-blue-200 cursor-pointer hover:border-[#1E3A8A] transition-all">
+                  <input type="radio" name="otpChannelChoice" value="email" checked class="text-[#1E3A8A] focus:ring-0">
+                  <div>
+                    <span class="block text-xs font-bold text-slate-800">Email / Gmail</span>
+                    <span class="block text-[10px] text-slate-400">6-digit code to inbox</span>
+                  </div>
+                </label>
+                <label class="flex items-center gap-2 p-2 bg-white rounded-xl border border-slate-200 cursor-pointer hover:border-[#1E3A8A] transition-all">
+                  <input type="radio" name="otpChannelChoice" value="sms" class="text-[#1E3A8A] focus:ring-0">
+                  <div>
+                    <span class="block text-xs font-bold text-slate-800">Mobile SMS</span>
+                    <span class="block text-[10px] text-slate-400">6-digit code via SMS</span>
+                  </div>
+                </label>
+              </div>
+            </div>
+
+            <div class="grid grid-cols-1 sm:grid-cols-3 gap-2">
+              <div>
+                <label class="block text-xs font-bold text-slate-700 mb-1">Division</label>
+                <select id="regPageDivision" required class="w-full text-xs py-2.5 px-2.5 bg-slate-50 border border-slate-300 rounded-xl focus:outline-none focus:border-[#1E3A8A] focus:bg-white transition-all"></select>
+              </div>
+              <div>
+                <label class="block text-xs font-bold text-slate-700 mb-1">District</label>
+                <select id="regPageDistrict" required class="w-full text-xs py-2.5 px-2.5 bg-slate-50 border border-slate-300 rounded-xl focus:outline-none focus:border-[#1E3A8A] focus:bg-white transition-all"></select>
+              </div>
+              <div>
+                <label class="block text-xs font-bold text-slate-700 mb-1">Upazila / Thana</label>
+                <select id="regPageUpazila" required class="w-full text-xs py-2.5 px-2.5 bg-slate-50 border border-slate-300 rounded-xl focus:outline-none focus:border-[#1E3A8A] focus:bg-white transition-all"></select>
+              </div>
+            </div>
+
+            <div>
+              <label class="block text-xs font-bold text-slate-700 mb-1">Delivery Address (House, Road, Area)</label>
+              <input 
+                type="text" 
+                id="regPageAddress" 
+                required 
+                placeholder="House, Road, Village/Area" 
+                class="w-full text-xs py-2.5 px-3 bg-slate-50 border border-slate-300 rounded-xl focus:outline-none focus:border-[#1E3A8A] focus:bg-white transition-all"
+              />
+            </div>
+
+            <div>
+              <label class="block text-xs font-bold text-slate-700 mb-1">Select Profile Avatar</label>
+              <div class="grid grid-cols-3 gap-2">
+                <label class="flex items-center gap-2 cursor-pointer p-2 bg-slate-50 hover:bg-slate-100 rounded-xl border border-slate-200">
+                  <input type="radio" name="avatarChoice" value="https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&w=150&q=80" checked class="text-blue-900">
+                  <img src="https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&w=150&q=80" class="w-7 h-7 rounded-full object-cover">
+                  <span class="text-[11px] text-slate-600 font-semibold">1</span>
+                </label>
+                <label class="flex items-center gap-2 cursor-pointer p-2 bg-slate-50 hover:bg-slate-100 rounded-xl border border-slate-200">
+                  <input type="radio" name="avatarChoice" value="https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&w=150&q=80" class="text-blue-900">
+                  <img src="https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&w=150&q=80" class="w-7 h-7 rounded-full object-cover">
+                  <span class="text-[11px] text-slate-600 font-semibold">2</span>
+                </label>
+                <label class="flex items-center gap-2 cursor-pointer p-2 bg-slate-50 hover:bg-slate-100 rounded-xl border border-slate-200">
+                  <input type="radio" name="avatarChoice" value="https://images.unsplash.com/photo-1570295999919-56ceb5ecca61?auto=format&fit=crop&w=150&q=80" class="text-blue-900">
+                  <img src="https://images.unsplash.com/photo-1570295999919-56ceb5ecca61?auto=format&fit=crop&w=150&q=80" class="w-7 h-7 rounded-full object-cover">
+                  <span class="text-[11px] text-slate-600 font-semibold">3</span>
+                </label>
+              </div>
+            </div>
+
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              <div>
+                <label class="block text-xs font-bold text-slate-700 mb-1">Password</label>
+                <input 
+                  type="password" 
+                  id="regPagePassword" 
+                  required 
+                  minlength="6"
+                  placeholder="Minimum 6 characters" 
+                  class="w-full text-xs py-2.5 px-3 bg-slate-50 border border-slate-300 rounded-xl focus:outline-none focus:border-[#1E3A8A] focus:bg-white transition-all font-brand"
+                />
+              </div>
+              <div>
+                <label class="block text-xs font-bold text-slate-700 mb-1">Confirm Password</label>
+                <input 
+                  type="password" 
+                  id="regPageConfirmPassword" 
+                  required 
+                  minlength="6"
+                  placeholder="Re-enter password" 
+                  class="w-full text-xs py-2.5 px-3 bg-slate-50 border border-slate-300 rounded-xl focus:outline-none focus:border-[#1E3A8A] focus:bg-white transition-all font-brand"
+                />
+              </div>
+            </div>
+
+            <button type="submit" id="sendOtpBtn" class="w-full py-3.5 bg-gradient-to-r from-[#10B981] to-emerald-600 hover:from-emerald-600 hover:to-emerald-700 text-white font-black text-sm rounded-xl shadow-lg transition-all active:scale-98 cursor-pointer">
+              Send Verification OTP →
+            </button>
+
+            <!-- Social Sign Up Shortcut -->
+            <div class="relative my-3 text-center">
+              <div class="absolute inset-0 flex items-center"><div class="w-full border-t border-slate-200"></div></div>
+              <span class="relative bg-white px-3 text-[11px] font-semibold text-slate-400">Or sign up instantly with</span>
+            </div>
+            <div class="grid grid-cols-3 gap-2.5">
+              <button type="button" onclick="startRealOAuth('google')" class="flex items-center justify-center gap-1.5 py-2.5 px-2 border border-slate-300 hover:border-[#1E3A8A] hover:bg-blue-50/40 rounded-xl text-xs font-bold text-slate-800 transition-all shadow-2xs cursor-pointer">
+                <svg class="w-4 h-4 flex-shrink-0" viewBox="0 0 24 24"><path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/><path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/><path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z"/><path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z"/></svg>
+                <span>Google</span>
+              </button>
+              <button type="button" onclick="startRealOAuth('facebook')" class="flex items-center justify-center gap-1.5 py-2.5 px-2 border border-slate-300 hover:border-[#1877F2] hover:bg-blue-50/40 rounded-xl text-xs font-bold text-slate-800 transition-all shadow-2xs cursor-pointer">
+                <svg class="w-4 h-4 fill-[#1877F2] flex-shrink-0" viewBox="0 0 24 24"><path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/></svg>
+                <span>Facebook</span>
+              </button>
+              <button type="button" onclick="startRealOAuth('auth0')" class="flex items-center justify-center gap-1.5 py-2.5 px-2 border border-slate-300 hover:border-[#EB5424] hover:bg-orange-50/40 rounded-xl text-xs font-bold text-slate-800 transition-all shadow-2xs cursor-pointer" title="Sign up with Auth0">
+                <svg class="w-4 h-4 text-[#EB5424] flex-shrink-0" viewBox="0 0 24 24" fill="currentColor"><path d="M21.98 10.36a11.96 11.96 0 0 0-4.08-6.94A11.83 11.83 0 0 0 12 .5C8.8.5 5.86 1.8 3.73 4.07a11.9 11.9 0 0 0-3.62 7.74c-.45 4.1 1 8.2 3.96 11.08l6.32-6.32a3.02 3.02 0 0 1-.39-1.57c0-1.66 1.34-3 3-3s3 1.34 3 3a3.02 3.02 0 0 1-.39 1.57l6.32 6.32c1.92-1.87 3.12-4.38 3.38-7.07.25-2.6-.45-5.22-2.03-7.53z"/></svg>
+                <span>Auth0</span>
+              </button>
+            </div>
+          </form>
+
+          <!-- Step 2: 6-Digit OTP Verification Form -->
+          <form id="registerStep2OtpForm" onsubmit="handleVerifyOtpAndRegister(event)" class="hidden space-y-5">
+            <div class="text-center space-y-2 bg-slate-50 border border-slate-200 rounded-2xl p-5">
+              <div class="w-12 h-12 rounded-2xl bg-emerald-100 text-emerald-700 flex items-center justify-center text-2xl mx-auto">🔐</div>
+              <h2 class="text-lg font-black text-slate-900">Enter 6-Digit OTP Code</h2>
+              <p class="text-xs text-slate-600 leading-relaxed">
+                We sent a one-time verification code to <strong id="otpTargetDisplay" class="text-[#1E3A8A]"></strong>
+              </p>
+              <p class="text-[11px] font-bold text-amber-700">
+                Code expires in <span id="otpExpiryTimer">05:00</span>
+              </p>
+            </div>
+
+            <!-- 6 Individual OTP Boxes -->
+            <div id="otpDigitBoxes" class="grid grid-cols-6 gap-2 sm:gap-3">
+              <input type="text" inputmode="numeric" maxlength="1" autocomplete="one-time-code" class="otp-digit-input w-full h-12 sm:h-14 text-center text-xl font-black text-[#1E3A8A] bg-slate-50 border-2 border-slate-300 focus:border-[#1E3A8A] focus:bg-white rounded-xl focus:outline-none transition-all" required />
+              <input type="text" inputmode="numeric" maxlength="1" class="otp-digit-input w-full h-12 sm:h-14 text-center text-xl font-black text-[#1E3A8A] bg-slate-50 border-2 border-slate-300 focus:border-[#1E3A8A] focus:bg-white rounded-xl focus:outline-none transition-all" required />
+              <input type="text" inputmode="numeric" maxlength="1" class="otp-digit-input w-full h-12 sm:h-14 text-center text-xl font-black text-[#1E3A8A] bg-slate-50 border-2 border-slate-300 focus:border-[#1E3A8A] focus:bg-white rounded-xl focus:outline-none transition-all" required />
+              <input type="text" inputmode="numeric" maxlength="1" class="otp-digit-input w-full h-12 sm:h-14 text-center text-xl font-black text-[#1E3A8A] bg-slate-50 border-2 border-slate-300 focus:border-[#1E3A8A] focus:bg-white rounded-xl focus:outline-none transition-all" required />
+              <input type="text" inputmode="numeric" maxlength="1" class="otp-digit-input w-full h-12 sm:h-14 text-center text-xl font-black text-[#1E3A8A] bg-slate-50 border-2 border-slate-300 focus:border-[#1E3A8A] focus:bg-white rounded-xl focus:outline-none transition-all" required />
+              <input type="text" inputmode="numeric" maxlength="1" class="otp-digit-input w-full h-12 sm:h-14 text-center text-xl font-black text-[#1E3A8A] bg-slate-50 border-2 border-slate-300 focus:border-[#1E3A8A] focus:bg-white rounded-xl focus:outline-none transition-all" required />
+            </div>
+
+            <button type="submit" id="verifyOtpSubmitBtn" class="w-full py-3.5 bg-gradient-to-r from-[#1E3A8A] to-blue-900 hover:opacity-95 text-white font-black text-sm rounded-xl shadow-lg transition-all active:scale-98 cursor-pointer">
+              Verify OTP & Create Account
+            </button>
+
+            <div class="flex items-center justify-between text-xs pt-1">
+              <button type="button" onclick="backToRegisterStep1()" class="font-bold text-slate-600 hover:text-[#1E3A8A] cursor-pointer">
+                ← Edit Details
+              </button>
+              <button type="button" id="resendOtpBtn" onclick="handleResendOtp()" disabled class="font-bold text-[#1E3A8A] disabled:text-slate-400 cursor-pointer disabled:cursor-not-allowed">
+                Resend OTP (<span id="resendCountdownSpan">60</span>s)
+              </button>
+            </div>
+          </form>
+
+        </div>
+
+      </div>
+
+      <!-- Footer Note -->
+      <div class="px-6 py-4 bg-slate-50 border-t border-slate-100 text-center text-xs text-slate-500">
+        By signing in, you agree to AsbiMart's
+        <a href="terms.html" class="text-[#1E3A8A] underline font-semibold">Terms & Conditions</a> and
+        <a href="privacy-policy.html" class="text-[#1E3A8A] underline font-semibold">Privacy Policy</a>.
+      </div>
+    </div>
+  </main>
+
+  <footer class="py-5 text-center text-xs text-slate-500 border-t border-[#E5DACB]">
+    <div class="inline-flex items-center justify-center gap-2">
+      <div class="w-5 h-5 flex items-center justify-center flex-shrink-0">
+        <svg viewBox="0 0 100 100" class="w-full h-full" fill="none" style="shape-rendering: geometricPrecision;">
+          <defs>
+            <linearGradient id="login_ft_g" x1="28" y1="54" x2="76" y2="82" gradientUnits="userSpaceOnUse">
+              <stop offset="0%" stop-color="#10B981"/>
+              <stop offset="45%" stop-color="#10B981"/>
+              <stop offset="75%" stop-color="#F59E0B"/>
+              <stop offset="100%" stop-color="#FBBF24"/>
+            </linearGradient>
+          </defs>
+          <path d="M24 82L56 16C58 12 62 12 64 16L84 56" stroke="#1E3A8A" stroke-width="12" stroke-linecap="round" stroke-linejoin="round"/>
+          <path d="M28 54H52C60 54 64 60 76 82" stroke="url(#login_ft_g)" stroke-width="11" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+      </div>
+      <span>© 2026 <strong class="font-brand font-black text-[#1E3A8A]">Asbi<span class="text-[#F59E0B]">Mart</span></strong>. All rights reserved.</span>
+    </div>
+  </footer>
+
+  <script src="../js/bd-locations.js"></script>
+  <script>
+    let activeOtpSessionId = null;
+    let otpExpiryInterval = null;
+    let resendCooldownInterval = null;
+    let authProviderStatus = null;
+
+    document.addEventListener('DOMContentLoaded', () => {
+      initCascadingLocation('regPageDivision', 'regPageDistrict', 'regPageUpazila', { division: 'Dhaka', district: 'Dhaka', upazila: 'Badda' });
+      setupOtpInputs();
+      checkOAuthRedirectErrors();
+      fetchAuthProviderStatus();
+    });
+
+    async function fetchAuthProviderStatus() {
+      try {
+        const res = await fetch('/api/auth/providers');
+        const data = await res.json();
+        if (data.success && data.providers) {
+          authProviderStatus = data.providers;
+        }
+      } catch (err) {}
+    }
+
+    function showFeedback(message, type = 'error') {
+      const box = document.getElementById('authFeedbackBanner');
+      if (!box) return;
+      box.classList.remove('hidden', 'bg-rose-50', 'border-rose-200', 'text-rose-700', 'bg-emerald-50', 'border-emerald-200', 'text-emerald-800', 'bg-amber-50', 'border-amber-200', 'text-amber-900');
+
+      if (type === 'success') {
+        box.classList.add('bg-emerald-50', 'border-emerald-200', 'text-emerald-800');
+      } else if (type === 'warning') {
+        box.classList.add('bg-amber-50', 'border-amber-200', 'text-amber-900');
+      } else {
+        box.classList.add('bg-rose-50', 'border-rose-200', 'text-rose-700');
+      }
+      box.innerHTML = message;
+      box.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    }
+
+    function hideFeedback() {
+      const box = document.getElementById('authFeedbackBanner');
+      if (box) box.classList.add('hidden');
+    }
+
+    function checkOAuthRedirectErrors() {
+      const params = new URLSearchParams(window.location.search);
+      const err = params.get('auth_error');
+      if (!err) return;
+
+      const messages = {
+        auth0_not_configured: '<strong>Auth0 Setup Required:</strong> Add <code>AUTH0_DOMAIN</code>, <code>AUTH0_CLIENT_ID</code>, and <code>AUTH0_CLIENT_SECRET</code> in <code>backend/.env</code> (Allowed Callback URL: <code>http://localhost:5000/api/auth/auth0/callback</code>), then restart the server.',
+        auth0_invalid_state: 'Auth0 login session expired or state mismatch. Please click Auth0 again.',
+        auth0_auth_failed: 'Could not complete Auth0 verification. Please check your Auth0 application settings and try again.',
+        auth0_access_denied: 'Auth0 sign-in was cancelled. You can sign in with another method.',
+        google_not_configured: '<strong>Google Sign-In Setup Required:</strong> Add <code>GOOGLE_CLIENT_ID</code> and <code>GOOGLE_CLIENT_SECRET</code> in <code>backend/.env</code> (Redirect URI: <code>http://localhost:5000/api/auth/google/callback</code>), then restart the server.',
+        facebook_not_configured: '<strong>Facebook Login Setup Required:</strong> Add <code>FACEBOOK_APP_ID</code> and <code>FACEBOOK_APP_SECRET</code> in <code>backend/.env</code> (Redirect URI: <code>http://localhost:5000/api/auth/facebook/callback</code>), then restart the server.',
+        google_access_denied: 'Google sign-in was cancelled. You can select another account or sign in with your phone/email.',
+        facebook_access_denied: 'Facebook login was cancelled. Please try again.',
+        google_invalid_state: 'Google login session expired. Please click Google again.',
+        facebook_invalid_state: 'Facebook login session expired. Please click Facebook again.',
+        google_auth_failed: 'Could not complete Google verification. Please verify your Google OAuth credentials and try again.',
+        facebook_auth_failed: 'Could not complete Facebook verification. Please verify your Facebook App settings and try again.'
+      };
+
+      const isConfig = err.includes('not_configured');
+      showFeedback(messages[err] || 'Authentication could not be completed. Please try again.', isConfig ? 'warning' : 'error');
+      if (window.history && window.history.replaceState) {
+        window.history.replaceState({}, '', 'login.html');
+      }
+    }
+
+    function switchPageTab(tab) {
+      hideFeedback();
+      const loginForm = document.getElementById('pageLoginForm');
+      const regContainer = document.getElementById('pageRegisterContainer');
+      const tabLoginBtn = document.getElementById('tabLoginBtn');
+      const tabRegBtn = document.getElementById('tabRegisterBtn');
+
+      if (tab === 'login') {
+        loginForm.classList.remove('hidden');
+        regContainer.classList.add('hidden');
+        tabLoginBtn.className = 'py-2.5 text-xs font-black rounded-xl transition-all bg-white text-[#1E3A8A] shadow-md cursor-pointer';
+        tabRegBtn.className = 'py-2.5 text-xs font-black rounded-xl transition-all text-white hover:bg-white/10 cursor-pointer';
+      } else {
+        loginForm.classList.add('hidden');
+        regContainer.classList.remove('hidden');
+        tabRegBtn.className = 'py-2.5 text-xs font-black rounded-xl transition-all bg-white text-emerald-700 shadow-md cursor-pointer';
+        tabLoginBtn.className = 'py-2.5 text-xs font-black rounded-xl transition-all text-white hover:bg-white/10 cursor-pointer';
+      }
+    }
+
+    function togglePassVisibility(inputId, btn) {
+      const input = document.getElementById(inputId);
+      const isPass = input.type === 'password';
+      input.type = isPass ? 'text' : 'password';
+      if (btn) btn.textContent = isPass ? 'Hide' : 'Show';
+    }
+
+    // Real Google / Facebook / Auth0 OAuth 2.0 Redirect
+    function startRealOAuth(provider) {
+      hideFeedback();
+      const params = new URLSearchParams(window.location.search);
+      const returnTo = encodeURIComponent(params.get('returnTo') || 'index.html');
+      if (provider === 'google') {
+        window.location.href = `/api/auth/google?returnTo=${returnTo}`;
+        return;
+      }
+      if (provider === 'facebook') {
+        window.location.href = `/api/auth/facebook?returnTo=${returnTo}`;
+        return;
+      }
+      if (provider === 'auth0') {
+        window.location.href = `/api/auth/auth0?returnTo=${returnTo}`;
+      }
+    }
+
+    // Real Sign In (Phone OR Email + Password verified by backend)
+    async function handleLoginPageSubmit(e) {
+      e.preventDefault();
+      hideFeedback();
+      const identifier = document.getElementById('loginPageIdentifier').value.trim();
+      const password = document.getElementById('loginPagePassword').value;
+      const btn = document.getElementById('loginSubmitBtn');
+
+      btn.disabled = true;
+      btn.textContent = 'Signing in...';
+
+      try {
+        const res = await fetch('/api/auth/login', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ identifier, password })
+        });
+        const data = await res.json();
+
+        if (res.ok && data.success && data.user) {
+          localStorage.setItem('asbi_auth_token', data.token);
+          localStorage.setItem('asbi_auth_user', JSON.stringify({
+            ...data.user,
+            location: data.user.division || data.user.city || 'Dhaka',
+            loggedIn: true
+          }));
+          window.location.href = 'index.html';
+          return;
+        }
+
+        showFeedback(data.message || 'Invalid phone number, email, or password.', 'error');
+      } catch (err) {
+        showFeedback('Unable to connect to AsbiMart server. Please make sure the server is running.', 'error');
+      } finally {
+        btn.disabled = false;
+        btn.textContent = 'Sign In';
+      }
+    }
+
+    // OTP 6-Box Input UX (auto-advance, backspace, full-code paste)
+    function setupOtpInputs() {
+      const inputs = Array.from(document.querySelectorAll('.otp-digit-input'));
+      inputs.forEach((input, idx) => {
+        input.addEventListener('input', (e) => {
+          const digits = e.target.value.replace(/\D/g, '');
+          if (digits.length > 1) {
+            digits.slice(0, 6).split('').forEach((ch, offset) => {
+              if (inputs[offset]) inputs[offset].value = ch;
+            });
+            const focusIdx = Math.min(digits.length, 5);
+            inputs[focusIdx].focus();
+            return;
+          }
+          e.target.value = digits;
+          if (digits && idx < inputs.length - 1) {
+            inputs[idx + 1].focus();
+          }
+        });
+
+        input.addEventListener('keydown', (e) => {
+          if (e.key === 'Backspace' && !input.value && idx > 0) {
+            inputs[idx - 1].focus();
+          }
+        });
+
+        input.addEventListener('paste', (e) => {
+          const text = (e.clipboardData || window.clipboardData).getData('text') || '';
+          const digits = text.replace(/\D/g, '').slice(0, 6);
+          if (digits.length > 0) {
+            e.preventDefault();
+            digits.split('').forEach((ch, offset) => {
+              if (inputs[offset]) inputs[offset].value = ch;
+            });
+            inputs[Math.min(digits.length, 5)].focus();
+          }
+        });
+      });
+    }
+
+    function getEnteredOtpCode() {
+      return Array.from(document.querySelectorAll('.otp-digit-input')).map(i => i.value.trim()).join('');
+    }
+
+    function clearOtpBoxes() {
+      const inputs = document.querySelectorAll('.otp-digit-input');
+      inputs.forEach(i => { i.value = ''; });
+      if (inputs[0]) inputs[0].focus();
+    }
+
+    function startOtpTimers(expirySec = 300, resendSec = 60) {
+      if (otpExpiryInterval) clearInterval(otpExpiryInterval);
+      if (resendCooldownInterval) clearInterval(resendCooldownInterval);
+
+      let expLeft = expirySec;
+      const expEl = document.getElementById('otpExpiryTimer');
+      const renderExp = () => {
+        const m = String(Math.floor(expLeft / 60)).padStart(2, '0');
+        const s = String(expLeft % 60).padStart(2, '0');
+        if (expEl) expEl.textContent = `${m}:${s}`;
+      };
+      renderExp();
+      otpExpiryInterval = setInterval(() => {
+        expLeft--;
+        if (expLeft <= 0) {
+          clearInterval(otpExpiryInterval);
+          if (expEl) expEl.textContent = 'Expired';
+        } else {
+          renderExp();
+        }
+      }, 1000);
+
+      let resLeft = resendSec;
+      const resendBtn = document.getElementById('resendOtpBtn');
+      const renderResend = () => {
+        if (!resendBtn) return;
+        if (resLeft <= 0) {
+          resendBtn.disabled = false;
+          resendBtn.textContent = 'Resend OTP';
+        } else {
+          resendBtn.disabled = true;
+          resendBtn.innerHTML = `Resend OTP (<span id="resendCountdownSpan">${resLeft}</span>s)`;
+        }
+      };
+      renderResend();
+      resendCooldownInterval = setInterval(() => {
+        resLeft--;
+        if (resLeft <= 0) clearInterval(resendCooldownInterval);
+        renderResend();
+      }, 1000);
+    }
+
+    function backToRegisterStep1() {
+      hideFeedback();
+      document.getElementById('registerStep2OtpForm').classList.add('hidden');
+      document.getElementById('registerStep1Form').classList.remove('hidden');
+      if (otpExpiryInterval) clearInterval(otpExpiryInterval);
+      if (resendCooldownInterval) clearInterval(resendCooldownInterval);
+    }
+
+    // Step 1 Submit: Send Real 6-Digit OTP to Email/Gmail or Mobile SMS
+    async function handleSendRegistrationOtp(e) {
+      e.preventDefault();
+      hideFeedback();
+
+      const name = document.getElementById('regPageName').value.trim();
+      const phone = document.getElementById('regPagePhone').value.trim();
+      const email = document.getElementById('regPageEmail').value.trim();
+      const division = document.getElementById('regPageDivision').value;
+      const district = document.getElementById('regPageDistrict').value;
+      const upazila = document.getElementById('regPageUpazila').value;
+      const address = document.getElementById('regPageAddress').value.trim();
+      const password = document.getElementById('regPagePassword').value;
+      const confirmPassword = document.getElementById('regPageConfirmPassword').value;
+
+      if (password !== confirmPassword) {
+        showFeedback('Password and Confirm Password do not match.', 'error');
+        return;
+      }
+
+      const channelRadio = document.querySelector('input[name="otpChannelChoice"]:checked');
+      const otpChannel = channelRadio ? channelRadio.value : 'email';
+
+      const avatarRadio = document.querySelector('input[name="avatarChoice"]:checked');
+      const avatar = avatarRadio ? avatarRadio.value : 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&w=150&q=80';
+
+      const btn = document.getElementById('sendOtpBtn');
+      btn.disabled = true;
+      btn.textContent = 'Sending Verification OTP...';
+
+      try {
+        const res = await fetch('/api/auth/otp/send', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            name, phone, email, password, address,
+            city: division, division, district, upazila,
+            avatar, otpChannel
+          })
+        });
+        const data = await res.json();
+
+        if (res.ok && data.success && data.otpSessionId) {
+          activeOtpSessionId = data.otpSessionId;
+          document.getElementById('otpTargetDisplay').textContent = data.maskedTarget || (otpChannel === 'sms' ? phone : email);
+          document.getElementById('registerStep1Form').classList.add('hidden');
+          document.getElementById('registerStep2OtpForm').classList.remove('hidden');
+          clearOtpBoxes();
+          startOtpTimers(data.expiresInSeconds || 300, data.resendCooldownSeconds || 60);
+          showFeedback(data.message || '6-digit verification OTP has been sent!', 'success');
+          return;
+        }
+
+        showFeedback(data.message || 'Could not send verification OTP.', data.needsConfig ? 'warning' : 'error');
+      } catch (err) {
+        showFeedback('Unable to reach server. Please make sure the AsbiMart backend server is running.', 'error');
+      } finally {
+        btn.disabled = false;
+        btn.textContent = 'Send Verification OTP →';
+      }
+    }
+
+    // Resend OTP
+    async function handleResendOtp() {
+      if (!activeOtpSessionId) return;
+      hideFeedback();
+      const resendBtn = document.getElementById('resendOtpBtn');
+      resendBtn.disabled = true;
+      resendBtn.textContent = 'Sending...';
+
+      try {
+        const res = await fetch('/api/auth/otp/resend', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ otpSessionId: activeOtpSessionId })
+        });
+        const data = await res.json();
+
+        if (res.ok && data.success) {
+          clearOtpBoxes();
+          startOtpTimers(data.expiresInSeconds || 300, data.resendCooldownSeconds || 60);
+          showFeedback(data.message || 'A fresh 6-digit OTP has been sent.', 'success');
+          return;
+        }
+
+        showFeedback(data.message || 'Could not resend OTP.', 'error');
+        if (data.waitSeconds) startOtpTimers(240, data.waitSeconds);
+      } catch (err) {
+        showFeedback('Network error while resending OTP.', 'error');
+      }
+    }
+
+    // Step 2 Submit: Verify 6-Digit OTP & Create Verified Account
+    async function handleVerifyOtpAndRegister(e) {
+      e.preventDefault();
+      hideFeedback();
+
+      const otpCode = getEnteredOtpCode();
+      if (!/^\d{6}$/.test(otpCode)) {
+        showFeedback('Please enter all 6 digits of your verification OTP.', 'error');
+        return;
+      }
+
+      const btn = document.getElementById('verifyOtpSubmitBtn');
+      btn.disabled = true;
+      btn.textContent = 'Verifying OTP...';
+
+      try {
+        const res = await fetch('/api/auth/otp/verify-register', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ otpSessionId: activeOtpSessionId, otpCode })
+        });
+        const data = await res.json();
+
+        if (res.ok && data.success && data.user) {
+          localStorage.setItem('asbi_auth_token', data.token);
+          localStorage.setItem('asbi_auth_user', JSON.stringify({
+            ...data.user,
+            location: data.user.division || data.user.city || 'Dhaka',
+            loggedIn: true
+          }));
+          showFeedback('Verified! Redirecting to AsbiMart...', 'success');
+          setTimeout(() => { window.location.href = 'index.html'; }, 700);
+          return;
+        }
+
+        showFeedback(data.message || 'Invalid OTP code. Please try again.', 'error');
+      } catch (err) {
+        showFeedback('Unable to verify OTP right now. Please try again.', 'error');
+      } finally {
+        btn.disabled = false;
+        btn.textContent = 'Verify OTP & Create Account';
+      }
+    }
+  </script>
+</body>
+</html>

@@ -1,0 +1,90 @@
+[
+  {
+    "id": "log_1795342487544",
+    "productId": "honey-sundarban-01",
+    "productName": "সুন্দরবনের কাঁচা মধু",
+    "changeType": "restock",
+    "quantityChanged": 15,
+    "currentStock": 132,
+    "reason": "Manual Admin Restock",
+    "performedBy": "AsbiMart Super Admin",
+    "timestamp": "2026-11-22T10:14:47.544Z"
+  },
+  {
+    "id": "log_1795342456647",
+    "productId": "honey-sundarban-01",
+    "productName": "সুন্দরবনের কাঁচা মধু",
+    "changeType": "restock",
+    "quantityChanged": 15,
+    "currentStock": 120,
+    "reason": "Manual Admin Restock",
+    "performedBy": "AsbiMart Super Admin",
+    "timestamp": "2026-11-22T10:14:16.647Z"
+  },
+  {
+    "id": "log_1795342365332",
+    "productId": "honey-sundarban-01",
+    "productName": "সুন্দরবনের কাঁচা মধু",
+    "changeType": "restock",
+    "quantityChanged": 15,
+    "currentStock": 108,
+    "reason": "Manual Admin Restock",
+    "performedBy": "AsbiMart Super Admin",
+    "timestamp": "2026-11-22T10:12:45.332Z"
+  },
+  {
+    "id": "log_1795342273008",
+    "productId": "honey-sundarban-01",
+    "productName": "সুন্দরবনের কাঁচা মধু",
+    "changeType": "restock",
+    "quantityChanged": 15,
+    "currentStock": 96,
+    "reason": "Manual Admin Restock",
+    "performedBy": "AsbiMart Super Admin",
+    "timestamp": "2026-11-22T10:11:13.008Z"
+  },
+  {
+    "id": "log_1795341233895",
+    "productId": "honey-sundarban-01",
+    "productName": "সুন্দরবনের কাঁচা মধু",
+    "changeType": "restock",
+    "quantityChanged": 15,
+    "currentStock": 83,
+    "reason": "Manual Admin Restock",
+    "performedBy": "AsbiMart Super Admin",
+    "timestamp": "2026-11-22T09:53:53.895Z"
+  },
+  {
+    "id": "log_1795341005825",
+    "productId": "honey-sundarban-01",
+    "productName": "সুন্দরবনের কাঁচা মধু",
+    "changeType": "restock",
+    "quantityChanged": 15,
+    "currentStock": 70,
+    "reason": "Manual Admin Restock",
+    "performedBy": "AsbiMart Super Admin",
+    "timestamp": "2026-11-22T09:50:05.825Z"
+  },
+  {
+    "id": "log_1795340953156",
+    "productId": "honey-sundarban-01",
+    "productName": "সুন্দরবনের কাঁচা মধু",
+    "changeType": "restock",
+    "quantityChanged": 15,
+    "currentStock": 56,
+    "reason": "Manual Admin Restock",
+    "performedBy": "AsbiMart Super Admin",
+    "timestamp": "2026-11-22T09:49:13.156Z"
+  },
+  {
+    "id": "log_001",
+    "productId": "honey-sundarban-01",
+    "productName": "সুন্দরবনের কাঁচা মধু",
+    "changeType": "initial_stock",
+    "quantityChanged": 50,
+    "currentStock": 43,
+    "reason": "Initial inventory setup",
+    "performedBy": "system",
+    "timestamp": "2026-11-20T08:00:00.000Z"
+  }
+]

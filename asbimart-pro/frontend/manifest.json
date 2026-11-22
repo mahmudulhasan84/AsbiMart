@@ -1,0 +1,21 @@
+{
+  "name": "AsbiMart Organic Shop",
+  "short_name": "AsbiMart",
+  "description": "শতভাগ খাঁটি ও বিশুদ্ধ অর্গানিক খাদ্যপণ্যের নির্ভরযোগ্য ই-কমার্স শপ",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#F4ECE1",
+  "theme_color": "#1E3A8A",
+  "icons": [
+    {
+      "src": "data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 192 192'><rect width='192' height='192' rx='36' fill='%231E3A8A'/><text x='50%25' y='55%25' dominant-baseline='middle' text-anchor='middle' font-size='110'>🌿</text></svg>",
+      "sizes": "192x192",
+      "type": "image/svg+xml"
+    },
+    {
+      "src": "data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512'><rect width='512' height='512' rx='96' fill='%231E3A8A'/><text x='50%25' y='55%25' dominant-baseline='middle' text-anchor='middle' font-size='300'>🌿</text></svg>",
+      "sizes": "512x512",
+      "type": "image/svg+xml"
+    }
+  ]
+}

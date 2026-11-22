@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Track Order — AsbiMart</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@300;400;500;600;700&family=Plus+Jakarta+Sans:wght@600;700;800;900&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../css/style.css">
+  <link rel="stylesheet" href="../css/responsive.css">
+</head>
+<body class="bg-[#F4ECE1] text-slate-800 antialiased min-h-screen flex flex-col font-brand">
+
+  <!-- Header -->
+  <header class="bg-[#F4ECE1] border-b border-[#E5DACB] py-4 shadow-sm sticky top-0 z-40">
+    <div class="asbi-container flex items-center justify-between">
+      <a href="index.html" class="flex items-center gap-3 group">
+        <div class="w-11 h-11 flex items-center justify-center flex-shrink-0">
+          <svg viewBox="0 0 100 100" class="w-full h-full" fill="none" style="shape-rendering: geometricPrecision;">
+            <defs>
+              <linearGradient id="trk_g" x1="28" y1="54" x2="76" y2="82" gradientUnits="userSpaceOnUse">
+                <stop offset="0%" stop-color="#10B981"/>
+                <stop offset="45%" stop-color="#10B981"/>
+                <stop offset="75%" stop-color="#F59E0B"/>
+                <stop offset="100%" stop-color="#FBBF24"/>
+              </linearGradient>
+            </defs>
+            <path d="M24 82L56 16C58 12 62 12 64 16L84 56" stroke="#1E3A8A" stroke-width="12" stroke-linecap="round" stroke-linejoin="round"/>
+            <path d="M28 54H52C60 54 64 60 76 82" stroke="url(#trk_g)" stroke-width="11" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </div>
+        <span class="font-brand font-black text-2xl sm:text-3xl text-[#1E3A8A] tracking-tight leading-none">
+          Asbi<span class="text-[#F59E0B]">Mart</span>
+        </span>
+      </a>
+      <a href="index.html" class="flex items-center gap-2 text-xs sm:text-sm font-bold text-[#1E3A8A] hover:text-amber-600 bg-white px-4 py-2 rounded-full border border-[#E5DACB] shadow-sm transition-all">
+        <svg class="w-4 h-4 stroke-current" fill="none" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"/></svg>
+        <span>Back to Home</span>
+      </a>
+    </div>
+  </header>
+
+  <!-- Main Content -->
+  <main class="max-w-4xl mx-auto px-4 py-10 flex-grow w-full">
+    <div class="text-center mb-8">
+      <span class="inline-block px-3.5 py-1 bg-blue-100 text-[#1E3A8A] text-xs font-black rounded-full uppercase tracking-wider">Live Order Tracker</span>
+      <h1 class="text-3xl sm:text-4xl font-black text-slate-900 mt-3">Track Your Order</h1>
+      <p class="text-xs sm:text-sm text-slate-500 mt-1">Enter your Order ID (e.g. ASBI-782910) or Phone Number to check live status</p>
+    </div>
+
+    <!-- Search Card -->
+    <div class="bg-white rounded-3xl p-6 sm:p-8 shadow-md border border-[#E5DACB] mb-8">
+      <div class="flex flex-col sm:flex-row gap-3">
+        <input 
+          type="text" 
+          id="trackInput" 
+          value="ASBI-782910"
+          onkeydown="if(event.key==='Enter') trackOrderSubmit()"
+          placeholder="Order ID (ASBI-782910) or Phone (01700000000)"
+          class="flex-grow py-3 px-4 text-sm bg-slate-50 border-2 border-slate-200 focus:border-[#1E3A8A] rounded-2xl focus:outline-none"
+        />
+        <button onclick="trackOrderSubmit()" class="py-3 px-7 bg-[#1E3A8A] hover:bg-blue-800 text-white font-black text-sm rounded-2xl shadow-md transition-all cursor-pointer">
+          Track Now
+        </button>
+      </div>
+    </div>
+
+    <!-- Result Card -->
+    <div id="trackingResultCard" class="bg-white rounded-3xl p-6 sm:p-8 shadow-md border border-[#E5DACB] space-y-6">
+      <div class="flex flex-wrap items-center justify-between gap-3 pb-4 border-b border-slate-100">
+        <div>
+          <p class="text-xs text-slate-400 font-semibold">Order ID</p>
+          <h2 id="displayOrderId" class="text-xl font-black text-[#1E3A8A]">#ASBI-782910</h2>
+        </div>
+        <span id="displayOrderStatus" class="px-4 py-1.5 bg-amber-100 text-amber-800 text-xs font-black rounded-full">
+          🚚 On Delivery
+        </span>
+      </div>
+
+      <!-- Progress Bar -->
+      <div class="relative py-2">
+        <div class="overflow-hidden h-3 mb-6 text-xs flex rounded-full bg-slate-100">
+          <div id="trackProgressBar" style="width: 75%" class="transition-all duration-500 bg-gradient-to-r from-emerald-500 to-blue-700"></div>
+        </div>
+        <div class="grid grid-cols-4 text-center text-xs gap-2">
+          <div>
+            <div id="step1Icon" class="w-8 h-8 rounded-full bg-emerald-600 text-white mx-auto flex items-center justify-center font-bold mb-1 shadow-md">✓</div>
+            <p class="font-bold text-slate-800">Order Placed</p>
+          </div>
+          <div>
+            <div id="step2Icon" class="w-8 h-8 rounded-full bg-emerald-600 text-white mx-auto flex items-center justify-center font-bold mb-1 shadow-md">✓</div>
+            <p class="font-bold text-slate-800">Packed</p>
+          </div>
+          <div>
+            <div id="step3Icon" class="w-8 h-8 rounded-full bg-blue-900 text-white ring-4 ring-blue-100 mx-auto flex items-center justify-center font-bold mb-1 shadow-md">🚚</div>
+            <p class="font-bold text-blue-900">On Delivery</p>
+          </div>
+          <div>
+            <div id="step4Icon" class="w-8 h-8 rounded-full bg-slate-200 text-slate-500 mx-auto flex items-center justify-center font-bold mb-1">4</div>
+            <p class="text-slate-500 font-semibold">Delivered</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Details Grid -->
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-4 pt-2">
+        <div class="bg-slate-50 p-4 rounded-2xl border border-slate-200 text-xs space-y-2">
+          <h3 class="font-bold text-slate-800 text-sm">📦 Order Items</h3>
+          <div id="trackItemsList" class="space-y-1.5 text-slate-700">
+            <div class="flex justify-between"><span>Sundarbans Raw Honey (500g) × 1</span><strong>৳650</strong></div>
+            <div class="flex justify-between"><span>Danadar Cow Ghee (500g) × 1</span><strong>৳950</strong></div>
+          </div>
+          <div class="flex justify-between items-center pt-2 border-t border-slate-200 text-sm">
+            <span class="font-bold">Total Payable:</span>
+            <strong id="trackTotalAmount" class="text-emerald-700">৳1,660</strong>
+          </div>
+        </div>
+
+        <div class="bg-slate-50 p-4 rounded-2xl border border-slate-200 text-xs space-y-2">
+          <h3 class="font-bold text-slate-800 text-sm">📍 Delivery Details</h3>
+          <p><span class="text-slate-500">Customer:</span> <strong id="trackCustName">Asbi Mahmud</strong></p>
+          <p><span class="text-slate-500">Phone:</span> <strong id="trackCustPhone">01700000000</strong></p>
+          <p><span class="text-slate-500">Address:</span> <span id="trackCustAddress">House #12, Road #04, Sector #11, Uttara, Dhaka</span></p>
+          <p><span class="text-slate-500">Courier:</span> <strong id="trackCourier">RedX Express • REDX-ASBI-99238</strong></p>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <footer class="py-4 text-center text-xs text-slate-500 border-t border-[#E5DACB]">
+    © 2026 AsbiMart. All rights reserved.
+  </footer>
+
+  <script>
+    function renderTrackedOrder(order) {
+      document.getElementById('trackingResultCard').classList.remove('hidden');
+      document.getElementById('displayOrderId').textContent = '#' + order.orderId;
+
+      const statusMap = {
+        pending: { label: '⏳ Order Pending', pct: '25%', step: 1 },
+        confirmed: { label: '✓ Order Confirmed', pct: '40%', step: 2 },
+        processing: { label: '📦 Packing & Quality Check', pct: '50%', step: 2 },
+        in_courier: { label: '🚚 In Courier Transit', pct: '75%', step: 3 },
+        shipped: { label: '🚚 On Delivery', pct: '85%', step: 3 },
+        delivered: { label: '✓ Delivered', pct: '100%', step: 4 },
+        completed: { label: '✓ Completed', pct: '100%', step: 4 },
+        cancelled: { label: '❌ Cancelled', pct: '0%', step: 0 },
+        returned: { label: '↩️ Returned', pct: '0%', step: 0 }
+      };
+      const st = statusMap[order.statusCode] || statusMap.pending;
+      document.getElementById('displayOrderStatus').textContent = st.label;
+      document.getElementById('trackProgressBar').style.width = st.pct;
+
+      const activeStep = st.step;
+      const s1 = document.getElementById('step1Icon');
+      const s2 = document.getElementById('step2Icon');
+      const s3 = document.getElementById('step3Icon');
+      const s4 = document.getElementById('step4Icon');
+
+      if (s1) s1.className = `w-8 h-8 rounded-full ${activeStep >= 1 ? 'bg-emerald-600 text-white shadow-md' : 'bg-slate-200 text-slate-500'} mx-auto flex items-center justify-center font-bold mb-1`;
+      if (s2) s2.className = `w-8 h-8 rounded-full ${activeStep >= 2 ? 'bg-emerald-600 text-white shadow-md' : 'bg-slate-200 text-slate-500'} mx-auto flex items-center justify-center font-bold mb-1`;
+      if (s3) s3.className = `w-8 h-8 rounded-full ${activeStep >= 3 ? 'bg-blue-900 text-white ring-4 ring-blue-100 shadow-md' : 'bg-slate-200 text-slate-500'} mx-auto flex items-center justify-center font-bold mb-1`;
+      if (s4) s4.className = `w-8 h-8 rounded-full ${activeStep >= 4 ? 'bg-emerald-600 text-white shadow-md' : 'bg-slate-200 text-slate-500'} mx-auto flex items-center justify-center font-bold mb-1`;
+
+      const itemsEl = document.getElementById('trackItemsList');
+      itemsEl.innerHTML = (order.items || []).map(i => `
+        <div class="flex justify-between">
+          <span>${i.name} (${i.variant || i.size || 'Standard'}) × ${i.quantity || 1}</span>
+          <strong>৳${i.price || 0}</strong>
+        </div>
+      `).join('');
+
+      document.getElementById('trackTotalAmount').textContent = '৳' + (order.totalAmount || 0);
+      if (order.customer) {
+        document.getElementById('trackCustName').textContent = order.customer.name || 'Customer';
+        document.getElementById('trackCustPhone').textContent = order.customer.phone || '—';
+        document.getElementById('trackCustAddress').textContent = order.customer.address || '—';
+      }
+      document.getElementById('trackCourier').textContent = `${order.courier || 'RedX Express'} • ${order.trackingCode || 'TRK-PENDING'}`;
+    }
+
+    async function trackOrderSubmit() {
+      const val = document.getElementById('trackInput').value.trim();
+      if (!val) {
+        alert('Please enter your Order ID or Phone Number.');
+        return;
+      }
+
+      try {
+        const res = await fetch(`/api/track/${encodeURIComponent(val)}`);
+        const data = await res.json();
+        if (data.success && data.order) {
+          renderTrackedOrder(data.order);
+          return;
+        }
+      } catch (e) {}
+
+      let localOrders = [];
+      try { localOrders = JSON.parse(localStorage.getItem('asbi_orders')) || []; } catch(e){}
+      const found = localOrders.find(x => x.orderId.toLowerCase() === val.toLowerCase() || (x.customer && x.customer.phone === val));
+      if (found) {
+        renderTrackedOrder(found);
+      } else {
+        alert('No order found with this Order ID or Phone Number.');
+      }
+    }
+
+    // Auto-track on page load if query parameter present
+    document.addEventListener('DOMContentLoaded', () => {
+      const params = new URLSearchParams(window.location.search);
+      const queryVal = params.get('orderId') || params.get('order') || params.get('id') || params.get('phone');
+      if (queryVal) {
+        const input = document.getElementById('trackInput');
+        if (input) input.value = queryVal;
+        trackOrderSubmit();
+      }
+    });
+  </script>
+</body>
+</html>
