@@ -77,23 +77,15 @@ const routesJson = {
 };
 fs.writeFileSync(path.join(distDir, '_routes.json'), JSON.stringify(routesJson, null, 2), 'utf8');
 
-// 5. Create Cloudflare Pages _redirects (Clean 200 rewrites for single-page routing)
-const redirectsContent = `# Cloudflare Pages Clean Route Rewrites
-/admin          /admin.html          200
-/login          /login.html          200
-/profile        /profile.html        200
-/track-order    /track-order.html    200
-/category       /category.html       200
-/wishlist       /wishlist.html       200
-/contact        /contact.html        200
-/about          /about.html          200
-/faq            /faq.html            200
-/terms          /terms.html          200
-/privacy-policy /privacy-policy.html 200
-/return-policy  /return-policy.html  200
-/delivery-policy /delivery-policy.html 200
+// 5. Create Cloudflare Pages _redirects
+// NOTE: Cloudflare Pages automatically handles Clean URLs (/category -> /category.html) natively.
+// Writing 200 rewrites here caused an infinite 307 redirect loop.
+const redirectsContent = `# Cloudflare Pages Redirects
+/home           /                    301
+/index          /                    301
 `;
 fs.writeFileSync(path.join(distDir, '_redirects'), redirectsContent, 'utf8');
+fs.writeFileSync(path.join(rootDir, '_redirects'), redirectsContent, 'utf8');
 
 // 6. Create Cloudflare Pages _headers (Security Headers)
 const headersContent = `/*
@@ -108,5 +100,14 @@ const headersContent = `/*
   Access-Control-Allow-Headers: Content-Type, Authorization, X-Requested-With
 `;
 fs.writeFileSync(path.join(distDir, '_headers'), headersContent, 'utf8');
+
+// 7. Bundle single-file Cloudflare Worker for dashboard Quick Edit or wrangler
+try {
+  const { execSync } = require('child_process');
+  execSync('npx esbuild worker.js --bundle --format=esm --target=es2022 --outfile=dist/asbimart-worker.js', { stdio: 'inherit' });
+  console.log('✅ Single-file Worker bundled: dist/asbimart-worker.js');
+} catch (e) {
+  console.warn('Worker bundle note:', e.message);
+}
 
 console.log('✅ Build complete! dist ready with Pages Functions, _routes.json, _redirects, and _headers.');
