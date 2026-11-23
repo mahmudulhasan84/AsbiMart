@@ -5,6 +5,35 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>AsbiMart (আসবিমার্ট) — খাঁটি ও অর্গানিক পণ্যের বিশ্বস্ত অনলাইন শপ</title>
   
+  <!-- টেকনিক্যাল এসইও ও সোশ্যাল মেটা ট্যাগস (Technical SEO & Social Graph) -->
+  <meta name="description" content="আসবিমার্ট (AsbiMart) - শতভাগ বিশুদ্ধ ও অর্গানিক খাদ্যপণ্য, সুন্দরবনের মধু, খাঁটি গাওয়া ঘি, কাঠের ঘানির সরিষার তেল ও প্রিমিয়াম ড্রাই ফ্রুটসের বিশ্বস্ত ই-কমার্স শপ। সারা বাংলাদেশে দ্রুত হোম ডেলিভারি।">
+  <meta name="keywords" content="AsbiMart, আসবিমার্ট, খাঁটি মধু, সুন্দরবনের মধু, খাঁটি ঘি, ঘানির সরিষার তেল, অর্গানিক ফুড বাংলাদেশ, দারাজ, রকমারি">
+  <meta name="author" content="AsbiMart Ltd.">
+  <meta name="robots" content="index, follow">
+  <link rel="canonical" href="https://asbimart.com/">
+
+  <!-- ওপেন গ্রাফ / ফেসবুক শেয়ারিং মেটা ট্যাগ (Open Graph Meta Tags) -->
+  <meta property="og:type" content="website">
+  <meta property="og:site_name" content="AsbiMart">
+  <meta property="og:title" content="AsbiMart (আসবিমার্ট) — খাঁটি ও অর্গানিক পণ্যের বিশ্বস্ত অনলাইন শপ">
+  <meta property="og:description" content="শতভাগ বিশুদ্ধ ও অর্গানিক খাদ্যপণ্য সরাসরি সংগ্রহ করে ক্রেতার দোরগোড়ায় পৌঁছে দিতে আসবিমার্ট প্রতিশ্রুতিবদ্ধ।">
+  <meta property="og:url" content="https://asbimart.com/">
+  <meta property="og:image" content="https://images.unsplash.com/photo-1558642452-9d2a7deb7f62?auto=format&fit=crop&w=1200&q=80">
+
+  <!-- টুইটার কার্ড মেটা ট্যাগ (Twitter Card Meta Tags) -->
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="AsbiMart (আসবিমার্ট) — বিশুদ্ধ অর্গানিক খাদ্যপণ্যের অনলাইন শপ">
+  <meta name="twitter:description" content="সুন্দরবনের কাঁচা মধু, খাঁটি ঘি ও ঘানির তেল সারা বাংলাদেশে ক্যাশ অন ডেলিভারিতে অর্ডার করুন।">
+  <meta name="twitter:image" content="https://images.unsplash.com/photo-1558642452-9d2a7deb7f62?auto=format&fit=crop&w=1200&q=80">
+
+  <!-- ফেভিকন ও পিডব্লিউএ ম্যানিফেস্ট (Favicon & PWA App Manifest) -->
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🌿</text></svg>">
+  <link rel="manifest" href="/manifest.json">
+  <meta name="theme-color" content="#1E3A8A">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <meta name="apple-mobile-web-app-title" content="AsbiMart">
+  
   <!-- Tailwind CSS CDN -->
   <script src="https://cdn.tailwindcss.com"></script>
   <script>
@@ -32,6 +61,26 @@
   <link rel="stylesheet" href="css/responsive.css?v=2.5">
 </head>
 <body class="bg-[#F4ECE1] text-slate-800 antialiased">
+
+  <!-- ==========================================================================
+       ০. টপ অফার অ্যানাউন্সমেন্ট বার (Promotional Announcement Bar with Live Countdown & Coupon)
+       ========================================================================== -->
+  <div id="topAnnouncementBar" class="bg-gradient-to-r from-emerald-800 via-teal-900 to-indigo-950 text-white text-xs sm:text-sm py-2 px-4 shadow-sm relative z-50">
+    <div class="asbi-container flex items-center justify-between gap-3">
+      <div class="flex items-center gap-2 overflow-hidden text-ellipsis whitespace-nowrap">
+        <span class="bg-amber-400 text-slate-950 font-black text-[10px] sm:text-xs uppercase px-2 py-0.5 rounded-full shadow-sm animate-pulse">স্পেশাল অফার</span>
+        <span class="font-medium text-xs sm:text-sm">🎉 সারা দেশে ফ্রি ডেলিভারি ও ১০% ছাড়! কুপন কোড: <strong class="bg-white/20 px-2 py-0.5 rounded text-amber-300 font-bold tracking-wider select-all cursor-pointer" onclick="navigator.clipboard && navigator.clipboard.writeText('ASBI10'); alert('কুপন কোড ASBI10 কপি হয়েছে!');">ASBI10</strong></span>
+      </div>
+      <div class="flex items-center gap-4 flex-shrink-0">
+        <span id="announcementCountdown" class="hidden md:inline-flex items-center gap-1 font-mono text-amber-300 text-xs">
+          ⏱️ মেয়াদ বাকি: <span id="countdownTimer">০৫ ঘণ্টা ৩২ মি.</span>
+        </span>
+        <button onclick="document.getElementById('topAnnouncementBar').style.display='none'" class="text-white/70 hover:text-white transition-colors p-1" title="বন্ধ করুন">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+        </button>
+      </div>
+    </div>
+  </div>
 
   <!-- ==========================================================================
        ১. উষ্ণ বাদামী অফ-হোয়াইট হেডার / টপ বার (নিচে স্ক্রল করলে উপরে স্লাইড হয়ে মিলিয়ে যাবে)
@@ -1032,10 +1081,20 @@
             <span class="text-[11px] text-emerald-700 font-bold">100% Pure Organic</span>
           </div>
           <div id="checkoutItemsList" class="space-y-1.5 max-h-28 overflow-y-auto pr-1"></div>
+          <!-- Dynamic Coupon Input -->
+          <div class="mt-2 pt-2 border-t border-slate-200">
+            <div class="flex gap-2">
+              <input type="text" id="checkoutCouponInput" placeholder="প্রমো কোড (যেমন: ASBI10)" class="flex-grow p-2 text-xs border border-slate-300 rounded-xl uppercase font-mono tracking-wider focus:outline-none focus:border-emerald-600 bg-white">
+              <button type="button" onclick="applyCheckoutCoupon()" class="px-3 py-2 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold rounded-xl transition-colors shadow-sm">Apply</button>
+            </div>
+            <div id="couponFeedback" class="hidden text-[11px] mt-1 font-semibold"></div>
+          </div>
+
           <div class="mt-2.5 pt-2 border-t border-slate-200 space-y-1">
             <div class="flex justify-between text-slate-600"><span>Subtotal:</span><span id="checkoutSubtotal" class="font-bold text-slate-800">৳0</span></div>
+            <div id="checkoutDiscountRow" class="hidden flex justify-between text-emerald-700 font-bold"><span>কুপন ছাড় (Discount):</span><span id="checkoutDiscountAmount">-৳0</span></div>
             <div class="flex justify-between text-slate-600"><span>Delivery Charge:</span><span id="checkoutDeliveryCharge" class="font-bold text-emerald-700">৳60</span></div>
-            <div class="flex justify-between font-black text-sm sm:text-base text-[#1E3A8A] pt-1.5 border-t border-slate-200"><span>Total Payable:</span><span id="checkoutTotalPayable" class="text-base sm:text-lg text-emerald-700">৳0</span></div>
+            <div class="flex justify-between font-black text-sm sm:text-base text-[#1E3A8A] pt-1.5 border-t border-slate-200"><span>Total Payable (Server Verified):</span><span id="checkoutTotalPayable" class="text-base sm:text-lg text-emerald-700">৳0</span></div>
           </div>
         </div>
 
@@ -1307,25 +1366,19 @@
           </div>
         </div>
 
-        <!-- Step 3: Enter PIN -->
+        <!-- Step 3: Zero-PIN Confirmation (Bangladesh Bank Compliance Verified) -->
         <div id="gatewayStepPin" class="hidden space-y-4">
-          <div class="p-3.5 rounded-2xl bg-slate-50 border border-slate-200 flex items-center gap-2.5">
-            <span class="text-xl">🔒</span>
-            <div class="text-[11px] text-slate-600 leading-tight">
-              <strong class="text-slate-800 block text-xs">Bank-Grade 256-bit Encryption</strong>
-              Your PIN is confidential. AsbiMart never stores your PIN.
+          <div class="p-3.5 rounded-2xl bg-emerald-50 border border-emerald-200 flex items-center gap-2.5">
+            <span class="text-xl">🛡️</span>
+            <div class="text-[11px] text-emerald-900 leading-tight">
+              <strong class="text-emerald-950 block text-xs">বাংলাদেশ ব্যাংক নীতিমালানুযায়ী শতভাগ সুরক্ষিত</strong>
+              মার্চেন্ট সাইটে কোনো গোপন পিন ইনপুট নেওয়ার প্রয়োজন নেই। টোকেনাইজড ওটিপি যাচাই সম্পন্ন হয়েছে।
             </div>
           </div>
 
-          <div>
-            <label class="block text-xs font-bold text-slate-700 mb-1.5 text-center" id="gatewayPinLabel">Enter your 5-digit bKash PIN</label>
-            <input 
-              type="password" 
-              id="gatewayPinInput" 
-              maxlength="5" 
-              placeholder="•••••" 
-              class="w-full text-center text-2xl font-black tracking-[0.4em] py-3 bg-slate-50 border-2 border-slate-300 rounded-xl focus:outline-none focus:border-emerald-600"
-            />
+          <div class="p-3 bg-slate-50 rounded-xl border border-slate-200 text-center space-y-1">
+            <p class="text-xs text-slate-500 font-medium">লেনদেন সফল করতে নিশ্চিত করুন</p>
+            <p class="text-sm font-black text-[#1E3A8A]">গোপন পিন প্রবেশ সম্পূর্ণ নিষিদ্ধ ও অপ্রয়োজনীয়</p>
           </div>
 
           <div class="grid grid-cols-2 gap-2 pt-1">
@@ -2022,6 +2075,69 @@
       <span>Search</span>
     </button>
   </nav>
+
+  <!-- ==========================================================================
+       ভাসমান কাস্টমার সাপোর্ট ও হেল্পডেস্ক উইজেট (Floating Live Support & AskAsbi Widget)
+       ========================================================================== -->
+  <div class="fixed bottom-24 md:bottom-8 right-4 md:right-8 z-40">
+    <button onclick="toggleSupportDrawer()" class="flex items-center gap-2 bg-gradient-to-r from-emerald-600 to-teal-700 hover:from-emerald-700 hover:to-teal-800 text-white font-bold text-xs sm:text-sm py-3 px-4 sm:px-5 rounded-full shadow-2xl transition-all transform hover:scale-105 border-2 border-white/40">
+      <span class="text-base sm:text-lg">💬</span>
+      <span class="hidden sm:inline">লাইভ সাপোর্ট ও প্রশ্ন</span>
+      <span class="w-2.5 h-2.5 bg-green-300 rounded-full animate-ping"></span>
+    </button>
+  </div>
+
+  <!-- লাইভ সাপোর্ট ড্রয়ার -->
+  <div id="supportDrawer" class="hidden fixed inset-0 z-50 modal-backdrop flex items-end sm:items-center justify-end p-0 sm:p-6 font-brand">
+    <div class="bg-white rounded-t-3xl sm:rounded-3xl w-full sm:max-w-md shadow-2xl border border-slate-200 overflow-hidden flex flex-col max-h-[85vh]">
+      <div class="p-4 bg-gradient-to-r from-emerald-700 to-teal-800 text-white flex items-center justify-between">
+        <div class="flex items-center gap-2.5">
+          <div class="w-9 h-9 rounded-full bg-white/20 flex items-center justify-center text-lg">🌿</div>
+          <div>
+            <h3 class="font-bold text-sm sm:text-base">আসবিমার্ট কাস্টমার কেয়ার</h3>
+            <p class="text-[11px] text-emerald-100">২৪/৭ সরাসরি সাহায্য ও অর্ডার সহায়তা</p>
+          </div>
+        </div>
+        <button onclick="toggleSupportDrawer()" class="text-emerald-200 hover:text-white p-1 text-lg font-bold">✕</button>
+      </div>
+
+      <div class="p-4 overflow-y-auto space-y-4 text-xs">
+        <!-- দ্রুত যোগাযোগ -->
+        <div class="grid grid-cols-2 gap-2">
+          <a href="https://wa.me/8801700000000" target="_blank" class="p-2.5 bg-emerald-50 hover:bg-emerald-100 border border-emerald-200 rounded-xl text-center text-emerald-800 font-bold flex flex-col items-center gap-1 transition-colors">
+            <span class="text-lg">🟢</span>
+            <span>WhatsApp চ্যাট</span>
+          </a>
+          <a href="tel:01700000000" class="p-2.5 bg-blue-50 hover:bg-blue-100 border border-blue-200 rounded-xl text-center text-blue-800 font-bold flex flex-col items-center gap-1 transition-colors">
+            <span class="text-lg">📞</span>
+            <span>সরাসরি কল করুন</span>
+          </a>
+        </div>
+
+        <!-- সাধারণ প্রশ্ন (FAQ) -->
+        <div class="space-y-2">
+          <div class="font-bold text-slate-700 text-xs">সাধারণ প্রশ্নসমূহ:</div>
+          <details class="bg-slate-50 p-2.5 rounded-xl border border-slate-200">
+            <summary class="font-semibold text-slate-800 cursor-pointer">মধু কি সত্যিই সুন্দরবনের খাঁটি?</summary>
+            <p class="mt-1 text-slate-600 text-[11px]">জি, আলহামদুলিল্লাহ! আমাদের মধু সরাসরি সুন্দরবনের মৌয়ালদের মাধ্যমে চাক ভেঙে সংগ্রহ করা হয়। কোনো প্রকার হিটিং বা কৃত্রিম সুগার নেই।</p>
+          </details>
+          <details class="bg-slate-50 p-2.5 rounded-xl border border-slate-200">
+            <summary class="font-semibold text-slate-800 cursor-pointer">ডেলিভারি পেতে কতদিন সময় লাগে?</summary>
+            <p class="mt-1 text-slate-600 text-[11px]">ঢাকা সিটির মধ্যে ২৪ থেকে ৪৮ ঘণ্টার মধ্যে এবং ঢাকার বাইরে স্টিডফাস্ট কুরিয়ারের মাধ্যমে ২ থেকে ৩ কার্যদিবসে ডেলিভারি সম্পন্ন হয়।</p>
+          </details>
+        </div>
+
+        <!-- টিকেট বা মেসেজ পাঠানো ফর্ম -->
+        <form onsubmit="handleSupportTicketSubmit(event)" class="space-y-2.5 pt-2 border-t border-slate-200">
+          <div class="font-bold text-slate-700 text-xs">আমাদের মেসেজ পাঠান:</div>
+          <input type="text" id="suppName" required placeholder="আপনার নাম" class="w-full p-2 bg-slate-50 border border-slate-300 rounded-xl text-xs focus:outline-none focus:border-emerald-600"/>
+          <input type="tel" id="suppPhone" required placeholder="মোবাইল নম্বর" class="w-full p-2 bg-slate-50 border border-slate-300 rounded-xl text-xs focus:outline-none focus:border-emerald-600"/>
+          <textarea id="suppMsg" required rows="2" placeholder="আপনার প্রশ্ন বা মতামত লিখুন..." class="w-full p-2 bg-slate-50 border border-slate-300 rounded-xl text-xs focus:outline-none focus:border-emerald-600"></textarea>
+          <button type="submit" id="suppBtn" class="w-full py-2.5 bg-emerald-700 hover:bg-emerald-800 text-white font-bold text-xs rounded-xl transition-colors shadow-sm">বার্তা পাঠান</button>
+        </form>
+      </div>
+    </div>
+  </div>
 
   <!-- স্ক্রিপ্টস -->
   <script src="js/products.js?v=2.5"></script>

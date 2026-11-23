@@ -25,7 +25,7 @@
         "size": "৫০০ গ্রাম",
         "price": 650,
         "originalPrice": 765,
-        "stock": 7
+        "stock": 5
       },
       {
         "size": "১ কেজি",
@@ -48,10 +48,10 @@
         "comment": "প্যাকেজিং খুবই চমৎকার ছিল। সম্পূর্ণ অক্ষত পেয়েছি।"
       }
     ],
-    "stock": 130,
+    "stock": 143,
     "sku": "ASBI-HONEY-SUND",
     "barcode": "880240110140",
-    "updatedAt": "2026-11-22T10:14:47.543Z"
+    "updatedAt": "2026-11-23T06:46:56.550Z"
   },
   {
     "id": "honey-kalojira-02",
@@ -325,7 +325,7 @@
         "comment": "মহিষের খাঁটি ঘি পাওয়া খুব কঠিন ছিল। অসাধারণ কোয়ালিটি।"
       }
     ],
-    "stock": 10,
+    "stock": 0,
     "sku": "ASBI-GHEE-BUFFA",
     "barcode": "880359386026"
   },

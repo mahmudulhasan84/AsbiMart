@@ -50,7 +50,11 @@ const FEATURED_CATEGORIES = [
   }
 ];
 
-const PRODUCTS_DATA = [
+if (typeof window !== 'undefined') {
+  window.PRODUCTS_DATA = PRODUCTS_DATA;
+}
+
+var PRODUCTS_DATA = [
   {
     "id": "honey-sundarban-01",
     "name": "Sundarbans Raw Wild Honey",
@@ -1784,3 +1788,7 @@ const PRODUCTS_DATA = [
     "videoFallback": "https://assets.mixkit.co/videos/32058/32058-360.mp4"
   }
 ];
+
+if (typeof window !== 'undefined') {
+  window.PRODUCTS_DATA = PRODUCTS_DATA;
+}

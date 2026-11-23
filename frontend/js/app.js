@@ -1108,6 +1108,15 @@ function handleSearch(query) {
     return;
   }
 
+  // সার্চ স্টেট ও শেয়ারযোগ্য ইউআরএল আপডেট (Shareable Search Query Permalinks)
+  if (typeof window !== 'undefined' && window.history && window.history.pushState) {
+    try {
+      const currentUrl = new URL(window.location.href);
+      currentUrl.searchParams.set('q', q);
+      window.history.pushState({ search: q }, '', currentUrl.toString());
+    } catch (e) {}
+  }
+
   const filtered = searchProductsSmart(q);
 
   if (isOnCategoryPage()) {
@@ -1136,6 +1145,17 @@ function resetProductSearchAndFilter() {
   if (mainInput) mainInput.value = '';
   if (mobInput) mobInput.value = '';
   closeSearchSuggestions();
+
+  if (typeof window !== 'undefined' && window.history && window.history.pushState) {
+    try {
+      const currentUrl = new URL(window.location.href);
+      if (currentUrl.searchParams.has('q')) {
+        currentUrl.searchParams.delete('q');
+        window.history.pushState({}, '', currentUrl.pathname + (currentUrl.search || ''));
+      }
+    } catch (e) {}
+  }
+
   if (isOnCategoryPage()) {
     renderCategoryPage(currentCategoryPageId, currentCategorySort, null, null);
     return;
@@ -1499,6 +1519,15 @@ function openProductDetailPage(productId) {
   modal.classList.remove('hidden');
   document.body.classList.add('overflow-hidden');
   modal.scrollTop = 0;
+
+  // পারমালিংক ও শেয়ারযোগ্য ইউআরএল স্টেট আপডেট (SEO & Shareable Product URL)
+  if (typeof window !== 'undefined' && window.history && window.history.pushState) {
+    try {
+      const currentUrl = new URL(window.location.href);
+      currentUrl.searchParams.set('product', productId);
+      window.history.pushState({ productId }, '', currentUrl.toString());
+    } catch (e) {}
+  }
 }
 
 async function loadProductReviewsFromServer(productId) {
@@ -1531,6 +1560,16 @@ function closeProductDetailPage() {
   }
   document.body.classList.remove('overflow-hidden');
   currentDetailProduct = null;
+
+  if (typeof window !== 'undefined' && window.history && window.history.pushState) {
+    try {
+      const currentUrl = new URL(window.location.href);
+      if (currentUrl.searchParams.has('product')) {
+        currentUrl.searchParams.delete('product');
+        window.history.pushState({}, '', currentUrl.pathname + (currentUrl.search || ''));
+      }
+    } catch (e) {}
+  }
 }
 
 function selectDetailThumbnail(imgUrl) {
@@ -2427,6 +2466,7 @@ async function handleCheckoutSubmit(e) {
         headers,
         body: JSON.stringify({
           name, phone, email, address, area, items, totalAmount,
+          couponCode: (typeof appliedCoupon !== 'undefined' && appliedCoupon) ? appliedCoupon.code : '',
           method: selectedPaymentMethod
         })
       });
@@ -2466,6 +2506,7 @@ async function handleCheckoutSubmit(e) {
       headers,
       body: JSON.stringify({
         name, phone, email, address, area, items, totalAmount,
+        couponCode: (typeof appliedCoupon !== 'undefined' && appliedCoupon) ? appliedCoupon.code : '',
         paymentMethod: isBank ? 'Bank Transfer' : 'Cash on Delivery',
         paymentStatus: isBank ? 'Under Verification' : 'Cash on Delivery',
         transactionId: bankTrxId,
@@ -2813,12 +2854,6 @@ async function proceedGatewayToPin() {
     document.getElementById('gatewayStepOtp').classList.add('hidden');
     document.getElementById('gatewayStepPin').classList.remove('hidden');
     document.getElementById('gatewayStepProcessing').classList.add('hidden');
-
-    const pinInput = document.getElementById('gatewayPinInput');
-    if (pinInput) {
-      pinInput.value = '';
-      pinInput.focus();
-    }
   } catch (err) {
     showGatewayError('Server verification error. Please try again.');
   } finally {
@@ -2842,20 +2877,12 @@ async function executeAutomatedGatewayPayment() {
   if (!currentGatewayOrderData) return;
   const accountInput = document.getElementById('gatewayAccountInput');
   const otpInput = document.getElementById('gatewayOtpInput');
-  const pinInput = document.getElementById('gatewayPinInput');
 
   let accountNumber = accountInput ? accountInput.value.replace(/[\s-+()]/g, '').trim() : '';
   if (accountNumber.startsWith('88')) accountNumber = accountNumber.slice(2);
   if (accountNumber.length === 10 && accountNumber.startsWith('1')) accountNumber = '0' + accountNumber;
 
   const otp = otpInput ? otpInput.value.trim() : '';
-  const pin = pinInput ? pinInput.value.trim() : '';
-
-  if (pin.length < 4) {
-    showGatewayError('Please enter your 4 or 5 digit PIN.');
-    if (pinInput) pinInput.focus();
-    return;
-  }
 
   document.getElementById('gatewayStepPin').classList.add('hidden');
   document.getElementById('gatewayStepProcessing').classList.remove('hidden');
@@ -2868,8 +2895,7 @@ async function executeAutomatedGatewayPayment() {
         orderId: currentGatewayOrderData.orderId,
         method: currentGatewayMethod,
         accountNumber,
-        otp,
-        pin
+        otp
       })
     });
     const data = await res.json();
@@ -3503,8 +3529,140 @@ function initMainNavScrollArrows() {
   updateMainNavArrows();
 }
 
+// ============================================================================
+// AsbiMart Pro এন্টারপ্রাইজ ফিচারস (Coupons, Master Catalog Sync & Support)
+// ============================================================================
+let appliedCoupon = null;
+
+async function applyCheckoutCoupon() {
+  const input = document.getElementById('checkoutCouponInput');
+  const feedback = document.getElementById('couponFeedback');
+  const discountRow = document.getElementById('checkoutDiscountRow');
+  const discountAmt = document.getElementById('checkoutDiscountAmount');
+  const totalElem = document.getElementById('checkoutTotalPayable');
+  if (!input) return;
+
+  const code = input.value.trim().toUpperCase();
+  if (!code) {
+    if (feedback) {
+      feedback.textContent = 'দয়া করে একটি কুপন কোড লিখুন।';
+      feedback.className = 'text-xs text-rose-600 mt-1 block';
+    }
+    return;
+  }
+
+  const subtotal = (typeof cart !== 'undefined' && Array.isArray(cart))
+    ? cart.reduce((sum, item) => sum + (Number(item.price) || 0) * (Number(item.quantity) || 1), 0)
+    : 0;
+
+  const area = (document.getElementById('custArea') && document.getElementById('custArea').value) || 'dhaka_inside';
+
+  try {
+    const res = await fetch('/api/coupons/validate', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ code, subtotal, area })
+    });
+    const data = await res.json();
+
+    if (!res.ok || !data.success) {
+      appliedCoupon = null;
+      if (feedback) {
+        feedback.textContent = data.message || 'অকার্যকর কুপন কোড।';
+        feedback.className = 'text-xs text-rose-600 mt-1 block';
+      }
+      if (discountRow) discountRow.classList.add('hidden');
+      return;
+    }
+
+    appliedCoupon = data;
+    if (feedback) {
+      feedback.textContent = `✓ ${data.message}`;
+      feedback.className = 'text-xs text-emerald-700 font-bold mt-1 block';
+    }
+    if (discountRow && discountAmt) {
+      discountRow.classList.remove('hidden');
+      discountAmt.textContent = `-৳${data.discount}`;
+    }
+    if (totalElem) {
+      totalElem.textContent = `৳${data.finalTotal}`;
+    }
+  } catch (err) {
+    if (feedback) {
+      feedback.textContent = 'কুপন যাচাই করতে সমস্যা হয়েছে।';
+      feedback.className = 'text-xs text-rose-600 mt-1 block';
+    }
+  }
+}
+
+// সেন্ট্রালাইজড প্রোডাক্ট ডেটাবেস সিঙ্ক (Triple-Decoupling Flaw Fix)
+async function syncMasterCatalogFromBackend() {
+  try {
+    const res = await fetch('/api/products');
+    if (res.ok) {
+      const data = await res.json();
+      if (data && Array.isArray(data.products) && data.products.length > 0) {
+        if (typeof PRODUCTS_DATA !== 'undefined' && Array.isArray(PRODUCTS_DATA)) {
+          PRODUCTS_DATA.length = 0;
+          PRODUCTS_DATA.push(...data.products);
+        }
+        window.PRODUCTS_DATA = data.products;
+        if (typeof renderFeaturedCategories === 'function') renderFeaturedCategories();
+        if (typeof renderTopProductsGrid === 'function') renderTopProductsGrid();
+        if (typeof renderProductGrid === 'function') renderProductGrid();
+        if (typeof initCategoryPage === 'function' && typeof isOnCategoryPage === 'function' && isOnCategoryPage()) {
+          initCategoryPage();
+        }
+      }
+    }
+  } catch (e) {
+    console.warn('Master catalog sync fallback:', e);
+  }
+}
+
+// লাইভ কাস্টমার সাপোর্ট ড্রয়ার হ্যান্ডলার
+function toggleSupportDrawer() {
+  const drawer = document.getElementById('supportDrawer');
+  if (drawer) drawer.classList.toggle('hidden');
+}
+
+async function handleSupportTicketSubmit(e) {
+  e.preventDefault();
+  const name = document.getElementById('suppName').value.trim();
+  const phone = document.getElementById('suppPhone').value.trim();
+  const message = document.getElementById('suppMsg').value.trim();
+  const btn = document.getElementById('suppBtn');
+
+  if (!name || !phone || !message) return;
+
+  btn.disabled = true;
+  btn.textContent = 'পাঠানো হচ্ছে...';
+
+  try {
+    const res = await fetch('/api/support/ticket', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ name, phone, message })
+    });
+    const data = await res.json();
+    if (res.ok && data.success) {
+      alert('আলহামদুলিল্লাহ! আপনার বার্তাটি সফলভাবে পৌঁছেছে। আমরা দ্রুত যোগাযোগ করব।');
+      document.getElementById('suppMsg').value = '';
+      toggleSupportDrawer();
+    } else {
+      alert(data.message || 'বার্তা পাঠাতে সমস্যা হয়েছে।');
+    }
+  } catch (err) {
+    alert('সার্ভারে যোগাযোগ ব্যর্থ হয়েছে।');
+  } finally {
+    btn.disabled = false;
+    btn.textContent = 'বার্তা পাঠান';
+  }
+}
+
 // ইনিশিয়ালাইজেশন
 document.addEventListener('DOMContentLoaded', () => {
+  syncMasterCatalogFromBackend();
   initHeroCarousel();
   renderFeaturedCategories();
   renderTopProductsGrid();
@@ -3516,6 +3674,46 @@ document.addEventListener('DOMContentLoaded', () => {
   checkPaymentCallbackReturn();
   initMobileBottomNav();
   initMainNavScrollArrows();
+
+  // পারমালিংক ও শেয়ারযোগ্য ইউআরএল হ্যান্ডলিং (URL Permalink & Search Auto-Restore)
+  try {
+    const params = new URLSearchParams(window.location.search);
+    const prodParam = params.get('product') || (window.location.pathname.startsWith('/product/') ? window.location.pathname.replace('/product/', '').replace(/\/$/, '') : null);
+    if (prodParam) {
+      setTimeout(() => {
+        openProductDetailPage(decodeURIComponent(prodParam));
+      }, 350);
+    }
+    const qParam = params.get('q') || params.get('search');
+    if (qParam) {
+      setTimeout(() => {
+        const mainInput = document.getElementById('mainSearchInput');
+        if (mainInput) mainInput.value = qParam;
+        handleSearch(qParam);
+      }, 300);
+    }
+  } catch (e) {}
+
+  // ব্রাউজার ব্যাক / ফরোয়ার্ড বোতাম হ্যান্ডলিং
+  window.addEventListener('popstate', () => {
+    try {
+      const params = new URLSearchParams(window.location.search);
+      const prodId = params.get('product');
+      if (prodId) {
+        openProductDetailPage(prodId);
+      } else {
+        const modal = document.getElementById('productDetailModal');
+        if (modal && !modal.classList.contains('hidden')) {
+          closeProductDetailPage();
+        }
+      }
+    } catch (err) {}
+  });
+
+  // PWA সার্ভিস ওয়ার্কার রেজিস্ট্রেশন (Offline Capability)
+  if ('serviceWorker' in navigator && window.location.protocol.startsWith('http')) {
+    navigator.serviceWorker.register('/sw.js').catch(() => {});
+  }
 
   // মোডাল ব্যাকড্রপ ক্লিক এবং এস্কেপ (Esc) কি দিয়ে বন্ধ করা
   const detailModal = document.getElementById('productDetailModal');

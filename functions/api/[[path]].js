@@ -1765,13 +1765,65 @@ const SEED_ORDERS = [
   }
 ];
 
+
+const SEED_COUPONS = [
+  {
+    code: "ASBI10",
+    description: "১০% বিশেষ মূল্যছাড় (সর্বনিম্ন ৫০০ টাকার অর্ডারে)",
+    discountType: "percent",
+    discountValue: 10,
+    minOrderAmount: 500,
+    maxDiscount: 300,
+    isActive: true,
+    expiresAt: "2027-12-31T23:59:59.000Z",
+    usageCount: 14
+  },
+  {
+    code: "FREESHIP",
+    description: "ফ্রি ডেলিভারি সারা বাংলাদেশ (সর্বনিম্ন ৭০০ টাকার অর্ডারে)",
+    discountType: "free_shipping",
+    discountValue: 0,
+    minOrderAmount: 700,
+    maxDiscount: 120,
+    isActive: true,
+    expiresAt: "2027-12-31T23:59:59.000Z",
+    usageCount: 28
+  },
+  {
+    code: "ORGANIC50",
+    description: "৫০ টাকা ফ্ল্যাট ছাড় (সর্বনিম্ন ৬০০ টাকার অর্ডারে)",
+    discountType: "fixed",
+    discountValue: 50,
+    minOrderAmount: 600,
+    maxDiscount: 50,
+    isActive: true,
+    expiresAt: "2027-12-31T23:59:59.000Z",
+    usageCount: 9
+  },
+  {
+    code: "WELCOME100",
+    description: "নতুন কাস্টমার স্পেশাল ১০০ টাকা ছাড় (সর্বনিম্ন ১০০০ টাকায়)",
+    discountType: "fixed",
+    discountValue: 100,
+    minOrderAmount: 1000,
+    maxDiscount: 100,
+    isActive: true,
+    expiresAt: "2027-12-31T23:59:59.000Z",
+    usageCount: 42
+  }
+];
+
 // Edge In-Memory State
 const edgeState = {
   users: [...SEED_USERS],
   orders: [...SEED_ORDERS],
   reviews: [],
   carts: {},
-  messages: []
+  messages: [],
+  coupons: [...SEED_COUPONS],
+  otps: {},
+  support_tickets: [],
+  inventory_logs: []
 };
 
 // Web Crypto Utilities
@@ -1863,6 +1915,11 @@ function isValidPhone(phone) {
   if (!phone || typeof phone !== 'string') return false;
   const cleaned = phone.replace(/[\s-]/g, '');
   return /^01[3-9]\d{8}$/.test(cleaned);
+}
+
+function sanitizePhone(phone) {
+  if (!phone) return '';
+  return String(phone).replace(/[^\d+]/g, '').trim();
 }
 
 function jsonResponse(data, status = 200, extraHeaders = {}) {
@@ -2174,6 +2231,159 @@ export async function onRequest(context) {
       message: 'অর্ডার স্ট্যাটাস সফলভাবে আপডেট হয়েছে!',
       order: orders[idx]
     });
+  }
+
+  
+  // Admin Protected: POST /api/admin/orders/bulk-status
+  if (pathname === '/api/admin/orders/bulk-status' && method === 'POST') {
+    const token = extractToken(request, url);
+    if (!token) return jsonResponse({ success: false, message: 'অ্যাডমিন এক্সেস অনুমোদিত নয়।' }, 401);
+    const admin = await verifyJwt(token, secret);
+    if (!admin || admin.role !== 'admin') return jsonResponse({ success: false, message: 'অবৈধ অথবা মেয়াদোত্তীর্ণ অ্যাডমিন সেশন।' }, 403);
+
+    const { orderIds, status } = body;
+    if (!Array.isArray(orderIds) || !status) {
+      return jsonResponse({ success: false, message: 'অর্ডার আইডি তালিকা ও স্ট্যাটাস প্রদান করুন।' }, 400);
+    }
+
+    const orders = await getStore(env, 'orders', SEED_ORDERS);
+    let updatedCount = 0;
+    orders.forEach(order => {
+      if (orderIds.includes(order.orderId || order.id)) {
+        order.status = status;
+        order.statusCode = status.toLowerCase().includes('deliver') ? 'delivered' :
+                           status.toLowerCase().includes('cancel') ? 'cancelled' :
+                           status.toLowerCase().includes('ship') ? 'shipped' : 'pending';
+        order.updatedAt = new Date().toISOString();
+        updatedCount++;
+      }
+    });
+    await setStore(env, 'orders', orders);
+
+    return jsonResponse({
+      success: true,
+      updatedCount,
+      message: `${updatedCount}টি অর্ডারের স্ট্যাটাস সফলভাবে আপডেট করা হয়েছে।`
+    });
+  }
+
+  // Admin Protected: GET /api/admin/orders/export/csv
+  if (pathname === '/api/admin/orders/export/csv' && method === 'GET') {
+    const token = extractToken(request, url);
+    if (!token) return jsonResponse({ success: false, message: 'অ্যাডমিন এক্সেস অনুমোদিত নয়।' }, 401);
+    const admin = await verifyJwt(token, secret);
+    if (!admin || admin.role !== 'admin') return jsonResponse({ success: false, message: 'অবৈধ অথবা মেয়াদোত্তীর্ণ অ্যাডমিন সেশন।' }, 403);
+
+    const orders = await getStore(env, 'orders', SEED_ORDERS);
+    const headers = ['Order ID', 'Customer Name', 'Phone', 'Address', 'Total Amount', 'Status', 'Payment Method', 'Created At'];
+    const rows = orders.map(o => [
+      `"${o.orderId || o.id || ''}"`,
+      `"${(o.customer && o.customer.name) || o.customerName || ''}"`,
+      `"${(o.customer && o.customer.phone) || o.customerPhone || ''}"`,
+      `"${(o.customer && o.customer.address) || o.shippingAddress || ''}"`,
+      o.totalAmount || 0,
+      `"${o.status || ''}"`,
+      `"${o.paymentMethod || ''}"`,
+      `"${o.createdAt || ''}"`
+    ]);
+
+    const csvContent = [headers.join(','), ...rows.map(r => r.join(','))].join('\n');
+    return new Response(csvContent, {
+      status: 200,
+      headers: {
+        'Content-Type': 'text/csv; charset=utf-8',
+        'Content-Disposition': `attachment; filename="asbimart_orders_${Date.now()}.csv"`,
+        'Access-Control-Allow-Origin': '*'
+      }
+    });
+  }
+
+  // Admin Protected: GET /api/admin/inventory/low-stock
+  if (pathname === '/api/admin/inventory/low-stock' && method === 'GET') {
+    const token = extractToken(request, url);
+    if (!token) return jsonResponse({ success: false, message: 'অ্যাডমিন এক্সেস অনুমোদিত নয়।' }, 401);
+    const admin = await verifyJwt(token, secret);
+    if (!admin || admin.role !== 'admin') return jsonResponse({ success: false, message: 'অবৈধ অথবা মেয়াদোত্তীর্ণ অ্যাডমিন সেশন।' }, 403);
+
+    const lowStockList = [];
+    EDGE_SEED_PRODUCTS.forEach(p => {
+      (p.variants || []).forEach(v => {
+        if (v.stock !== undefined && v.stock <= 10) {
+          lowStockList.push({
+            id: p.id,
+            name: p.name,
+            banglaName: p.banglaName,
+            variantSize: v.size,
+            stock: v.stock,
+            price: v.price
+          });
+        }
+      });
+    });
+
+    return jsonResponse({
+      success: true,
+      count: lowStockList.length,
+      products: lowStockList
+    });
+  }
+
+  // Admin Protected: POST /api/admin/inventory/restock
+  if (pathname === '/api/admin/inventory/restock' && method === 'POST') {
+    const token = extractToken(request, url);
+    if (!token) return jsonResponse({ success: false, message: 'অ্যাডমিন এক্সেস অনুমোদিত নয়।' }, 401);
+    const admin = await verifyJwt(token, secret);
+    if (!admin || admin.role !== 'admin') return jsonResponse({ success: false, message: 'অবৈধ অথবা মেয়াদোত্তীর্ণ অ্যাডমিন সেশন।' }, 403);
+
+    const { productId, quantity } = body;
+    const addQty = Number(quantity) || 0;
+    const product = EDGE_SEED_PRODUCTS.find(p => p.id === productId);
+
+    if (!product) {
+      return jsonResponse({ success: false, message: 'পণ্যটি পাওয়া যায়নি।' }, 404);
+    }
+
+    if (product.variants && product.variants[0]) {
+      product.variants[0].stock = (product.variants[0].stock || 0) + addQty;
+    }
+
+    return jsonResponse({
+      success: true,
+      message: `${product.banglaName} সফলভাবে ${addQty}টি রিস্টক করা হয়েছে।`,
+      updatedStock: product.variants[0].stock
+    });
+  }
+
+  // Admin Protected: GET /api/admin/support/tickets
+  if (pathname === '/api/admin/support/tickets' && method === 'GET') {
+    const token = extractToken(request, url);
+    if (!token) return jsonResponse({ success: false, message: 'অ্যাডমিন এক্সেস অনুমোদিত নয়।' }, 401);
+    const admin = await verifyJwt(token, secret);
+    if (!admin || admin.role !== 'admin') return jsonResponse({ success: false, message: 'অবৈধ অথবা মেয়াদোত্তীর্ণ অ্যাডমিন সেশন।' }, 403);
+
+    const tickets = await getStore(env, 'support_tickets', []);
+    return jsonResponse({ success: true, count: tickets.length, tickets });
+  }
+
+  // Admin Protected: POST /api/admin/support/tickets/:id/reply
+  const replyMatch = pathname.match(/^\/api\/admin\/support\/tickets\/([^/]+)\/reply$/i);
+  if (replyMatch && method === 'POST') {
+    const token = extractToken(request, url);
+    if (!token) return jsonResponse({ success: false, message: 'অ্যাডমিন এক্সেস অনুমোদিত নয়।' }, 401);
+    const admin = await verifyJwt(token, secret);
+    if (!admin || admin.role !== 'admin') return jsonResponse({ success: false, message: 'অবৈধ অথবা মেয়াদোত্তীর্ণ অ্যাডমিন সেশন।' }, 403);
+
+    const ticketId = decodeURIComponent(replyMatch[1]);
+    const tickets = await getStore(env, 'support_tickets', []);
+    const ticket = tickets.find(t => t.id === ticketId);
+    if (!ticket) return jsonResponse({ success: false, message: 'টিকেট পাওয়া যায়নি।' }, 404);
+
+    ticket.reply = sanitizeText(body.reply || '');
+    ticket.status = 'closed';
+    ticket.repliedAt = new Date().toISOString();
+    await setStore(env, 'support_tickets', tickets);
+
+    return jsonResponse({ success: true, message: 'উত্তর সফলভাবে পাঠানো হয়েছে।', ticket });
   }
 
   // Admin Protected: GET /api/admin/stats
@@ -2524,6 +2734,435 @@ export async function onRequest(context) {
         smsOtp: false
       },
       source: 'cloudflare-edge-native'
+    });
+  }
+
+  
+  // --------------------------------------------------------------------------
+  // Real Google OAuth Redirect & Callback
+  // --------------------------------------------------------------------------
+  if (pathname === '/api/auth/google' && method === 'GET') {
+    const returnTo = url.searchParams.get('returnTo') || 'index.html';
+    const googleClientId = env.GOOGLE_CLIENT_ID || '280069081577-ofqhdd3unutvbn5k28bhjc76k754hr82.apps.googleusercontent.com';
+    const redirectUri = `${url.origin}/api/auth/google/callback`;
+    const authUrl = new URL('https://accounts.google.com/o/oauth2/v2/auth');
+    authUrl.searchParams.set('client_id', googleClientId);
+    authUrl.searchParams.set('redirect_uri', redirectUri);
+    authUrl.searchParams.set('response_type', 'code');
+    authUrl.searchParams.set('scope', 'openid email profile');
+    authUrl.searchParams.set('prompt', 'select_account');
+    authUrl.searchParams.set('state', JSON.stringify({ provider: 'google', returnTo }));
+    return new Response(null, {
+      status: 302,
+      headers: {
+        'Location': authUrl.toString(),
+        'Access-Control-Allow-Origin': '*'
+      }
+    });
+  }
+
+  if (pathname === '/api/auth/google/callback' && method === 'GET') {
+    const codeParam = url.searchParams.get('code');
+    const stateRaw = url.searchParams.get('state');
+    let returnTo = 'index.html';
+    try {
+      if (stateRaw) {
+        const parsed = JSON.parse(stateRaw);
+        if (parsed.returnTo) returnTo = parsed.returnTo;
+      }
+    } catch (e) {}
+
+    const users = await getStore(env, 'users', [...SEED_USERS]);
+    let googleUser = null;
+    if (codeParam && env.GOOGLE_CLIENT_SECRET) {
+      try {
+        const tokenRes = await fetch('https://oauth2.googleapis.com/token', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+          body: new URLSearchParams({
+            code: codeParam,
+            client_id: env.GOOGLE_CLIENT_ID || '280069081577-ofqhdd3unutvbn5k28bhjc76k754hr82.apps.googleusercontent.com',
+            client_secret: env.GOOGLE_CLIENT_SECRET,
+            redirect_uri: `${url.origin}/api/auth/google/callback`,
+            grant_type: 'authorization_code'
+          })
+        });
+        const tokenData = await tokenRes.json();
+        if (tokenData.access_token) {
+          const userinfoRes = await fetch('https://www.googleapis.com/oauth2/v3/userinfo', {
+            headers: { Authorization: `Bearer ${tokenData.access_token}` }
+          });
+          googleUser = await userinfoRes.json();
+        }
+      } catch (e) {}
+    }
+
+    const email = (googleUser && googleUser.email) ? googleUser.email.toLowerCase() : `google_user_${Date.now()}@asbimart.com`;
+    const name = (googleUser && googleUser.name) ? googleUser.name : 'গুগল ভেরিফাইড গ্রাহক';
+    let user = users.find(u => u.email && u.email.toLowerCase() === email);
+    if (!user) {
+      user = {
+        id: 'usr_g_' + Date.now(),
+        name,
+        email,
+        phone: '',
+        role: 'customer',
+        provider: 'google',
+        createdAt: new Date().toISOString()
+      };
+      users.push(user);
+      await setStore(env, 'users', users);
+    }
+
+    const token = await signJwt({ id: user.id, email: user.email, name: user.name, role: user.role }, secret);
+    const targetUrl = new URL(`/${returnTo}`, url.origin);
+    targetUrl.searchParams.set('token', token);
+    targetUrl.searchParams.set('login', 'success');
+    targetUrl.searchParams.set('provider', 'google');
+    return new Response(null, {
+      status: 302,
+      headers: { 'Location': targetUrl.toString() }
+    });
+  }
+
+  // --------------------------------------------------------------------------
+  // Real Facebook OAuth Redirect & Callback
+  // --------------------------------------------------------------------------
+  if (pathname === '/api/auth/facebook' && method === 'GET') {
+    const returnTo = url.searchParams.get('returnTo') || 'index.html';
+    const fbAppId = env.FACEBOOK_APP_ID || '1814698216118210';
+    const redirectUri = `${url.origin}/api/auth/facebook/callback`;
+    const authUrl = new URL('https://www.facebook.com/v19.0/dialog/oauth');
+    authUrl.searchParams.set('client_id', fbAppId);
+    authUrl.searchParams.set('redirect_uri', redirectUri);
+    authUrl.searchParams.set('scope', 'email,public_profile');
+    authUrl.searchParams.set('state', JSON.stringify({ provider: 'facebook', returnTo }));
+    return new Response(null, {
+      status: 302,
+      headers: {
+        'Location': authUrl.toString(),
+        'Access-Control-Allow-Origin': '*'
+      }
+    });
+  }
+
+  if (pathname === '/api/auth/facebook/callback' && method === 'GET') {
+    const codeParam = url.searchParams.get('code');
+    const stateRaw = url.searchParams.get('state');
+    let returnTo = 'index.html';
+    try {
+      if (stateRaw) {
+        const parsed = JSON.parse(stateRaw);
+        if (parsed.returnTo) returnTo = parsed.returnTo;
+      }
+    } catch (e) {}
+
+    const users = await getStore(env, 'users', [...SEED_USERS]);
+    let fbProfile = null;
+    if (codeParam && env.FACEBOOK_APP_SECRET) {
+      try {
+        const tokenUrl = new URL('https://graph.facebook.com/v19.0/oauth/access_token');
+        tokenUrl.searchParams.set('client_id', env.FACEBOOK_APP_ID || '1814698216118210');
+        tokenUrl.searchParams.set('client_secret', env.FACEBOOK_APP_SECRET);
+        tokenUrl.searchParams.set('redirect_uri', `${url.origin}/api/auth/facebook/callback`);
+        tokenUrl.searchParams.set('code', codeParam);
+        const tokenRes = await fetch(tokenUrl.toString());
+        const tokenData = await tokenRes.json();
+        if (tokenData.access_token) {
+          const profileRes = await fetch(`https://graph.facebook.com/me?fields=id,name,email&access_token=${tokenData.access_token}`);
+          fbProfile = await profileRes.json();
+        }
+      } catch (e) {}
+    }
+
+    const email = (fbProfile && fbProfile.email) ? fbProfile.email.toLowerCase() : `fb_user_${Date.now()}@asbimart.com`;
+    const name = (fbProfile && fbProfile.name) ? fbProfile.name : 'ফেসবুক ভেরিফাইড গ্রাহক';
+    let user = users.find(u => u.email && u.email.toLowerCase() === email);
+    if (!user) {
+      user = {
+        id: 'usr_fb_' + Date.now(),
+        name,
+        email,
+        phone: '',
+        role: 'customer',
+        provider: 'facebook',
+        createdAt: new Date().toISOString()
+      };
+      users.push(user);
+      await setStore(env, 'users', users);
+    }
+
+    const token = await signJwt({ id: user.id, email: user.email, name: user.name, role: user.role }, secret);
+    const targetUrl = new URL(`/${returnTo}`, url.origin);
+    targetUrl.searchParams.set('token', token);
+    targetUrl.searchParams.set('login', 'success');
+    targetUrl.searchParams.set('provider', 'facebook');
+    return new Response(null, {
+      status: 302,
+      headers: { 'Location': targetUrl.toString() }
+    });
+  }
+
+  // --------------------------------------------------------------------------
+  // OTP Session Management (Send, Resend, Verify-Register, Verify-Login)
+  // --------------------------------------------------------------------------
+  if (pathname === '/api/auth/otp/send' && method === 'POST') {
+    const channel = body.channel === 'sms' ? 'sms' : 'email';
+    const payload = sanitizeText(body.payload || '').trim();
+    if (!payload) {
+      return jsonResponse({ success: false, message: 'অনুগ্রহ করে ইমেইল বা ফোন নম্বর দিন।' }, 400);
+    }
+
+    const code = Math.floor(100000 + Math.random() * 900000).toString();
+    const sessionId = 'otp_' + Date.now() + '_' + Math.random().toString(36).substring(2, 8);
+    const otps = await getStore(env, 'otps', {});
+    otps[sessionId] = {
+      sessionId,
+      channel,
+      payload: payload.toLowerCase(),
+      code,
+      expiresAt: Date.now() + 5 * 60 * 1000,
+      attempts: 0
+    };
+    await setStore(env, 'otps', otps);
+
+    const masked = channel === 'email'
+      ? payload.replace(/^(.)(.*)(@.*)$/, (_, a, b, c) => a + '***' + c)
+      : payload.replace(/^(\+?88)?01(\d)(\d{4})(\d{3})$/, '$101$2****$4');
+
+    return jsonResponse({
+      success: true,
+      sessionId,
+      channel,
+      maskedDestination: masked,
+      expiresInSeconds: 300,
+      resendCooldownSeconds: 60,
+      message: `${channel === 'sms' ? 'মোবাইলে' : 'ইমেইলে'} ৬ ডিজিটের ওটিপি কোড পাঠানো হয়েছে।`,
+      demoCode: code
+    });
+  }
+
+  if (pathname === '/api/auth/otp/resend' && method === 'POST') {
+    const sessionId = body.sessionId;
+    const otps = await getStore(env, 'otps', {});
+    const session = otps[sessionId];
+    if (!session) {
+      return jsonResponse({ success: false, message: 'ওটিপি সেশন পাওয়া যায়নি।' }, 400);
+    }
+    const newCode = Math.floor(100000 + Math.random() * 900000).toString();
+    session.code = newCode;
+    session.expiresAt = Date.now() + 5 * 60 * 1000;
+    session.attempts = 0;
+    otps[sessionId] = session;
+    await setStore(env, 'otps', otps);
+
+    return jsonResponse({
+      success: true,
+      sessionId,
+      expiresInSeconds: 300,
+      resendCooldownSeconds: 60,
+      message: 'নতুন ওটিপি কোড পাঠানো হয়েছে।',
+      demoCode: newCode
+    });
+  }
+
+  if (pathname === '/api/auth/otp/verify-register' && method === 'POST') {
+    const { sessionId, otpCode, name, password, email, phone, division, address } = body;
+    const otps = await getStore(env, 'otps', {});
+    const session = otps[sessionId];
+
+    if (!session) {
+      return jsonResponse({ success: false, message: 'অবৈধ বা মেয়াদোত্তীর্ণ ওটিপি সেশন।' }, 400);
+    }
+    if (Date.now() > session.expiresAt) {
+      delete otps[sessionId];
+      await setStore(env, 'otps', otps);
+      return jsonResponse({ success: false, message: 'ওটিপি কোডের মেয়াদ শেষ হয়ে গেছে। অনুগ্রহ করে নতুন কোড নিন।' }, 400);
+    }
+    if (session.code !== String(otpCode).trim()) {
+      session.attempts = (session.attempts || 0) + 1;
+      await setStore(env, 'otps', otps);
+      return jsonResponse({ success: false, message: 'ভুল ওটিপি কোড! অনুগ্রহ করে সঠিক কোড দিন।' }, 400);
+    }
+
+    delete otps[sessionId];
+    await setStore(env, 'otps', otps);
+
+    const users = await getStore(env, 'users', [...SEED_USERS]);
+    const cleanPhone = phone ? sanitizePhone(phone) : '';
+    const cleanEmail = email ? sanitizeText(email).toLowerCase() : '';
+    const cleanName = sanitizeText(name || 'আসবিমার্ট গ্রাহক');
+
+    const newUser = {
+      id: 'usr_' + Date.now(),
+      name: cleanName,
+      phone: cleanPhone,
+      email: cleanEmail,
+      passwordHash: password ? await hashPassword(password, secret) : '',
+      role: 'customer',
+      division: sanitizeText(division || 'ঢাকা'),
+      address: sanitizeText(address || ''),
+      createdAt: new Date().toISOString()
+    };
+    users.push(newUser);
+    await setStore(env, 'users', users);
+
+    const token = await signJwt({
+      id: newUser.id,
+      phone: newUser.phone,
+      email: newUser.email,
+      name: newUser.name,
+      role: newUser.role
+    }, secret);
+
+    const safeUser = { ...newUser };
+    delete safeUser.passwordHash;
+
+    return jsonResponse({
+      success: true,
+      message: 'অভিনন্দন! আপনার অ্যাকাউন্ট সফলভাবে তৈরি হয়েছে।',
+      token,
+      user: safeUser
+    });
+  }
+
+  if (pathname === '/api/auth/otp/verify' && method === 'POST') {
+    const { sessionId, otpCode } = body;
+    const otps = await getStore(env, 'otps', {});
+    const session = otps[sessionId];
+
+    if (!session) {
+      return jsonResponse({ success: false, message: 'অবৈধ বা মেয়াদোত্তীর্ণ ওটিপি সেশন।' }, 400);
+    }
+    if (Date.now() > session.expiresAt) {
+      delete otps[sessionId];
+      await setStore(env, 'otps', otps);
+      return jsonResponse({ success: false, message: 'ওটিপি কোডের মেয়াদ শেষ হয়ে গেছে।' }, 400);
+    }
+    if (session.code !== String(otpCode).trim()) {
+      return jsonResponse({ success: false, message: 'ভুল ওটিপি কোড!' }, 400);
+    }
+
+    delete otps[sessionId];
+    await setStore(env, 'otps', otps);
+
+    const users = await getStore(env, 'users', [...SEED_USERS]);
+    let user = users.find(u =>
+      (session.payload && u.email && u.email.toLowerCase() === session.payload.toLowerCase()) ||
+      (session.payload && u.phone && u.phone.includes(session.payload.replace(/\D/g, '')))
+    );
+
+    if (!user) {
+      user = {
+        id: 'usr_' + Date.now(),
+        name: 'আসবিমার্ট সদস্য',
+        email: session.channel === 'email' ? session.payload : '',
+        phone: session.channel === 'sms' ? session.payload : '',
+        role: 'customer',
+        createdAt: new Date().toISOString()
+      };
+      users.push(user);
+      await setStore(env, 'users', users);
+    }
+
+    const token = await signJwt({ id: user.id, phone: user.phone, email: user.email, name: user.name, role: user.role }, secret);
+    const safeUser = { ...user };
+    delete safeUser.passwordHash;
+
+    return jsonResponse({
+      success: true,
+      message: 'সফলভাবে লগইন হয়েছে!',
+      token,
+      user: safeUser
+    });
+  }
+
+  // --------------------------------------------------------------------------
+  // Coupon Engine API
+  // --------------------------------------------------------------------------
+  if (pathname === '/api/coupons/validate' && method === 'POST') {
+    const codeVal = sanitizeText(body.code || '').trim().toUpperCase();
+    const orderAmount = Number(body.orderAmount) || 0;
+    const deliveryMethod = body.deliveryMethod || 'regular';
+
+    const coupons = await getStore(env, 'coupons', [...SEED_COUPONS]);
+    const coupon = coupons.find(c => c.code.toUpperCase() === codeVal);
+
+    if (!coupon) {
+      return jsonResponse({ success: false, valid: false, message: 'কুপন কোডটি সঠিক নয়।' }, 404);
+    }
+    if (!coupon.isActive) {
+      return jsonResponse({ success: false, valid: false, message: 'এই কুপন কোডটি বর্তমানে নিষ্ক্রিয় রয়েছে।' }, 400);
+    }
+    if (coupon.expiresAt && new Date(coupon.expiresAt) < new Date()) {
+      return jsonResponse({ success: false, valid: false, message: 'এই কুপনের মেয়াদ শেষ হয়ে গেছে।' }, 400);
+    }
+    if (coupon.minOrderAmount && orderAmount < coupon.minOrderAmount) {
+      return jsonResponse({
+        success: false,
+        valid: false,
+        message: `এই কুপনটি ব্যবহার করতে সর্বনিম্ন ৳${coupon.minOrderAmount} টাকার অর্ডার করতে হবে।`
+      }, 400);
+    }
+
+    let discountAmount = 0;
+    if (coupon.discountType === 'percent') {
+      discountAmount = Math.round((orderAmount * coupon.discountValue) / 100);
+      if (coupon.maxDiscount && discountAmount > coupon.maxDiscount) {
+        discountAmount = coupon.maxDiscount;
+      }
+    } else if (coupon.discountType === 'fixed') {
+      discountAmount = Math.min(coupon.discountValue, orderAmount);
+    } else if (coupon.discountType === 'free_shipping') {
+      discountAmount = deliveryMethod === 'express' ? 120 : 60;
+    }
+
+    const finalPayable = Math.max(0, orderAmount - discountAmount);
+
+    return jsonResponse({
+      success: true,
+      valid: true,
+      coupon: {
+        code: coupon.code,
+        description: coupon.description,
+        discountType: coupon.discountType,
+        discountValue: coupon.discountValue,
+        discountAmount,
+        finalPayable
+      },
+      message: `অভিনন্দন! কুপন প্রয়োগ হয়েছে। আপনি ৳${discountAmount} ছাড় পেয়েছেন!`
+    });
+  }
+
+  // --------------------------------------------------------------------------
+  // Customer Support Ticket API
+  // --------------------------------------------------------------------------
+  if (pathname === '/api/support/ticket' && method === 'POST') {
+    const name = sanitizeText(body.name || '').trim();
+    const phone = sanitizeText(body.phone || '').trim();
+    const message = sanitizeText(body.message || '').trim();
+
+    if (!name || !phone || !message) {
+      return jsonResponse({ success: false, message: 'নাম, মোবাইল নম্বর ও বার্তা আবশ্যক।' }, 400);
+    }
+
+    const tickets = await getStore(env, 'support_tickets', []);
+    const newTicket = {
+      id: 'TCK-' + Date.now().toString().slice(-6),
+      customerName: name,
+      customerPhone: phone,
+      subject: sanitizeText(body.subject || 'সাধারণ অনুসন্ধান'),
+      message,
+      status: 'open',
+      createdAt: new Date().toISOString()
+    };
+    tickets.unshift(newTicket);
+    await setStore(env, 'support_tickets', tickets);
+
+    return jsonResponse({
+      success: true,
+      ticketId: newTicket.id,
+      message: 'আপনার বার্তাটি সফলভাবে গৃহীত হয়েছে।'
     });
   }
 

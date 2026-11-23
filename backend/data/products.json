@@ -25,7 +25,7 @@
         "size": "৫০০ গ্রাম",
         "price": 650,
         "originalPrice": 765,
-        "stock": 25
+        "stock": 23
       },
       {
         "size": "১ কেজি",
@@ -47,7 +47,10 @@
         "date": "১ সপ্তাহ আগে",
         "comment": "প্যাকেজিং খুবই চমৎকার ছিল। সম্পূর্ণ অক্ষত পেয়েছি।"
       }
-    ]
+    ],
+    "stock": 41,
+    "sku": "ASBI-HONEY-SUND",
+    "barcode": "880153399007"
   },
   {
     "id": "honey-kalojira-02",
@@ -90,7 +93,10 @@
         "date": "২ দিন আগে",
         "comment": "গাঢ় প্রাকৃতিক মধু, অনেক ভালো লেগেছে।"
       }
-    ]
+    ],
+    "stock": 45,
+    "sku": "ASBI-HONEY-KALO",
+    "barcode": "880764309377"
   },
   {
     "id": "honey-litchi-03",
@@ -133,7 +139,10 @@
         "date": "৫ দিন আগে",
         "comment": "বাচ্চারা খুব পছন্দ করেছে। দারুণ স্বাদ।"
       }
-    ]
+    ],
+    "stock": 55,
+    "sku": "ASBI-HONEY-LITC",
+    "barcode": "880294289939"
   },
   {
     "id": "honey-mustard-04",
@@ -176,7 +185,10 @@
         "date": "১ সপ্তাহ আগে",
         "comment": "একদম ক্রিমি আসল সরিষা ফুলের মধু।"
       }
-    ]
+    ],
+    "stock": 65,
+    "sku": "ASBI-HONEY-MUST",
+    "barcode": "880286855525"
   },
   {
     "id": "honey-nut-premium-05",
@@ -219,7 +231,10 @@
         "date": "১ দিন আগে",
         "comment": "অবিশ্বাস্য রকমের সুস্বাদু! এক চামচ খেলেই মন ভরে যায়।"
       }
-    ]
+    ],
+    "stock": 60,
+    "sku": "ASBI-HONEY-NUT-",
+    "barcode": "880413450092"
   },
   {
     "id": "ghee-pabna-06",
@@ -262,7 +277,10 @@
         "date": "২ দিন আগে",
         "comment": "ঘির ঘ্রাণে পুরো বাড়ি ম ম করছে। দানাদার খাঁটি ঘি!"
       }
-    ]
+    ],
+    "stock": 65,
+    "sku": "ASBI-GHEE-PABNA",
+    "barcode": "880916103853"
   },
   {
     "id": "ghee-buffalo-07",
@@ -289,7 +307,7 @@
         "size": "৫০০ গ্রাম",
         "price": 880,
         "originalPrice": 980,
-        "stock": 35
+        "stock": 33
       },
       {
         "size": "১ কেজি",
@@ -305,7 +323,10 @@
         "date": "৪ দিন আগে",
         "comment": "মহিষের খাঁটি ঘি পাওয়া খুব কঠিন ছিল। অসাধারণ কোয়ালিটি।"
       }
-    ]
+    ],
+    "stock": 48,
+    "sku": "ASBI-GHEE-BUFFA",
+    "barcode": "880126868488"
   },
   {
     "id": "ghee-butter-home-08",
@@ -348,7 +369,10 @@
         "date": "৩ দিন আগে",
         "comment": "বিলোনার আসল ঘ্রাণ পাওয়া যায়। সেরা ঘি!"
       }
-    ]
+    ],
+    "stock": 35,
+    "sku": "ASBI-GHEE-BUTTE",
+    "barcode": "880149160191"
   },
   {
     "id": "oil-mustard-ghani-09",
@@ -391,7 +415,10 @@
         "date": "৪ দিন আগে",
         "comment": "তিলের ঝাঁঝ আর আসল সরিষার গন্ধ পাওয়া যায়।"
       }
-    ]
+    ],
+    "stock": 65,
+    "sku": "ASBI-OIL-MUSTAR",
+    "barcode": "880439296507"
   },
   {
     "id": "kalojira-oil-pure-10",
@@ -434,7 +461,10 @@
         "date": "৪ দিন আগে",
         "comment": "তেলটা একদম আসল ও ঘন।"
       }
-    ]
+    ],
+    "stock": 55,
+    "sku": "ASBI-KALOJIRA-O",
+    "barcode": "880260515552"
   },
   {
     "id": "coconut-oil-extra-virgin-11",
@@ -477,7 +507,10 @@
         "date": "৩ দিন আগে",
         "comment": "নারিকেলের মিষ্টি প্রাকৃতিক গন্ধ। চুল পরা কমে গেছে।"
       }
-    ]
+    ],
+    "stock": 65,
+    "sku": "ASBI-COCONUT-OI",
+    "barcode": "880238487525"
   },
   {
     "id": "oil-sesame-til-12",
@@ -520,7 +553,10 @@
         "date": "১ সপ্তাহ আগে",
         "comment": "ব্যথায় মালিশ করে খুব আরাম পেয়েছি।"
       }
-    ]
+    ],
+    "stock": 55,
+    "sku": "ASBI-OIL-SESAME",
+    "barcode": "880583667000"
   },
   {
     "id": "nuts-dryfruits-mix-13",
@@ -563,7 +599,10 @@
         "date": "৩ দিন আগে",
         "comment": "প্রতিটি বাদাম অনেক ফ্রেশ এবং ক্রিস্পি।"
       }
-    ]
+    ],
+    "stock": 70,
+    "sku": "ASBI-NUTS-DRYFR",
+    "barcode": "880307516206"
   },
   {
     "id": "almond-california-14",
@@ -606,7 +645,10 @@
         "date": "১ সপ্তাহ আগে",
         "comment": "সাইজ বড় এবং স্বাদে অতুলনীয়।"
       }
-    ]
+    ],
+    "stock": 70,
+    "sku": "ASBI-ALMOND-CAL",
+    "barcode": "880115473271"
   },
   {
     "id": "cashew-premium-15",
@@ -649,7 +691,10 @@
         "date": "৩ দিন আগে",
         "comment": "মুচমুচে এবং মিষ্টি টেস্ট।"
       }
-    ]
+    ],
+    "stock": 60,
+    "sku": "ASBI-CASHEW-PRE",
+    "barcode": "880237355991"
   },
   {
     "id": "walnut-kashmiri-16",
@@ -692,7 +737,10 @@
         "date": "৪ দিন আগে",
         "comment": "হাতে চাপ দিলেই খোসা ভেঙে যায়।"
       }
-    ]
+    ],
+    "stock": 50,
+    "sku": "ASBI-WALNUT-KAS",
+    "barcode": "880490564207"
   },
   {
     "id": "pista-iranian-17",
@@ -735,7 +783,10 @@
         "date": "৫ দিন আগে",
         "comment": "অসাধারণ স্বাদ ও নিখুঁত সাইজ।"
       }
-    ]
+    ],
+    "stock": 45,
+    "sku": "ASBI-PISTA-IRAN",
+    "barcode": "880126854302"
   },
   {
     "id": "raisin-golden-18",
@@ -778,7 +829,10 @@
         "date": "১ সপ্তাহ আগে",
         "comment": "খুব মিষ্টি এবং পরিচ্ছন্ন।"
       }
-    ]
+    ],
+    "stock": 85,
+    "sku": "ASBI-RAISIN-GOL",
+    "barcode": "880327490836"
   },
   {
     "id": "care-neem-toothpaste-19",
@@ -821,7 +875,10 @@
         "date": "৩ দিন আগে",
         "comment": "দাঁতের শিরশিরানি ভাব একদম কমে গেছে।"
       }
-    ]
+    ],
+    "stock": 90,
+    "sku": "ASBI-CARE-NEEM-",
+    "barcode": "880188402296"
   },
   {
     "id": "care-bamboo-brush-20",
@@ -858,7 +915,10 @@
         "date": "৫ দিন আগে",
         "comment": "খুবই সফট ব্রিসল আর চমৎকার কোয়ালিটি।"
       }
-    ]
+    ],
+    "stock": 45,
+    "sku": "ASBI-CARE-BAMBO",
+    "barcode": "880759465709"
   },
   {
     "id": "care-organic-lotion-21",
@@ -901,7 +961,10 @@
         "date": "১ দিন আগে",
         "comment": "একটুও চিটচিটে না, ত্বক নরম রাখে।"
       }
-    ]
+    ],
+    "stock": 60,
+    "sku": "ASBI-CARE-ORGAN",
+    "barcode": "880309640480"
   },
   {
     "id": "care-neem-soap-22",
@@ -944,7 +1007,10 @@
         "date": "৪ দিন আগে",
         "comment": "সাবানটা মুখে দিলে দারুণ ফ্রেশ লাগে।"
       }
-    ]
+    ],
+    "stock": 95,
+    "sku": "ASBI-CARE-NEEM-",
+    "barcode": "880616423982"
   },
   {
     "id": "care-aloevera-gel-23",
@@ -981,7 +1047,10 @@
         "date": "২ দিন আগে",
         "comment": "খুবই স্নিগ্ধ এবং ত্বকে দ্রুত মিশে যায়।"
       }
-    ]
+    ],
+    "stock": 40,
+    "sku": "ASBI-CARE-ALOEV",
+    "barcode": "880901211498"
   },
   {
     "id": "chia-seed-organic-24",
@@ -1024,7 +1093,10 @@
         "date": "২ দিন আগে",
         "comment": "দানাদানা একদম পরিষ্কার ও প্রিমিয়াম।"
       }
-    ]
+    ],
+    "stock": 70,
+    "sku": "ASBI-CHIA-SEED-",
+    "barcode": "880605001351"
   },
   {
     "id": "flax-seed-organic-25",
@@ -1067,7 +1139,10 @@
         "date": "৫ দিন আগে",
         "comment": "পরিচ্ছন্ন দানা, ভালো মানের তিসি।"
       }
-    ]
+    ],
+    "stock": 75,
+    "sku": "ASBI-FLAX-SEED-",
+    "barcode": "880440847964"
   },
   {
     "id": "pumpkin-seeds-26",
@@ -1110,7 +1185,10 @@
         "date": "৩ দিন আগে",
         "comment": "রোস্ট করে খেতে দারুণ মজা।"
       }
-    ]
+    ],
+    "stock": 55,
+    "sku": "ASBI-PUMPKIN-SE",
+    "barcode": "880528062062"
   },
   {
     "id": "sunflower-seeds-27",
@@ -1153,7 +1231,10 @@
         "date": "৬ দিন আগে",
         "comment": "খুবই মুচমুচে এবং টেস্ট ভালো।"
       }
-    ]
+    ],
+    "stock": 65,
+    "sku": "ASBI-SUNFLOWER-",
+    "barcode": "880201516463"
   },
   {
     "id": "dates-ajwa-madinah-28",
@@ -1196,7 +1277,10 @@
         "date": "১ দিন আগে",
         "comment": "খেজুরগুলো অত্যন্ত নরম ও মিষ্টি।"
       }
-    ]
+    ],
+    "stock": 55,
+    "sku": "ASBI-DATES-AJWA",
+    "barcode": "880825550980"
   },
   {
     "id": "spices-haldi-morich-29",
@@ -1239,7 +1323,10 @@
         "date": "৫ দিন আগে",
         "comment": "বাজারের প্যাকেট মসলার চেয়ে অনেক ভালো।"
       }
-    ]
+    ],
+    "stock": 55,
+    "sku": "ASBI-SPICES-HAL",
+    "barcode": "880690243584"
   },
   {
     "id": "spices-cumin-jeera-30",
@@ -1276,7 +1363,10 @@
         "date": "৩ দিন আগে",
         "comment": "ঘিয়ে ভাজার চমৎকার ঘ্রাণ আসে।"
       }
-    ]
+    ],
+    "stock": 40,
+    "sku": "ASBI-SPICES-CUM",
+    "barcode": "880230792828"
   },
   {
     "id": "tea-sreemangal-green-31",
@@ -1319,7 +1409,10 @@
         "date": "৬ দিন আগে",
         "comment": "দারুণ সতেজ ঘ্রাণ।"
       }
-    ]
+    ],
+    "stock": 70,
+    "sku": "ASBI-TEA-SREEMA",
+    "barcode": "880634910514"
   },
   {
     "id": "tea-masala-black-32",
@@ -1362,7 +1455,10 @@
         "date": "২ দিন আগে",
         "comment": "সিলেটের চায়ের আসল স্বাদ! লিকার অনেক কড়া।"
       }
-    ]
+    ],
+    "stock": 80,
+    "sku": "ASBI-TEA-MASALA",
+    "barcode": "880673695788"
   },
   {
     "id": "superfood-moringa-powder-33",
@@ -1405,7 +1501,10 @@
         "date": "১ দিন আগে",
         "comment": "সকালে হালকা গরম পানিতে মিশিয়ে খাই, সারাদিন অনেক এনার্জি পাই।"
       }
-    ]
+    ],
+    "stock": 65,
+    "sku": "ASBI-SUPERFOOD-",
+    "barcode": "880481123273"
   },
   {
     "id": "honey-comb-wild-34",
@@ -1448,7 +1547,10 @@
         "date": "৩ দিন আগে",
         "comment": "চাকের মোম চিবিয়ে খাওয়ার ফিলটাই আলাদা! দারুণ অরিজিনাল।"
       }
-    ]
+    ],
+    "stock": 32,
+    "sku": "ASBI-HONEY-COMB",
+    "barcode": "880625288874"
   },
   {
     "id": "salt-himalayan-pink-35",
@@ -1491,7 +1593,10 @@
         "date": "৪ দিন আগে",
         "comment": "রান্নায় সাধারণ লবণের বদলে পিংক সল্ট ব্যবহার করছি, স্বাদ খুব ভালো।"
       }
-    ]
+    ],
+    "stock": 95,
+    "sku": "ASBI-SALT-HIMAL",
+    "barcode": "880515144020"
   },
   {
     "id": "dates-mabroom-saudi-36",
@@ -1534,7 +1639,10 @@
         "date": "২ দিন আগে",
         "comment": "খেজুরগুলো খুব ফ্রেশ ও সুস্বাদু ছিল।"
       }
-    ]
+    ],
+    "stock": 48,
+    "sku": "ASBI-DATES-MABR",
+    "barcode": "880839194911"
   },
   {
     "id": "combo-health-pack-37",
@@ -1571,7 +1679,10 @@
         "date": "১ দিন আগে",
         "comment": "এক সাথে খাঁটি মধু, ঘি ও সরিষার তেল পেয়ে অনেক টাকা বাঁচল। পণ্যের মান টপ নচ।"
       }
-    ]
+    ],
+    "stock": 25,
+    "sku": "ASBI-COMBO-HEAL",
+    "barcode": "880266091373"
   },
   {
     "id": "combo-royal-nuts-38",
@@ -1608,7 +1719,10 @@
         "date": "২ দিন আগে",
         "comment": "প্যাকেজিং আর বাদামের কোয়ালিটি সত্যিই অসাধারণ। ধন্যবাদ আসবিমার্ট।"
       }
-    ]
+    ],
+    "stock": 20,
+    "sku": "ASBI-COMBO-ROYA",
+    "barcode": "880683801054"
   },
   {
     "id": "spices-green-cardamom-31",
@@ -1651,6 +1765,9 @@
         "date": "৪ দিন আগে",
         "comment": "এলাচের ঘ্রাণ অসাধারণ! একদম ফ্রেশ ও বড় দানা।"
       }
-    ]
+    ],
+    "stock": 65,
+    "sku": "ASBI-SPICES-GRE",
+    "barcode": "880640356556"
   }
 ]

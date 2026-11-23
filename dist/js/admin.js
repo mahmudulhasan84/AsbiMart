@@ -83,12 +83,7 @@ async function handleAdminLogin(e) {
       errElem.classList.remove('hidden');
     }
   } catch (err) {
-    // If backend is unreachable (e.g. offline local test), fallback to verified local credential
-    if (username === 'asbi' && (password === 'asbi123' || password === 'AsbiMart@2026')) {
-      sessionStorage.setItem('asbi_admin_auth', 'true');
-      if (errElem) errElem.classList.add('hidden');
-      checkAdminAuth();
-    } else if (errElem) {
+    if (errElem) {
       errElem.textContent = 'Connection error. Please check server status.';
       errElem.classList.remove('hidden');
     }
@@ -274,6 +269,24 @@ const INITIAL_ADMIN_ORDERS = [
 // ==========================================
 // 1. Data Initialization & Server Sync
 // ==========================================
+async function fetchServerProducts() {
+  try {
+    const baseUrl = getAdminApiBaseUrl();
+    const res = await fetch(`${baseUrl}/api/products?t=` + Date.now(), { cache: 'no-store' });
+    if (res.ok) {
+      const data = await res.json();
+      if (data.success && Array.isArray(data.products) && data.products.length > 0) {
+        adminProducts = data.products;
+        localStorage.setItem('asbi_products_custom', JSON.stringify(adminProducts));
+        renderAdminProductsTable();
+        updateDashboardStats();
+      }
+    }
+  } catch (e) {
+    console.warn('[Admin] Server products fetch offline:', e);
+  }
+}
+
 async function initAdminData() {
   // 1. Products Initialization
   const storedProducts = localStorage.getItem('asbi_products_custom');
@@ -315,10 +328,14 @@ async function initAdminData() {
   renderAdminOrdersTable();
   renderAdminReviewsList();
 
-  // Fetch real orders from backend server (with base URL support)
-  await fetchServerOrders();
+  // Fetch real master catalog and real orders from backend server
+  await Promise.all([
+    fetchServerProducts(),
+    fetchServerOrders()
+  ]);
 
   updateDashboardStats();
+  renderAdminProductsTable();
   renderAdminOrdersTable();
 }
 
@@ -573,14 +590,21 @@ function saveAdminOrders() {
 // 2. Tab Navigation
 // ==========================================
 function switchTab(tabId) {
-  const tabs = ['dashboard', 'products', 'addproduct', 'orders', 'reviews'];
+  const tabs = ['dashboard', 'products', 'addproduct', 'orders', 'reviews', 'coupons', 'inventory', 'support'];
   const titles = {
     dashboard: 'Dashboard Overview',
     products: 'Product Inventory & Catalog',
     addproduct: 'Add New Product',
     orders: 'Customer Orders Management',
-    reviews: 'Customer Reviews & Feedback'
+    reviews: 'Customer Reviews & Feedback',
+    coupons: 'Coupons & Promotional Discounts',
+    inventory: 'Inventory Health & Restock Alerts',
+    support: 'Customer CRM & Helpdesk Tickets'
   };
+
+  if (tabId === 'coupons') loadCouponsData();
+  if (tabId === 'inventory') loadInventoryData();
+  if (tabId === 'support') loadSupportTickets();
 
   tabs.forEach(t => {
     const sec = document.getElementById(`section-${t}`);
@@ -618,6 +642,17 @@ function updateDashboardStats() {
   if (pCount) pCount.textContent = formatNumber(totalProducts);
   if (oCount) oCount.textContent = formatNumber(totalOrders);
   if (sCount) sCount.textContent = `৳${formatNumber(totalSales)}`;
+
+  const avgValue = totalOrders > 0 ? Math.round(totalSales / totalOrders) : 0;
+  const lowStockCount = adminProducts.filter(p => (Number(p.stock) || 0) <= 10).length;
+
+  const avgElem = document.getElementById('statAvgOrderValue');
+  const lowStockElem = document.getElementById('statLowStock');
+  const sideLow = document.getElementById('sidebarLowStockCount');
+
+  if (avgElem) avgElem.textContent = `৳${formatNumber(avgValue)}`;
+  if (lowStockElem) lowStockElem.textContent = formatNumber(lowStockCount);
+  if (sideLow) sideLow.textContent = formatNumber(lowStockCount);
   if (rCount) rCount.textContent = formatNumber(totalReviews);
   if (sideP) sideP.textContent = String(totalProducts);
   if (sideO) sideO.textContent = String(totalOrders);
@@ -759,7 +794,7 @@ function previewNewProductImage(url) {
   }
 }
 
-function handleAddNewProduct(e) {
+async function handleAddNewProduct(e) {
   e.preventDefault();
   
   const englishName = document.getElementById('addEnglishName').value.trim();
@@ -793,6 +828,7 @@ function handleAddNewProduct(e) {
     gallery: [imageUrl],
     description: description,
     benefits: benefits,
+    stock: stock,
     variants: [
       { size: size, price: price, originalPrice: originalPrice, stock: stock }
     ],
@@ -801,10 +837,25 @@ function handleAddNewProduct(e) {
     ]
   };
 
-  adminProducts.unshift(newProduct);
-  saveAdminProducts();
+  try {
+    const baseUrl = getAdminApiBaseUrl();
+    const res = await fetch(`${baseUrl}/api/admin/products`, {
+      method: 'POST',
+      headers: getAdminAuthHeaders(),
+      body: JSON.stringify(newProduct)
+    });
+    const data = await res.json();
+    if (res.ok && data.success && data.product) {
+      adminProducts.unshift(data.product);
+    } else {
+      adminProducts.unshift(newProduct);
+    }
+  } catch (err) {
+    adminProducts.unshift(newProduct);
+  }
 
-  alert(`"${englishName}" successfully published to the product catalog!`);
+  saveAdminProducts();
+  alert(`"${englishName}" successfully published to the centralized master catalog!`);
   document.getElementById('addProductForm').reset();
   switchTab('products');
   renderAdminProductsTable();
@@ -836,7 +887,7 @@ function closeEditProductModal() {
   document.getElementById('editProductModal').classList.add('hidden');
 }
 
-function handleSaveEditedProduct(e) {
+async function handleSaveEditedProduct(e) {
   e.preventDefault();
   const id = document.getElementById('editProductId').value;
   const product = adminProducts.find(p => p.id === id);
@@ -851,35 +902,59 @@ function handleSaveEditedProduct(e) {
   const stock = parseInt(document.getElementById('editStock').value) || 0;
   const imageUrl = document.getElementById('editImageUrl').value.trim();
 
-  product.name = englishName;
-  product.banglaName = banglaName;
-  product.discountPercent = discount;
-  product.image = imageUrl;
-  product.gallery = [imageUrl];
+  const updates = {
+    name: englishName,
+    banglaName: banglaName,
+    discountPercent: discount,
+    image: imageUrl,
+    gallery: [imageUrl],
+    stock: stock,
+    variants: [
+      { size: size, price: price, originalPrice: origPrice, stock: stock }
+    ]
+  };
 
-  if (product.variants && product.variants.length > 0) {
-    product.variants[0].price = price;
-    product.variants[0].originalPrice = origPrice;
-    product.variants[0].size = size;
-    product.variants[0].stock = stock;
+  try {
+    const baseUrl = getAdminApiBaseUrl();
+    const res = await fetch(`${baseUrl}/api/admin/products/${encodeURIComponent(id)}`, {
+      method: 'PUT',
+      headers: getAdminAuthHeaders(),
+      body: JSON.stringify(updates)
+    });
+    const data = await res.json();
+    if (res.ok && data.success && data.product) {
+      Object.assign(product, data.product);
+    } else {
+      Object.assign(product, updates);
+    }
+  } catch (err) {
+    Object.assign(product, updates);
   }
 
   saveAdminProducts();
   closeEditProductModal();
   renderAdminProductsTable();
-  alert("Product details updated successfully!");
+  alert("Product details updated successfully in the centralized database!");
 }
 
-function deleteAdminProduct(productId) {
+async function deleteAdminProduct(productId) {
   const product = adminProducts.find(p => p.id === productId);
   if (!product) return;
 
   const confirmed = confirm(`Are you sure you want to delete "${product.name}"?`);
   if (confirmed) {
+    try {
+      const baseUrl = getAdminApiBaseUrl();
+      await fetch(`${baseUrl}/api/admin/products/${encodeURIComponent(productId)}`, {
+        method: 'DELETE',
+        headers: getAdminAuthHeaders()
+      });
+    } catch (err) {}
+
     adminProducts = adminProducts.filter(p => p.id !== productId);
     saveAdminProducts();
     renderAdminProductsTable();
-    alert("Product deleted successfully!");
+    alert("Product deleted successfully from the catalog!");
   }
 }
 
@@ -950,12 +1025,27 @@ function renderAdminOrdersTable() {
           ৳${formatNumber(o.totalAmount)}
         </td>
         <td class="p-3.5">
-          <select onchange="updateLiveOrderStatus('${escapeHtml(o.orderId || idx)}', this.value)" class="text-[11px] font-bold py-1 px-2 rounded-lg border border-slate-200 bg-white text-slate-700 focus:outline-none">
-            <option value="pending" ${currentCode === 'pending' ? 'selected' : ''}>Pending</option>
-            <option value="processing" ${currentCode === 'processing' ? 'selected' : ''}>Processing</option>
-            <option value="delivered" ${currentCode === 'delivered' ? 'selected' : ''}>Delivered</option>
-            <option value="cancelled" ${currentCode === 'cancelled' ? 'selected' : ''}>Cancelled</option>
-          </select>
+          <div class="space-y-1.5">
+            <select onchange="updateLiveOrderStatus('${escapeHtml(o.orderId || idx)}', this.value)" class="w-full text-[11px] font-bold py-1 px-2 rounded-lg border border-slate-200 bg-white text-slate-700 focus:outline-none">
+              <option value="pending" ${currentCode === 'pending' ? 'selected' : ''}>Pending (গৃহীত)</option>
+              <option value="confirmed" ${currentCode === 'confirmed' ? 'selected' : ''}>Confirmed (নিশ্চিত)</option>
+              <option value="processing" ${currentCode === 'processing' ? 'selected' : ''}>Processing (প্রস্তুত)</option>
+              <option value="in_courier" ${currentCode === 'in_courier' ? 'selected' : ''}>In Courier (কুরিয়ারে)</option>
+              <option value="shipped" ${currentCode === 'shipped' ? 'selected' : ''}>Shipped (পথে)</option>
+              <option value="delivered" ${currentCode === 'delivered' ? 'selected' : ''}>Delivered (ডেলিভার্ড)</option>
+              <option value="cancelled" ${currentCode === 'cancelled' ? 'selected' : ''}>Cancelled (বাতিল)</option>
+              <option value="returned" ${currentCode === 'returned' ? 'selected' : ''}>Returned (ফেরত)</option>
+            </select>
+            <div class="flex items-center gap-1">
+              <button onclick="bookCourierForOrder('${escapeHtml(o.orderId)}')" title="Steadfast কুরিয়ারে ১-ক্লিকে পার্সেল বুকিং" class="px-2 py-1 bg-amber-500 hover:bg-amber-600 text-white rounded text-[10px] font-bold transition-all shadow-xs flex items-center gap-1">
+                <span>🚚</span><span>Courier</span>
+              </button>
+              <button onclick="window.open('/api/admin/orders/' + encodeURIComponent('${escapeHtml(o.orderId)}') + '/invoice', '_blank')" title="সরকারি মূসক-৬.৩ কর চালান প্রিন্ট" class="px-2 py-1 bg-emerald-700 hover:bg-emerald-800 text-white rounded text-[10px] font-bold transition-all shadow-xs flex items-center gap-1">
+                <span>🧾</span><span>Invoice</span>
+              </button>
+            </div>
+            ${o.trackingCode ? `<div class="text-[9px] text-slate-500 font-mono font-semibold">Trk: ${escapeHtml(o.trackingCode)}</div>` : ''}
+          </div>
         </td>
       </tr>
     `;
@@ -1072,3 +1162,257 @@ async function deleteProductReview(productId, reviewIndex) {
 document.addEventListener('DOMContentLoaded', () => {
   checkAdminAuth();
 });
+
+
+// ============================================================================
+// AsbiMart Pro Enterprise Controller Functions
+// ============================================================================
+
+// ১. কুরিয়ার ১-ক্লিক অটোমেশন
+async function bookCourierForOrder(orderId) {
+  if (!orderId) return alert('অর্ডার আইডি পাওয়া যায়নি।');
+  const courier = prompt('কোন কুরিয়ারে বুকিং করতে চান? (Steadfast, Pathao, RedX)', 'Steadfast') || 'Steadfast';
+
+  try {
+    const res = await fetch(`/api/admin/orders/${encodeURIComponent(orderId)}/courier/book`, {
+      method: 'POST',
+      headers: getAdminAuthHeaders(),
+      body: JSON.stringify({ courier })
+    });
+    const data = await res.json();
+    if (res.ok && data.success) {
+      alert(`✓ ${data.message}\nট্র্যাকিং নম্বর: ${data.booking.trackingCode}`);
+      if (typeof refreshAdminData === 'function') refreshAdminData();
+    } else {
+      alert(data.message || 'কুরিয়ার বুকিং ব্যর্থ হয়েছে।');
+    }
+  } catch (err) {
+    alert('কুরিয়ার সার্ভারে যোগাযোগ ব্যর্থ হয়েছে।');
+  }
+}
+
+// ২. CSV এক্সপোর্ট
+function exportOrdersToCsv() {
+  const token = sessionStorage.getItem('asbi_admin_token') || localStorage.getItem('asbi_admin_token') || '';
+  const url = token ? `/api/admin/orders/export/csv?token=${encodeURIComponent(token)}` : '/api/admin/orders/export/csv';
+  window.open(url, '_blank');
+}
+
+// ৩. বাল্ক স্ট্যাটাস পরিবর্তন
+async function handleBulkStatusChange() {
+  const newStatus = prompt('অর্ডারগুলোর নতুন স্ট্যাটাস কোড লিখুন:\n(pending, confirmed, processing, in_courier, shipped, delivered, cancelled)', 'processing');
+  if (!newStatus) return;
+
+  const orderIds = adminOrders.map(o => o.orderId).filter(Boolean);
+  if (orderIds.length === 0) return alert('কোনো অর্ডার পাওয়া যায়নি।');
+
+  try {
+    const res = await fetch('/api/admin/orders/bulk-status', {
+      method: 'POST',
+      headers: getAdminAuthHeaders(),
+      body: JSON.stringify({ orderIds, statusCode: newStatus })
+    });
+    const data = await res.json();
+    if (res.ok && data.success) {
+      alert(data.message);
+      if (typeof refreshAdminData === 'function') refreshAdminData();
+    } else {
+      alert(data.message || 'বাল্ক স্ট্যাটাস পরিবর্তন ব্যর্থ হয়েছে।');
+    }
+  } catch (e) {
+    alert('সার্ভার যোগাযোগে ত্রুটি।');
+  }
+}
+
+// ৪. কুপন ম্যানেজমেন্ট
+async function loadCouponsData() {
+  const tbody = document.getElementById('adminCouponsTableBody');
+  if (!tbody) return;
+
+  try {
+    const res = await fetch('/api/admin/coupons', { headers: getAdminAuthHeaders() });
+    const data = await res.json();
+    if (res.ok && data.success) {
+      if (data.coupons.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="7" class="p-6 text-center text-slate-400">কোনো কুপন তৈরি করা হয়নি।</td></tr>';
+        return;
+      }
+      tbody.innerHTML = data.coupons.map(c => `
+        <tr class="hover:bg-slate-50 transition-colors">
+          <td class="p-3.5 font-bold font-mono text-emerald-800 text-sm">${escapeHtml(c.code)}</td>
+          <td class="p-3.5 text-slate-700 font-medium">${escapeHtml(c.description || '')}</td>
+          <td class="p-3.5"><span class="px-2 py-0.5 rounded text-[10px] font-bold uppercase ${c.discountType === 'percent' ? 'bg-blue-100 text-blue-800' : 'bg-purple-100 text-purple-800'}">${escapeHtml(c.discountType)}</span></td>
+          <td class="p-3.5 font-bold text-slate-900">${c.discountType === 'percent' ? c.discountValue + '%' : '৳' + c.discountValue}</td>
+          <td class="p-3.5 text-slate-600">৳${c.minOrderAmount || 0}</td>
+          <td class="p-3.5 font-bold text-indigo-700">${c.usageCount || 0} বার</td>
+          <td class="p-3.5">
+            <button onclick="deleteCouponCode('${escapeHtml(c.code)}')" class="text-rose-600 hover:text-rose-800 font-bold text-xs p-1">মুছুন</button>
+          </td>
+        </tr>
+      `).join('');
+    }
+  } catch (e) {
+    tbody.innerHTML = '<tr><td colspan="7" class="p-4 text-center text-rose-500">কুপন লোড ব্যর্থ।</td></tr>';
+  }
+}
+
+async function openCreateCouponModal() {
+  const code = prompt('নতুন কুপন কোড (যেমন: SUPER20):');
+  if (!code) return;
+  const desc = prompt('কুপনের বিবরণ:', 'বিশেষ মূল্যছাড়') || 'বিশেষ মূল্যছাড়';
+  const val = prompt('ছাড়ের পরিমাণ (শতাংশ বা ফিক্সড টাকা):', '10') || '10';
+  const minOrd = prompt('সর্বনিম্ন অর্ডারের পরিমাণ:', '500') || '500';
+
+  try {
+    const res = await fetch('/api/admin/coupons', {
+      method: 'POST',
+      headers: getAdminAuthHeaders(),
+      body: JSON.stringify({
+        code,
+        description: desc,
+        discountType: 'percent',
+        discountValue: Number(val) || 10,
+        minOrderAmount: Number(minOrd) || 500
+      })
+    });
+    const data = await res.json();
+    if (res.ok && data.success) {
+      alert('নতুন কুপন সফলভাবে তৈরি হয়েছে!');
+      loadCouponsData();
+    } else {
+      alert(data.message || 'কুপন তৈরি ব্যর্থ।');
+    }
+  } catch (e) {
+    alert('সার্ভার যোগাযোগে ত্রুটি।');
+  }
+}
+
+async function deleteCouponCode(code) {
+  if (!confirm(`আপনি কি "${code}" কুপনটি মুছে ফেলতে চান?`)) return;
+  try {
+    const res = await fetch(`/api/admin/coupons/${encodeURIComponent(code)}`, {
+      method: 'DELETE',
+      headers: getAdminAuthHeaders()
+    });
+    const data = await res.json();
+    if (res.ok && data.success) {
+      alert('কুপন মুছে ফেলা হয়েছে।');
+      loadCouponsData();
+    }
+  } catch (e) {}
+}
+
+// ৫. ইনভেন্টরি ও রিস্টক কন্ট্রোলার
+async function loadInventoryData() {
+  const container = document.getElementById('adminInventoryList');
+  if (!container) return;
+
+  try {
+    const res = await fetch('/api/admin/inventory/low-stock', { headers: getAdminAuthHeaders() });
+    const data = await res.json();
+    if (res.ok && data.success) {
+      if (data.products.length === 0) {
+        container.innerHTML = '<div class="p-6 text-center text-emerald-700 font-bold bg-emerald-50 rounded-2xl">✓ আলহামদুলিল্লাহ! কোনো পণ্যের স্টক সংকটাপন্ন নয়। সব পণ্যের পর্যাপ্ত স্টক রয়েছে।</div>';
+        return;
+      }
+
+      container.innerHTML = data.products.map(p => `
+        <div class="flex items-center justify-between p-3.5 bg-rose-50 border border-rose-200 rounded-xl">
+          <div class="flex items-center gap-3">
+            <span class="text-xl">⚠️</span>
+            <div>
+              <h4 class="font-bold text-slate-900 text-xs sm:text-sm">${escapeHtml(p.banglaName || p.name)}</h4>
+              <p class="text-[11px] text-rose-700 font-semibold">বর্তমান অবশিষ্ট স্টক: মাত্র ${p.stock}টি</p>
+            </div>
+          </div>
+          <button onclick="handleRestockProduct('${escapeHtml(p.id)}')" class="px-3 py-1.5 bg-emerald-700 hover:bg-emerald-800 text-white font-bold text-xs rounded-xl transition-all shadow-xs">
+            + রিস্টক করুন
+          </button>
+        </div>
+      `).join('');
+    }
+  } catch (e) {
+    container.innerHTML = '<div class="p-4 text-center text-rose-500">ইনভেন্টরি ডেটা লোড ব্যর্থ।</div>';
+  }
+}
+
+async function handleRestockProduct(productId) {
+  const qty = prompt('কতটি পণ্য স্টক যোগ করতে চান?', '20');
+  if (!qty || isNaN(qty)) return;
+
+  try {
+    const res = await fetch('/api/admin/inventory/restock', {
+      method: 'POST',
+      headers: getAdminAuthHeaders(),
+      body: JSON.stringify({ productId, quantity: Number(qty) })
+    });
+    const data = await res.json();
+    if (res.ok && data.success) {
+      alert(data.message);
+      loadInventoryData();
+      if (typeof refreshAdminData === 'function') refreshAdminData();
+    } else {
+      alert(data.message || 'রিস্টক ব্যর্থ হয়েছে।');
+    }
+  } catch (e) {}
+}
+
+// ৬. কাস্টমার সাপোর্ট টিকেট কন্ট্রোলার
+async function loadSupportTickets() {
+  const container = document.getElementById('adminSupportList');
+  if (!container) return;
+
+  try {
+    const res = await fetch('/api/admin/support/tickets', { headers: getAdminAuthHeaders() });
+    const data = await res.json();
+    if (res.ok && data.success) {
+      if (data.tickets.length === 0) {
+        container.innerHTML = '<div class="p-6 text-center text-slate-400 font-semibold">কোনো কাস্টমার সাপোর্ট টিকেট নেই।</div>';
+        return;
+      }
+      container.innerHTML = data.tickets.map(t => `
+        <div class="p-4 bg-slate-50 border border-slate-200 rounded-xl space-y-2">
+          <div class="flex items-center justify-between">
+            <span class="font-bold text-slate-900 text-xs sm:text-sm">${escapeHtml(t.customerName)} (${escapeHtml(t.customerPhone)})</span>
+            <span class="px-2 py-0.5 rounded text-[10px] font-bold uppercase ${t.status === 'open' ? 'bg-amber-100 text-amber-800' : 'bg-emerald-100 text-emerald-800'}">${escapeHtml(t.status)}</span>
+          </div>
+          <div class="text-xs text-slate-700 bg-white p-2.5 rounded-lg border border-slate-200">
+            <strong>বিষয়:</strong> ${escapeHtml(t.subject)}<br>
+            <strong>বার্তা:</strong> ${escapeHtml(t.message)}
+          </div>
+          ${t.reply ? `
+            <div class="text-[11px] text-emerald-800 bg-emerald-50 p-2 rounded-lg border border-emerald-200">
+              <strong>অ্যাডমিন উত্তর:</strong> ${escapeHtml(t.reply)}
+            </div>
+          ` : `
+            <button onclick="handleReplySupportTicket('${escapeHtml(t.id)}')" class="px-3 py-1 bg-blue-900 hover:bg-blue-800 text-white font-bold text-xs rounded-lg transition-all shadow-xs">
+              উত্তর লিখুন (Reply)
+            </button>
+          `}
+        </div>
+      `).join('');
+    }
+  } catch (e) {
+    container.innerHTML = '<div class="p-4 text-center text-rose-500">টিকেট লোড ব্যর্থ।</div>';
+  }
+}
+
+async function handleReplySupportTicket(ticketId) {
+  const reply = prompt('গ্রাহককে কী উত্তর দিতে চান?');
+  if (!reply) return;
+
+  try {
+    const res = await fetch(`/api/admin/support/tickets/${encodeURIComponent(ticketId)}/reply`, {
+      method: 'POST',
+      headers: getAdminAuthHeaders(),
+      body: JSON.stringify({ reply })
+    });
+    const data = await res.json();
+    if (res.ok && data.success) {
+      alert('উত্তর সফলভাবে পাঠানো হয়েছে!');
+      loadSupportTickets();
+    } else {
+      alert(data.message || 'উত্তর পাঠাতে ব্যর্থ হয়েছে।');
+    }
+  } catch (e) {}
+}

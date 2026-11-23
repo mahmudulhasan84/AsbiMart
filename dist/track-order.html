@@ -139,14 +139,30 @@
       document.getElementById('displayOrderId').textContent = '#' + order.orderId;
 
       const statusMap = {
-        pending: { label: '⏳ Order Pending', pct: '25%' },
-        processing: { label: '📦 Packing & Quality Check', pct: '50%' },
-        shipped: { label: '🚚 On Delivery', pct: '75%' },
-        delivered: { label: '✓ Delivered', pct: '100%' }
+        pending: { label: '⏳ Order Pending', pct: '25%', step: 1 },
+        confirmed: { label: '✓ Order Confirmed', pct: '40%', step: 2 },
+        processing: { label: '📦 Packing & Quality Check', pct: '50%', step: 2 },
+        in_courier: { label: '🚚 In Courier Transit', pct: '75%', step: 3 },
+        shipped: { label: '🚚 On Delivery', pct: '85%', step: 3 },
+        delivered: { label: '✓ Delivered', pct: '100%', step: 4 },
+        completed: { label: '✓ Completed', pct: '100%', step: 4 },
+        cancelled: { label: '❌ Cancelled', pct: '0%', step: 0 },
+        returned: { label: '↩️ Returned', pct: '0%', step: 0 }
       };
       const st = statusMap[order.statusCode] || statusMap.pending;
       document.getElementById('displayOrderStatus').textContent = st.label;
       document.getElementById('trackProgressBar').style.width = st.pct;
+
+      const activeStep = st.step;
+      const s1 = document.getElementById('step1Icon');
+      const s2 = document.getElementById('step2Icon');
+      const s3 = document.getElementById('step3Icon');
+      const s4 = document.getElementById('step4Icon');
+
+      if (s1) s1.className = `w-8 h-8 rounded-full ${activeStep >= 1 ? 'bg-emerald-600 text-white shadow-md' : 'bg-slate-200 text-slate-500'} mx-auto flex items-center justify-center font-bold mb-1`;
+      if (s2) s2.className = `w-8 h-8 rounded-full ${activeStep >= 2 ? 'bg-emerald-600 text-white shadow-md' : 'bg-slate-200 text-slate-500'} mx-auto flex items-center justify-center font-bold mb-1`;
+      if (s3) s3.className = `w-8 h-8 rounded-full ${activeStep >= 3 ? 'bg-blue-900 text-white ring-4 ring-blue-100 shadow-md' : 'bg-slate-200 text-slate-500'} mx-auto flex items-center justify-center font-bold mb-1`;
+      if (s4) s4.className = `w-8 h-8 rounded-full ${activeStep >= 4 ? 'bg-emerald-600 text-white shadow-md' : 'bg-slate-200 text-slate-500'} mx-auto flex items-center justify-center font-bold mb-1`;
 
       const itemsEl = document.getElementById('trackItemsList');
       itemsEl.innerHTML = (order.items || []).map(i => `

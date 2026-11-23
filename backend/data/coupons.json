@@ -1,0 +1,46 @@
+[
+  {
+    "code": "ASBI10",
+    "description": "১০% বিশেষ মূল্যছাড় (সর্বনিম্ন ৫০০ টাকার অর্ডারে)",
+    "discountType": "percent",
+    "discountValue": 10,
+    "minOrderAmount": 500,
+    "maxDiscount": 300,
+    "isActive": true,
+    "expiresAt": "2027-12-31T23:59:59.000Z",
+    "usageCount": 14
+  },
+  {
+    "code": "FREESHIP",
+    "description": "ফ্রি ডেলিভারি সারা বাংলাদেশ (সর্বনিম্ন ৭০০ টাকার অর্ডারে)",
+    "discountType": "free_shipping",
+    "discountValue": 0,
+    "minOrderAmount": 700,
+    "maxDiscount": 120,
+    "isActive": true,
+    "expiresAt": "2027-12-31T23:59:59.000Z",
+    "usageCount": 28
+  },
+  {
+    "code": "ORGANIC50",
+    "description": "৫০ টাকা ফ্ল্যাট ছাড় (সর্বনিম্ন ৬০০ টাকার অর্ডারে)",
+    "discountType": "fixed",
+    "discountValue": 50,
+    "minOrderAmount": 600,
+    "maxDiscount": 50,
+    "isActive": true,
+    "expiresAt": "2027-12-31T23:59:59.000Z",
+    "usageCount": 9
+  },
+  {
+    "code": "WELCOME100",
+    "description": "নতুন কাস্টমার স্পেশাল ১০০ টাকা ছাড় (সর্বনিম্ন ১০০০ টাকায়)",
+    "discountType": "fixed",
+    "discountValue": 100,
+    "minOrderAmount": 1000,
+    "maxDiscount": 100,
+    "isActive": true,
+    "expiresAt": "2027-12-31T23:59:59.000Z",
+    "usageCount": 42
+  }
+]

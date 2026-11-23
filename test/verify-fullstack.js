@@ -49,6 +49,7 @@ async function runTests() {
 
   // Start the server
   const serverModule = require('../backend/server.js');
+  serverInstance = serverModule.listen(5056);
   // Wait 1 second for port listening
   await new Promise(r => setTimeout(r, 1000));
 
@@ -303,9 +304,11 @@ async function runTests() {
 
     // ------------------------------------------------------------------------
     console.log('\n✅ ALL 10 TEST SUITES PASSED FLAWLESSLY WITH 100% SUCCESS!\n');
+    if (serverInstance) serverInstance.close();
     process.exit(0);
   } catch (err) {
     console.error('\n❌ Verification Failed with Error:', err.message);
+    if (serverInstance) serverInstance.close();
     process.exit(1);
   }
 }

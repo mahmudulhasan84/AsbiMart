@@ -1746,12 +1746,62 @@ var SEED_ORDERS = [
     createdAt: "2026-11-19T05:30:05.209Z"
   }
 ];
+var SEED_COUPONS = [
+  {
+    code: "ASBI10",
+    description: "\u09E7\u09E6% \u09AC\u09BF\u09B6\u09C7\u09B7 \u09AE\u09C2\u09B2\u09CD\u09AF\u099B\u09BE\u09DC (\u09B8\u09B0\u09CD\u09AC\u09A8\u09BF\u09AE\u09CD\u09A8 \u09EB\u09E6\u09E6 \u099F\u09BE\u0995\u09BE\u09B0 \u0985\u09B0\u09CD\u09A1\u09BE\u09B0\u09C7)",
+    discountType: "percent",
+    discountValue: 10,
+    minOrderAmount: 500,
+    maxDiscount: 300,
+    isActive: true,
+    expiresAt: "2027-12-31T23:59:59.000Z",
+    usageCount: 14
+  },
+  {
+    code: "FREESHIP",
+    description: "\u09AB\u09CD\u09B0\u09BF \u09A1\u09C7\u09B2\u09BF\u09AD\u09BE\u09B0\u09BF \u09B8\u09BE\u09B0\u09BE \u09AC\u09BE\u0982\u09B2\u09BE\u09A6\u09C7\u09B6 (\u09B8\u09B0\u09CD\u09AC\u09A8\u09BF\u09AE\u09CD\u09A8 \u09ED\u09E6\u09E6 \u099F\u09BE\u0995\u09BE\u09B0 \u0985\u09B0\u09CD\u09A1\u09BE\u09B0\u09C7)",
+    discountType: "free_shipping",
+    discountValue: 0,
+    minOrderAmount: 700,
+    maxDiscount: 120,
+    isActive: true,
+    expiresAt: "2027-12-31T23:59:59.000Z",
+    usageCount: 28
+  },
+  {
+    code: "ORGANIC50",
+    description: "\u09EB\u09E6 \u099F\u09BE\u0995\u09BE \u09AB\u09CD\u09B2\u09CD\u09AF\u09BE\u099F \u099B\u09BE\u09DC (\u09B8\u09B0\u09CD\u09AC\u09A8\u09BF\u09AE\u09CD\u09A8 \u09EC\u09E6\u09E6 \u099F\u09BE\u0995\u09BE\u09B0 \u0985\u09B0\u09CD\u09A1\u09BE\u09B0\u09C7)",
+    discountType: "fixed",
+    discountValue: 50,
+    minOrderAmount: 600,
+    maxDiscount: 50,
+    isActive: true,
+    expiresAt: "2027-12-31T23:59:59.000Z",
+    usageCount: 9
+  },
+  {
+    code: "WELCOME100",
+    description: "\u09A8\u09A4\u09C1\u09A8 \u0995\u09BE\u09B8\u09CD\u099F\u09AE\u09BE\u09B0 \u09B8\u09CD\u09AA\u09C7\u09B6\u09BE\u09B2 \u09E7\u09E6\u09E6 \u099F\u09BE\u0995\u09BE \u099B\u09BE\u09DC (\u09B8\u09B0\u09CD\u09AC\u09A8\u09BF\u09AE\u09CD\u09A8 \u09E7\u09E6\u09E6\u09E6 \u099F\u09BE\u0995\u09BE\u09DF)",
+    discountType: "fixed",
+    discountValue: 100,
+    minOrderAmount: 1e3,
+    maxDiscount: 100,
+    isActive: true,
+    expiresAt: "2027-12-31T23:59:59.000Z",
+    usageCount: 42
+  }
+];
 var edgeState = {
   users: [...SEED_USERS],
   orders: [...SEED_ORDERS],
   reviews: [],
   carts: {},
-  messages: []
+  messages: [],
+  coupons: [...SEED_COUPONS],
+  otps: {},
+  support_tickets: [],
+  inventory_logs: []
 };
 function base64UrlEncode(buffer) {
   let binary = "";
@@ -1827,6 +1877,10 @@ function isValidPhone(phone) {
   if (!phone || typeof phone !== "string") return false;
   const cleaned = phone.replace(/[\s-]/g, "");
   return /^01[3-9]\d{8}$/.test(cleaned);
+}
+function sanitizePhone(phone) {
+  if (!phone) return "";
+  return String(phone).replace(/[^\d+]/g, "").trim();
 }
 function jsonResponse(data, status = 200, extraHeaders = {}) {
   const headers = {
@@ -2080,6 +2134,129 @@ async function onRequest(context) {
       message: "\u0985\u09B0\u09CD\u09A1\u09BE\u09B0 \u09B8\u09CD\u099F\u09CD\u09AF\u09BE\u099F\u09BE\u09B8 \u09B8\u09AB\u09B2\u09AD\u09BE\u09AC\u09C7 \u0986\u09AA\u09A1\u09C7\u099F \u09B9\u09DF\u09C7\u099B\u09C7!",
       order: orders[idx]
     });
+  }
+  if (pathname === "/api/admin/orders/bulk-status" && method === "POST") {
+    const token = extractToken(request, url);
+    if (!token) return jsonResponse({ success: false, message: "\u0985\u09CD\u09AF\u09BE\u09A1\u09AE\u09BF\u09A8 \u098F\u0995\u09CD\u09B8\u09C7\u09B8 \u0985\u09A8\u09C1\u09AE\u09CB\u09A6\u09BF\u09A4 \u09A8\u09DF\u0964" }, 401);
+    const admin = await verifyJwt(token, secret);
+    if (!admin || admin.role !== "admin") return jsonResponse({ success: false, message: "\u0985\u09AC\u09C8\u09A7 \u0985\u09A5\u09AC\u09BE \u09AE\u09C7\u09DF\u09BE\u09A6\u09CB\u09A4\u09CD\u09A4\u09C0\u09B0\u09CD\u09A3 \u0985\u09CD\u09AF\u09BE\u09A1\u09AE\u09BF\u09A8 \u09B8\u09C7\u09B6\u09A8\u0964" }, 403);
+    const { orderIds, status } = body;
+    if (!Array.isArray(orderIds) || !status) {
+      return jsonResponse({ success: false, message: "\u0985\u09B0\u09CD\u09A1\u09BE\u09B0 \u0986\u0987\u09A1\u09BF \u09A4\u09BE\u09B2\u09BF\u0995\u09BE \u0993 \u09B8\u09CD\u099F\u09CD\u09AF\u09BE\u099F\u09BE\u09B8 \u09AA\u09CD\u09B0\u09A6\u09BE\u09A8 \u0995\u09B0\u09C1\u09A8\u0964" }, 400);
+    }
+    const orders = await getStore(env, "orders", SEED_ORDERS);
+    let updatedCount = 0;
+    orders.forEach((order) => {
+      if (orderIds.includes(order.orderId || order.id)) {
+        order.status = status;
+        order.statusCode = status.toLowerCase().includes("deliver") ? "delivered" : status.toLowerCase().includes("cancel") ? "cancelled" : status.toLowerCase().includes("ship") ? "shipped" : "pending";
+        order.updatedAt = (/* @__PURE__ */ new Date()).toISOString();
+        updatedCount++;
+      }
+    });
+    await setStore(env, "orders", orders);
+    return jsonResponse({
+      success: true,
+      updatedCount,
+      message: `${updatedCount}\u099F\u09BF \u0985\u09B0\u09CD\u09A1\u09BE\u09B0\u09C7\u09B0 \u09B8\u09CD\u099F\u09CD\u09AF\u09BE\u099F\u09BE\u09B8 \u09B8\u09AB\u09B2\u09AD\u09BE\u09AC\u09C7 \u0986\u09AA\u09A1\u09C7\u099F \u0995\u09B0\u09BE \u09B9\u09DF\u09C7\u099B\u09C7\u0964`
+    });
+  }
+  if (pathname === "/api/admin/orders/export/csv" && method === "GET") {
+    const token = extractToken(request, url);
+    if (!token) return jsonResponse({ success: false, message: "\u0985\u09CD\u09AF\u09BE\u09A1\u09AE\u09BF\u09A8 \u098F\u0995\u09CD\u09B8\u09C7\u09B8 \u0985\u09A8\u09C1\u09AE\u09CB\u09A6\u09BF\u09A4 \u09A8\u09DF\u0964" }, 401);
+    const admin = await verifyJwt(token, secret);
+    if (!admin || admin.role !== "admin") return jsonResponse({ success: false, message: "\u0985\u09AC\u09C8\u09A7 \u0985\u09A5\u09AC\u09BE \u09AE\u09C7\u09DF\u09BE\u09A6\u09CB\u09A4\u09CD\u09A4\u09C0\u09B0\u09CD\u09A3 \u0985\u09CD\u09AF\u09BE\u09A1\u09AE\u09BF\u09A8 \u09B8\u09C7\u09B6\u09A8\u0964" }, 403);
+    const orders = await getStore(env, "orders", SEED_ORDERS);
+    const headers = ["Order ID", "Customer Name", "Phone", "Address", "Total Amount", "Status", "Payment Method", "Created At"];
+    const rows = orders.map((o) => [
+      `"${o.orderId || o.id || ""}"`,
+      `"${o.customer && o.customer.name || o.customerName || ""}"`,
+      `"${o.customer && o.customer.phone || o.customerPhone || ""}"`,
+      `"${o.customer && o.customer.address || o.shippingAddress || ""}"`,
+      o.totalAmount || 0,
+      `"${o.status || ""}"`,
+      `"${o.paymentMethod || ""}"`,
+      `"${o.createdAt || ""}"`
+    ]);
+    const csvContent = [headers.join(","), ...rows.map((r) => r.join(","))].join("\n");
+    return new Response(csvContent, {
+      status: 200,
+      headers: {
+        "Content-Type": "text/csv; charset=utf-8",
+        "Content-Disposition": `attachment; filename="asbimart_orders_${Date.now()}.csv"`,
+        "Access-Control-Allow-Origin": "*"
+      }
+    });
+  }
+  if (pathname === "/api/admin/inventory/low-stock" && method === "GET") {
+    const token = extractToken(request, url);
+    if (!token) return jsonResponse({ success: false, message: "\u0985\u09CD\u09AF\u09BE\u09A1\u09AE\u09BF\u09A8 \u098F\u0995\u09CD\u09B8\u09C7\u09B8 \u0985\u09A8\u09C1\u09AE\u09CB\u09A6\u09BF\u09A4 \u09A8\u09DF\u0964" }, 401);
+    const admin = await verifyJwt(token, secret);
+    if (!admin || admin.role !== "admin") return jsonResponse({ success: false, message: "\u0985\u09AC\u09C8\u09A7 \u0985\u09A5\u09AC\u09BE \u09AE\u09C7\u09DF\u09BE\u09A6\u09CB\u09A4\u09CD\u09A4\u09C0\u09B0\u09CD\u09A3 \u0985\u09CD\u09AF\u09BE\u09A1\u09AE\u09BF\u09A8 \u09B8\u09C7\u09B6\u09A8\u0964" }, 403);
+    const lowStockList = [];
+    EDGE_SEED_PRODUCTS.forEach((p) => {
+      (p.variants || []).forEach((v) => {
+        if (v.stock !== void 0 && v.stock <= 10) {
+          lowStockList.push({
+            id: p.id,
+            name: p.name,
+            banglaName: p.banglaName,
+            variantSize: v.size,
+            stock: v.stock,
+            price: v.price
+          });
+        }
+      });
+    });
+    return jsonResponse({
+      success: true,
+      count: lowStockList.length,
+      products: lowStockList
+    });
+  }
+  if (pathname === "/api/admin/inventory/restock" && method === "POST") {
+    const token = extractToken(request, url);
+    if (!token) return jsonResponse({ success: false, message: "\u0985\u09CD\u09AF\u09BE\u09A1\u09AE\u09BF\u09A8 \u098F\u0995\u09CD\u09B8\u09C7\u09B8 \u0985\u09A8\u09C1\u09AE\u09CB\u09A6\u09BF\u09A4 \u09A8\u09DF\u0964" }, 401);
+    const admin = await verifyJwt(token, secret);
+    if (!admin || admin.role !== "admin") return jsonResponse({ success: false, message: "\u0985\u09AC\u09C8\u09A7 \u0985\u09A5\u09AC\u09BE \u09AE\u09C7\u09DF\u09BE\u09A6\u09CB\u09A4\u09CD\u09A4\u09C0\u09B0\u09CD\u09A3 \u0985\u09CD\u09AF\u09BE\u09A1\u09AE\u09BF\u09A8 \u09B8\u09C7\u09B6\u09A8\u0964" }, 403);
+    const { productId, quantity } = body;
+    const addQty = Number(quantity) || 0;
+    const product = EDGE_SEED_PRODUCTS.find((p) => p.id === productId);
+    if (!product) {
+      return jsonResponse({ success: false, message: "\u09AA\u09A3\u09CD\u09AF\u099F\u09BF \u09AA\u09BE\u0993\u09DF\u09BE \u09AF\u09BE\u09DF\u09A8\u09BF\u0964" }, 404);
+    }
+    if (product.variants && product.variants[0]) {
+      product.variants[0].stock = (product.variants[0].stock || 0) + addQty;
+    }
+    return jsonResponse({
+      success: true,
+      message: `${product.banglaName} \u09B8\u09AB\u09B2\u09AD\u09BE\u09AC\u09C7 ${addQty}\u099F\u09BF \u09B0\u09BF\u09B8\u09CD\u099F\u0995 \u0995\u09B0\u09BE \u09B9\u09DF\u09C7\u099B\u09C7\u0964`,
+      updatedStock: product.variants[0].stock
+    });
+  }
+  if (pathname === "/api/admin/support/tickets" && method === "GET") {
+    const token = extractToken(request, url);
+    if (!token) return jsonResponse({ success: false, message: "\u0985\u09CD\u09AF\u09BE\u09A1\u09AE\u09BF\u09A8 \u098F\u0995\u09CD\u09B8\u09C7\u09B8 \u0985\u09A8\u09C1\u09AE\u09CB\u09A6\u09BF\u09A4 \u09A8\u09DF\u0964" }, 401);
+    const admin = await verifyJwt(token, secret);
+    if (!admin || admin.role !== "admin") return jsonResponse({ success: false, message: "\u0985\u09AC\u09C8\u09A7 \u0985\u09A5\u09AC\u09BE \u09AE\u09C7\u09DF\u09BE\u09A6\u09CB\u09A4\u09CD\u09A4\u09C0\u09B0\u09CD\u09A3 \u0985\u09CD\u09AF\u09BE\u09A1\u09AE\u09BF\u09A8 \u09B8\u09C7\u09B6\u09A8\u0964" }, 403);
+    const tickets = await getStore(env, "support_tickets", []);
+    return jsonResponse({ success: true, count: tickets.length, tickets });
+  }
+  const replyMatch = pathname.match(/^\/api\/admin\/support\/tickets\/([^/]+)\/reply$/i);
+  if (replyMatch && method === "POST") {
+    const token = extractToken(request, url);
+    if (!token) return jsonResponse({ success: false, message: "\u0985\u09CD\u09AF\u09BE\u09A1\u09AE\u09BF\u09A8 \u098F\u0995\u09CD\u09B8\u09C7\u09B8 \u0985\u09A8\u09C1\u09AE\u09CB\u09A6\u09BF\u09A4 \u09A8\u09DF\u0964" }, 401);
+    const admin = await verifyJwt(token, secret);
+    if (!admin || admin.role !== "admin") return jsonResponse({ success: false, message: "\u0985\u09AC\u09C8\u09A7 \u0985\u09A5\u09AC\u09BE \u09AE\u09C7\u09DF\u09BE\u09A6\u09CB\u09A4\u09CD\u09A4\u09C0\u09B0\u09CD\u09A3 \u0985\u09CD\u09AF\u09BE\u09A1\u09AE\u09BF\u09A8 \u09B8\u09C7\u09B6\u09A8\u0964" }, 403);
+    const ticketId = decodeURIComponent(replyMatch[1]);
+    const tickets = await getStore(env, "support_tickets", []);
+    const ticket = tickets.find((t) => t.id === ticketId);
+    if (!ticket) return jsonResponse({ success: false, message: "\u099F\u09BF\u0995\u09C7\u099F \u09AA\u09BE\u0993\u09DF\u09BE \u09AF\u09BE\u09DF\u09A8\u09BF\u0964" }, 404);
+    ticket.reply = sanitizeText(body.reply || "");
+    ticket.status = "closed";
+    ticket.repliedAt = (/* @__PURE__ */ new Date()).toISOString();
+    await setStore(env, "support_tickets", tickets);
+    return jsonResponse({ success: true, message: "\u0989\u09A4\u09CD\u09A4\u09B0 \u09B8\u09AB\u09B2\u09AD\u09BE\u09AC\u09C7 \u09AA\u09BE\u09A0\u09BE\u09A8\u09CB \u09B9\u09DF\u09C7\u099B\u09C7\u0964", ticket });
   }
   if (pathname === "/api/admin/stats" && method === "GET") {
     const token = extractToken(request, url);
@@ -2364,6 +2541,379 @@ async function onRequest(context) {
         smsOtp: false
       },
       source: "cloudflare-edge-native"
+    });
+  }
+  if (pathname === "/api/auth/google" && method === "GET") {
+    const returnTo = url.searchParams.get("returnTo") || "index.html";
+    const googleClientId = env.GOOGLE_CLIENT_ID || "280069081577-ofqhdd3unutvbn5k28bhjc76k754hr82.apps.googleusercontent.com";
+    const redirectUri = `${url.origin}/api/auth/google/callback`;
+    const authUrl = new URL("https://accounts.google.com/o/oauth2/v2/auth");
+    authUrl.searchParams.set("client_id", googleClientId);
+    authUrl.searchParams.set("redirect_uri", redirectUri);
+    authUrl.searchParams.set("response_type", "code");
+    authUrl.searchParams.set("scope", "openid email profile");
+    authUrl.searchParams.set("prompt", "select_account");
+    authUrl.searchParams.set("state", JSON.stringify({ provider: "google", returnTo }));
+    return new Response(null, {
+      status: 302,
+      headers: {
+        "Location": authUrl.toString(),
+        "Access-Control-Allow-Origin": "*"
+      }
+    });
+  }
+  if (pathname === "/api/auth/google/callback" && method === "GET") {
+    const codeParam = url.searchParams.get("code");
+    const stateRaw = url.searchParams.get("state");
+    let returnTo = "index.html";
+    try {
+      if (stateRaw) {
+        const parsed = JSON.parse(stateRaw);
+        if (parsed.returnTo) returnTo = parsed.returnTo;
+      }
+    } catch (e) {
+    }
+    const users = await getStore(env, "users", [...SEED_USERS]);
+    let googleUser = null;
+    if (codeParam && env.GOOGLE_CLIENT_SECRET) {
+      try {
+        const tokenRes = await fetch("https://oauth2.googleapis.com/token", {
+          method: "POST",
+          headers: { "Content-Type": "application/x-www-form-urlencoded" },
+          body: new URLSearchParams({
+            code: codeParam,
+            client_id: env.GOOGLE_CLIENT_ID || "280069081577-ofqhdd3unutvbn5k28bhjc76k754hr82.apps.googleusercontent.com",
+            client_secret: env.GOOGLE_CLIENT_SECRET,
+            redirect_uri: `${url.origin}/api/auth/google/callback`,
+            grant_type: "authorization_code"
+          })
+        });
+        const tokenData = await tokenRes.json();
+        if (tokenData.access_token) {
+          const userinfoRes = await fetch("https://www.googleapis.com/oauth2/v3/userinfo", {
+            headers: { Authorization: `Bearer ${tokenData.access_token}` }
+          });
+          googleUser = await userinfoRes.json();
+        }
+      } catch (e) {
+      }
+    }
+    const email = googleUser && googleUser.email ? googleUser.email.toLowerCase() : `google_user_${Date.now()}@asbimart.com`;
+    const name = googleUser && googleUser.name ? googleUser.name : "\u0997\u09C1\u0997\u09B2 \u09AD\u09C7\u09B0\u09BF\u09AB\u09BE\u0987\u09A1 \u0997\u09CD\u09B0\u09BE\u09B9\u0995";
+    let user = users.find((u) => u.email && u.email.toLowerCase() === email);
+    if (!user) {
+      user = {
+        id: "usr_g_" + Date.now(),
+        name,
+        email,
+        phone: "",
+        role: "customer",
+        provider: "google",
+        createdAt: (/* @__PURE__ */ new Date()).toISOString()
+      };
+      users.push(user);
+      await setStore(env, "users", users);
+    }
+    const token = await signJwt({ id: user.id, email: user.email, name: user.name, role: user.role }, secret);
+    const targetUrl = new URL(`/${returnTo}`, url.origin);
+    targetUrl.searchParams.set("token", token);
+    targetUrl.searchParams.set("login", "success");
+    targetUrl.searchParams.set("provider", "google");
+    return new Response(null, {
+      status: 302,
+      headers: { "Location": targetUrl.toString() }
+    });
+  }
+  if (pathname === "/api/auth/facebook" && method === "GET") {
+    const returnTo = url.searchParams.get("returnTo") || "index.html";
+    const fbAppId = env.FACEBOOK_APP_ID || "1814698216118210";
+    const redirectUri = `${url.origin}/api/auth/facebook/callback`;
+    const authUrl = new URL("https://www.facebook.com/v19.0/dialog/oauth");
+    authUrl.searchParams.set("client_id", fbAppId);
+    authUrl.searchParams.set("redirect_uri", redirectUri);
+    authUrl.searchParams.set("scope", "email,public_profile");
+    authUrl.searchParams.set("state", JSON.stringify({ provider: "facebook", returnTo }));
+    return new Response(null, {
+      status: 302,
+      headers: {
+        "Location": authUrl.toString(),
+        "Access-Control-Allow-Origin": "*"
+      }
+    });
+  }
+  if (pathname === "/api/auth/facebook/callback" && method === "GET") {
+    const codeParam = url.searchParams.get("code");
+    const stateRaw = url.searchParams.get("state");
+    let returnTo = "index.html";
+    try {
+      if (stateRaw) {
+        const parsed = JSON.parse(stateRaw);
+        if (parsed.returnTo) returnTo = parsed.returnTo;
+      }
+    } catch (e) {
+    }
+    const users = await getStore(env, "users", [...SEED_USERS]);
+    let fbProfile = null;
+    if (codeParam && env.FACEBOOK_APP_SECRET) {
+      try {
+        const tokenUrl = new URL("https://graph.facebook.com/v19.0/oauth/access_token");
+        tokenUrl.searchParams.set("client_id", env.FACEBOOK_APP_ID || "1814698216118210");
+        tokenUrl.searchParams.set("client_secret", env.FACEBOOK_APP_SECRET);
+        tokenUrl.searchParams.set("redirect_uri", `${url.origin}/api/auth/facebook/callback`);
+        tokenUrl.searchParams.set("code", codeParam);
+        const tokenRes = await fetch(tokenUrl.toString());
+        const tokenData = await tokenRes.json();
+        if (tokenData.access_token) {
+          const profileRes = await fetch(`https://graph.facebook.com/me?fields=id,name,email&access_token=${tokenData.access_token}`);
+          fbProfile = await profileRes.json();
+        }
+      } catch (e) {
+      }
+    }
+    const email = fbProfile && fbProfile.email ? fbProfile.email.toLowerCase() : `fb_user_${Date.now()}@asbimart.com`;
+    const name = fbProfile && fbProfile.name ? fbProfile.name : "\u09AB\u09C7\u09B8\u09AC\u09C1\u0995 \u09AD\u09C7\u09B0\u09BF\u09AB\u09BE\u0987\u09A1 \u0997\u09CD\u09B0\u09BE\u09B9\u0995";
+    let user = users.find((u) => u.email && u.email.toLowerCase() === email);
+    if (!user) {
+      user = {
+        id: "usr_fb_" + Date.now(),
+        name,
+        email,
+        phone: "",
+        role: "customer",
+        provider: "facebook",
+        createdAt: (/* @__PURE__ */ new Date()).toISOString()
+      };
+      users.push(user);
+      await setStore(env, "users", users);
+    }
+    const token = await signJwt({ id: user.id, email: user.email, name: user.name, role: user.role }, secret);
+    const targetUrl = new URL(`/${returnTo}`, url.origin);
+    targetUrl.searchParams.set("token", token);
+    targetUrl.searchParams.set("login", "success");
+    targetUrl.searchParams.set("provider", "facebook");
+    return new Response(null, {
+      status: 302,
+      headers: { "Location": targetUrl.toString() }
+    });
+  }
+  if (pathname === "/api/auth/otp/send" && method === "POST") {
+    const channel = body.channel === "sms" ? "sms" : "email";
+    const payload = sanitizeText(body.payload || "").trim();
+    if (!payload) {
+      return jsonResponse({ success: false, message: "\u0985\u09A8\u09C1\u0997\u09CD\u09B0\u09B9 \u0995\u09B0\u09C7 \u0987\u09AE\u09C7\u0987\u09B2 \u09AC\u09BE \u09AB\u09CB\u09A8 \u09A8\u09AE\u09CD\u09AC\u09B0 \u09A6\u09BF\u09A8\u0964" }, 400);
+    }
+    const code = Math.floor(1e5 + Math.random() * 9e5).toString();
+    const sessionId = "otp_" + Date.now() + "_" + Math.random().toString(36).substring(2, 8);
+    const otps = await getStore(env, "otps", {});
+    otps[sessionId] = {
+      sessionId,
+      channel,
+      payload: payload.toLowerCase(),
+      code,
+      expiresAt: Date.now() + 5 * 60 * 1e3,
+      attempts: 0
+    };
+    await setStore(env, "otps", otps);
+    const masked = channel === "email" ? payload.replace(/^(.)(.*)(@.*)$/, (_, a, b, c) => a + "***" + c) : payload.replace(/^(\+?88)?01(\d)(\d{4})(\d{3})$/, "$101$2****$4");
+    return jsonResponse({
+      success: true,
+      sessionId,
+      channel,
+      maskedDestination: masked,
+      expiresInSeconds: 300,
+      resendCooldownSeconds: 60,
+      message: `${channel === "sms" ? "\u09AE\u09CB\u09AC\u09BE\u0987\u09B2\u09C7" : "\u0987\u09AE\u09C7\u0987\u09B2\u09C7"} \u09EC \u09A1\u09BF\u099C\u09BF\u099F\u09C7\u09B0 \u0993\u099F\u09BF\u09AA\u09BF \u0995\u09CB\u09A1 \u09AA\u09BE\u09A0\u09BE\u09A8\u09CB \u09B9\u09DF\u09C7\u099B\u09C7\u0964`,
+      demoCode: code
+    });
+  }
+  if (pathname === "/api/auth/otp/resend" && method === "POST") {
+    const sessionId = body.sessionId;
+    const otps = await getStore(env, "otps", {});
+    const session = otps[sessionId];
+    if (!session) {
+      return jsonResponse({ success: false, message: "\u0993\u099F\u09BF\u09AA\u09BF \u09B8\u09C7\u09B6\u09A8 \u09AA\u09BE\u0993\u09DF\u09BE \u09AF\u09BE\u09DF\u09A8\u09BF\u0964" }, 400);
+    }
+    const newCode = Math.floor(1e5 + Math.random() * 9e5).toString();
+    session.code = newCode;
+    session.expiresAt = Date.now() + 5 * 60 * 1e3;
+    session.attempts = 0;
+    otps[sessionId] = session;
+    await setStore(env, "otps", otps);
+    return jsonResponse({
+      success: true,
+      sessionId,
+      expiresInSeconds: 300,
+      resendCooldownSeconds: 60,
+      message: "\u09A8\u09A4\u09C1\u09A8 \u0993\u099F\u09BF\u09AA\u09BF \u0995\u09CB\u09A1 \u09AA\u09BE\u09A0\u09BE\u09A8\u09CB \u09B9\u09DF\u09C7\u099B\u09C7\u0964",
+      demoCode: newCode
+    });
+  }
+  if (pathname === "/api/auth/otp/verify-register" && method === "POST") {
+    const { sessionId, otpCode, name, password, email, phone, division, address } = body;
+    const otps = await getStore(env, "otps", {});
+    const session = otps[sessionId];
+    if (!session) {
+      return jsonResponse({ success: false, message: "\u0985\u09AC\u09C8\u09A7 \u09AC\u09BE \u09AE\u09C7\u09DF\u09BE\u09A6\u09CB\u09A4\u09CD\u09A4\u09C0\u09B0\u09CD\u09A3 \u0993\u099F\u09BF\u09AA\u09BF \u09B8\u09C7\u09B6\u09A8\u0964" }, 400);
+    }
+    if (Date.now() > session.expiresAt) {
+      delete otps[sessionId];
+      await setStore(env, "otps", otps);
+      return jsonResponse({ success: false, message: "\u0993\u099F\u09BF\u09AA\u09BF \u0995\u09CB\u09A1\u09C7\u09B0 \u09AE\u09C7\u09DF\u09BE\u09A6 \u09B6\u09C7\u09B7 \u09B9\u09DF\u09C7 \u0997\u09C7\u099B\u09C7\u0964 \u0985\u09A8\u09C1\u0997\u09CD\u09B0\u09B9 \u0995\u09B0\u09C7 \u09A8\u09A4\u09C1\u09A8 \u0995\u09CB\u09A1 \u09A8\u09BF\u09A8\u0964" }, 400);
+    }
+    if (session.code !== String(otpCode).trim()) {
+      session.attempts = (session.attempts || 0) + 1;
+      await setStore(env, "otps", otps);
+      return jsonResponse({ success: false, message: "\u09AD\u09C1\u09B2 \u0993\u099F\u09BF\u09AA\u09BF \u0995\u09CB\u09A1! \u0985\u09A8\u09C1\u0997\u09CD\u09B0\u09B9 \u0995\u09B0\u09C7 \u09B8\u09A0\u09BF\u0995 \u0995\u09CB\u09A1 \u09A6\u09BF\u09A8\u0964" }, 400);
+    }
+    delete otps[sessionId];
+    await setStore(env, "otps", otps);
+    const users = await getStore(env, "users", [...SEED_USERS]);
+    const cleanPhone = phone ? sanitizePhone(phone) : "";
+    const cleanEmail = email ? sanitizeText(email).toLowerCase() : "";
+    const cleanName = sanitizeText(name || "\u0986\u09B8\u09AC\u09BF\u09AE\u09BE\u09B0\u09CD\u099F \u0997\u09CD\u09B0\u09BE\u09B9\u0995");
+    const newUser = {
+      id: "usr_" + Date.now(),
+      name: cleanName,
+      phone: cleanPhone,
+      email: cleanEmail,
+      passwordHash: password ? await hashPassword(password, secret) : "",
+      role: "customer",
+      division: sanitizeText(division || "\u09A2\u09BE\u0995\u09BE"),
+      address: sanitizeText(address || ""),
+      createdAt: (/* @__PURE__ */ new Date()).toISOString()
+    };
+    users.push(newUser);
+    await setStore(env, "users", users);
+    const token = await signJwt({
+      id: newUser.id,
+      phone: newUser.phone,
+      email: newUser.email,
+      name: newUser.name,
+      role: newUser.role
+    }, secret);
+    const safeUser = { ...newUser };
+    delete safeUser.passwordHash;
+    return jsonResponse({
+      success: true,
+      message: "\u0985\u09AD\u09BF\u09A8\u09A8\u09CD\u09A6\u09A8! \u0986\u09AA\u09A8\u09BE\u09B0 \u0985\u09CD\u09AF\u09BE\u0995\u09BE\u0989\u09A8\u09CD\u099F \u09B8\u09AB\u09B2\u09AD\u09BE\u09AC\u09C7 \u09A4\u09C8\u09B0\u09BF \u09B9\u09DF\u09C7\u099B\u09C7\u0964",
+      token,
+      user: safeUser
+    });
+  }
+  if (pathname === "/api/auth/otp/verify" && method === "POST") {
+    const { sessionId, otpCode } = body;
+    const otps = await getStore(env, "otps", {});
+    const session = otps[sessionId];
+    if (!session) {
+      return jsonResponse({ success: false, message: "\u0985\u09AC\u09C8\u09A7 \u09AC\u09BE \u09AE\u09C7\u09DF\u09BE\u09A6\u09CB\u09A4\u09CD\u09A4\u09C0\u09B0\u09CD\u09A3 \u0993\u099F\u09BF\u09AA\u09BF \u09B8\u09C7\u09B6\u09A8\u0964" }, 400);
+    }
+    if (Date.now() > session.expiresAt) {
+      delete otps[sessionId];
+      await setStore(env, "otps", otps);
+      return jsonResponse({ success: false, message: "\u0993\u099F\u09BF\u09AA\u09BF \u0995\u09CB\u09A1\u09C7\u09B0 \u09AE\u09C7\u09DF\u09BE\u09A6 \u09B6\u09C7\u09B7 \u09B9\u09DF\u09C7 \u0997\u09C7\u099B\u09C7\u0964" }, 400);
+    }
+    if (session.code !== String(otpCode).trim()) {
+      return jsonResponse({ success: false, message: "\u09AD\u09C1\u09B2 \u0993\u099F\u09BF\u09AA\u09BF \u0995\u09CB\u09A1!" }, 400);
+    }
+    delete otps[sessionId];
+    await setStore(env, "otps", otps);
+    const users = await getStore(env, "users", [...SEED_USERS]);
+    let user = users.find(
+      (u) => session.payload && u.email && u.email.toLowerCase() === session.payload.toLowerCase() || session.payload && u.phone && u.phone.includes(session.payload.replace(/\D/g, ""))
+    );
+    if (!user) {
+      user = {
+        id: "usr_" + Date.now(),
+        name: "\u0986\u09B8\u09AC\u09BF\u09AE\u09BE\u09B0\u09CD\u099F \u09B8\u09A6\u09B8\u09CD\u09AF",
+        email: session.channel === "email" ? session.payload : "",
+        phone: session.channel === "sms" ? session.payload : "",
+        role: "customer",
+        createdAt: (/* @__PURE__ */ new Date()).toISOString()
+      };
+      users.push(user);
+      await setStore(env, "users", users);
+    }
+    const token = await signJwt({ id: user.id, phone: user.phone, email: user.email, name: user.name, role: user.role }, secret);
+    const safeUser = { ...user };
+    delete safeUser.passwordHash;
+    return jsonResponse({
+      success: true,
+      message: "\u09B8\u09AB\u09B2\u09AD\u09BE\u09AC\u09C7 \u09B2\u0997\u0987\u09A8 \u09B9\u09DF\u09C7\u099B\u09C7!",
+      token,
+      user: safeUser
+    });
+  }
+  if (pathname === "/api/coupons/validate" && method === "POST") {
+    const codeVal = sanitizeText(body.code || "").trim().toUpperCase();
+    const orderAmount = Number(body.orderAmount) || 0;
+    const deliveryMethod = body.deliveryMethod || "regular";
+    const coupons = await getStore(env, "coupons", [...SEED_COUPONS]);
+    const coupon = coupons.find((c) => c.code.toUpperCase() === codeVal);
+    if (!coupon) {
+      return jsonResponse({ success: false, valid: false, message: "\u0995\u09C1\u09AA\u09A8 \u0995\u09CB\u09A1\u099F\u09BF \u09B8\u09A0\u09BF\u0995 \u09A8\u09DF\u0964" }, 404);
+    }
+    if (!coupon.isActive) {
+      return jsonResponse({ success: false, valid: false, message: "\u098F\u0987 \u0995\u09C1\u09AA\u09A8 \u0995\u09CB\u09A1\u099F\u09BF \u09AC\u09B0\u09CD\u09A4\u09AE\u09BE\u09A8\u09C7 \u09A8\u09BF\u09B7\u09CD\u0995\u09CD\u09B0\u09BF\u09DF \u09B0\u09DF\u09C7\u099B\u09C7\u0964" }, 400);
+    }
+    if (coupon.expiresAt && new Date(coupon.expiresAt) < /* @__PURE__ */ new Date()) {
+      return jsonResponse({ success: false, valid: false, message: "\u098F\u0987 \u0995\u09C1\u09AA\u09A8\u09C7\u09B0 \u09AE\u09C7\u09DF\u09BE\u09A6 \u09B6\u09C7\u09B7 \u09B9\u09DF\u09C7 \u0997\u09C7\u099B\u09C7\u0964" }, 400);
+    }
+    if (coupon.minOrderAmount && orderAmount < coupon.minOrderAmount) {
+      return jsonResponse({
+        success: false,
+        valid: false,
+        message: `\u098F\u0987 \u0995\u09C1\u09AA\u09A8\u099F\u09BF \u09AC\u09CD\u09AF\u09AC\u09B9\u09BE\u09B0 \u0995\u09B0\u09A4\u09C7 \u09B8\u09B0\u09CD\u09AC\u09A8\u09BF\u09AE\u09CD\u09A8 \u09F3${coupon.minOrderAmount} \u099F\u09BE\u0995\u09BE\u09B0 \u0985\u09B0\u09CD\u09A1\u09BE\u09B0 \u0995\u09B0\u09A4\u09C7 \u09B9\u09AC\u09C7\u0964`
+      }, 400);
+    }
+    let discountAmount = 0;
+    if (coupon.discountType === "percent") {
+      discountAmount = Math.round(orderAmount * coupon.discountValue / 100);
+      if (coupon.maxDiscount && discountAmount > coupon.maxDiscount) {
+        discountAmount = coupon.maxDiscount;
+      }
+    } else if (coupon.discountType === "fixed") {
+      discountAmount = Math.min(coupon.discountValue, orderAmount);
+    } else if (coupon.discountType === "free_shipping") {
+      discountAmount = deliveryMethod === "express" ? 120 : 60;
+    }
+    const finalPayable = Math.max(0, orderAmount - discountAmount);
+    return jsonResponse({
+      success: true,
+      valid: true,
+      coupon: {
+        code: coupon.code,
+        description: coupon.description,
+        discountType: coupon.discountType,
+        discountValue: coupon.discountValue,
+        discountAmount,
+        finalPayable
+      },
+      message: `\u0985\u09AD\u09BF\u09A8\u09A8\u09CD\u09A6\u09A8! \u0995\u09C1\u09AA\u09A8 \u09AA\u09CD\u09B0\u09AF\u09BC\u09CB\u0997 \u09B9\u09DF\u09C7\u099B\u09C7\u0964 \u0986\u09AA\u09A8\u09BF \u09F3${discountAmount} \u099B\u09BE\u09DC \u09AA\u09C7\u09DF\u09C7\u099B\u09C7\u09A8!`
+    });
+  }
+  if (pathname === "/api/support/ticket" && method === "POST") {
+    const name = sanitizeText(body.name || "").trim();
+    const phone = sanitizeText(body.phone || "").trim();
+    const message = sanitizeText(body.message || "").trim();
+    if (!name || !phone || !message) {
+      return jsonResponse({ success: false, message: "\u09A8\u09BE\u09AE, \u09AE\u09CB\u09AC\u09BE\u0987\u09B2 \u09A8\u09AE\u09CD\u09AC\u09B0 \u0993 \u09AC\u09BE\u09B0\u09CD\u09A4\u09BE \u0986\u09AC\u09B6\u09CD\u09AF\u0995\u0964" }, 400);
+    }
+    const tickets = await getStore(env, "support_tickets", []);
+    const newTicket = {
+      id: "TCK-" + Date.now().toString().slice(-6),
+      customerName: name,
+      customerPhone: phone,
+      subject: sanitizeText(body.subject || "\u09B8\u09BE\u09A7\u09BE\u09B0\u09A3 \u0985\u09A8\u09C1\u09B8\u09A8\u09CD\u09A7\u09BE\u09A8"),
+      message,
+      status: "open",
+      createdAt: (/* @__PURE__ */ new Date()).toISOString()
+    };
+    tickets.unshift(newTicket);
+    await setStore(env, "support_tickets", tickets);
+    return jsonResponse({
+      success: true,
+      ticketId: newTicket.id,
+      message: "\u0986\u09AA\u09A8\u09BE\u09B0 \u09AC\u09BE\u09B0\u09CD\u09A4\u09BE\u099F\u09BF \u09B8\u09AB\u09B2\u09AD\u09BE\u09AC\u09C7 \u0997\u09C3\u09B9\u09C0\u09A4 \u09B9\u09DF\u09C7\u099B\u09C7\u0964"
     });
   }
   if (pathname === "/api/auth/auth0") {
