@@ -249,7 +249,9 @@ body {
 }
 
 .product-card-horizontal.video-playing .bestseller-hover-video,
-.asbi-card-with-video.video-playing .bestseller-hover-video {
+.asbi-card-with-video.video-playing .bestseller-hover-video,
+.product-card-horizontal:hover .bestseller-hover-video,
+.asbi-card-with-video:hover .bestseller-hover-video {
   opacity: 1 !important;
 }
 

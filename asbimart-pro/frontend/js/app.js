@@ -330,6 +330,46 @@ const CATEGORY_DEFINITIONS = [
 
 let expandedCategories = {};
 
+// স্মার্ট মিডিয়া পাথ রেজলভার (Browser path, Live Server, Cloudflare Pages, root vs html subfolder auto-adapter)
+function resolveMediaAssetPath(src) {
+  if (!src) return '';
+  if (src.startsWith('http://') || src.startsWith('https://') || src.startsWith('data:')) return src;
+  const filename = src.split('/').pop();
+  const isHtmlSubfolder = typeof window !== 'undefined' && window.location && window.location.pathname && window.location.pathname.includes('/html/');
+  if (isHtmlSubfolder) {
+    return `../assets/videos/${filename}`;
+  }
+  return `assets/videos/${filename}`;
+}
+
+function getMediaFallbackSources(src, fallbackUrl) {
+  if (!src) return '';
+  const filename = src.split('/').pop();
+  const resolved = resolveMediaAssetPath(src);
+  return `
+    <source src="${resolved}" type="video/mp4">
+    <source src="../assets/videos/${filename}" type="video/mp4">
+    <source src="assets/videos/${filename}" type="video/mp4">
+    <source src="/assets/videos/${filename}" type="video/mp4">
+    ${fallbackUrl ? `<source src="${fallbackUrl}" type="video/mp4">` : ''}
+  `;
+}
+
+// নিরাপদ অথ ইউজার পার্সার (Double stringification & type-safe unpacker)
+function getParsedAuthUser() {
+  try {
+    const raw = localStorage.getItem('asbi_auth_user');
+    if (!raw) return null;
+    let user = JSON.parse(raw);
+    if (typeof user === 'string') {
+      try { user = JSON.parse(user); } catch (e) {}
+    }
+    return (user && typeof user === 'object') ? user : null;
+  } catch (err) {
+    return null;
+  }
+}
+
 // একক প্রোডাক্ট কার্ড HTML জেনারেটর
 function generateSingleProductCardHtml(product) {
   const defaultVar = product.variants ? product.variants[0] : { price: 500, originalPrice: 600 };
@@ -353,10 +393,9 @@ function generateSingleProductCardHtml(product) {
             loop 
             playsinline 
             preload="metadata"
-            data-video-src="${product.video}"
+            data-video-src="${resolveMediaAssetPath(product.video)}"
           >
-            <source src="${product.video}" type="video/mp4">
-            ${product.videoFallback ? `<source src="${product.videoFallback}" type="video/mp4">` : ''}
+            ${getMediaFallbackSources(product.video, product.videoFallback)}
           </video>
           <!-- পরিচ্ছন্ন ও ছিমছাম মোবাইল ট্যাপ বাটন (কোনো টেক্সট ছাড়া শুধু প্লে/পজ আইকন) -->
           <button type="button" class="video-play-tap-btn absolute bottom-2.5 left-2.5 z-10 w-7 h-7 sm:w-8 sm:h-8 rounded-full bg-black/60 hover:bg-emerald-600 active:scale-90 text-white flex items-center justify-center shadow-md border border-white/30 backdrop-blur-xs transition-all cursor-pointer" title="ভিডিও প্রিভিউ দেখুন" aria-label="ভিডিও প্রিভিউ">
@@ -1212,10 +1251,9 @@ function renderTopProductsGrid() {
               loop 
               playsinline 
               preload="metadata"
-              data-video-src="${product.video}"
+              data-video-src="${resolveMediaAssetPath(product.video)}"
             >
-              <source src="${product.video}" type="video/mp4">
-              ${product.videoFallback ? `<source src="${product.videoFallback}" type="video/mp4">` : ''}
+              ${getMediaFallbackSources(product.video, product.videoFallback)}
             </video>
 
             <!-- পরিচ্ছন্ন ও ছিমছাম মোবাইল ট্যাপ বাটন (কোনো টেক্সট ছাড়া শুধু প্লে/পজ আইকন) -->
@@ -3170,10 +3208,7 @@ function handleUserLogout() {
 }
 
 function updateAuthUI() {
-  let user = null;
-  try {
-    user = JSON.parse(localStorage.getItem('asbi_auth_user'));
-  } catch (err) {}
+  const user = getParsedAuthUser();
 
   const signInBtn = document.getElementById('headerSignInBtn');
   const profileBtn = document.getElementById('headerProfileBtn');

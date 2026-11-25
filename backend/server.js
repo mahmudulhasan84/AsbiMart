@@ -24,6 +24,7 @@
  */
 
 const path = require('path');
+const crypto = require('crypto');
 require('dotenv').config({ path: path.join(__dirname, '.env') });
 
 const express = require('express');
@@ -469,7 +470,7 @@ function renderOAuthSuccessPage(res, user, token, returnTo = '/index.html') {
   <script>
     try {
       localStorage.setItem('asbi_auth_token', ${serializedToken});
-      localStorage.setItem('asbi_auth_user', ${JSON.stringify(serializedUser)});
+      localStorage.setItem('asbi_auth_user', JSON.stringify(${serializedUser}));
       if (typeof BroadcastChannel !== 'undefined') {
         new BroadcastChannel('asbimart_sync').postMessage({ type: 'AUTH_CHANGED' });
       }
@@ -798,7 +799,12 @@ app.post('/api/auth/login', rateLimiter(20, 10 * 60 * 1000), (req, res) => {
     }
 
     const hashedInput = db.hashPassword(password);
-    if (user.passwordHash && user.passwordHash !== hashedInput) {
+    const passHashBuf = Buffer.from(user.passwordHash || '', 'hex');
+    const inputHashBuf = Buffer.from(hashedInput, 'hex');
+    const isPassValid = passHashBuf.length > 0 && 
+                        passHashBuf.length === inputHashBuf.length && 
+                        crypto.timingSafeEqual(passHashBuf, inputHashBuf);
+    if (!isPassValid) {
       return res.status(401).json({ success: false, message: 'ভুল মোবাইল নম্বর বা পাসওয়ার্ড।' });
     }
 
@@ -1077,7 +1083,30 @@ app.get('/api/orders/my-orders', (req, res) => {
       return res.status(400).json({ success: false, message: 'মোবাইল নম্বর বা ইমেইল প্রদান করুন।' });
     }
 
-    const orders = db.findOrdersByUser(userId, phone, email);
+    let orders = db.findOrdersByUser(userId, phone, email);
+
+    // OWASP API1:2023 BOLA / IDOR Defense: Authenticated non-admin can only query their own orders
+    if (authUser && authUser.role !== 'admin') {
+      const userOrders = db.findOrdersByUser(authUser.id, null, null);
+      const isPhoneAllowed = !req.query.phone || 
+        (authUser.phone && authUser.phone.replace(/[\s-]/g, '').trim() === phone) ||
+        userOrders.some(o => o.customer && o.customer.phone && o.customer.phone.replace(/[\s-]/g, '').trim() === phone);
+      
+      const isEmailAllowed = !req.query.email || 
+        (authUser.email && authUser.email.toLowerCase() === email.toLowerCase()) ||
+        userOrders.some(o => o.customer && o.customer.email && o.customer.email.toLowerCase() === email.toLowerCase());
+
+      if (!isPhoneAllowed || !isEmailAllowed) {
+        return res.status(403).json({ success: false, message: 'অন্য গ্রাহকের অর্ডার দেখার অনুমতি নেই।' });
+      }
+
+      orders = orders.filter(o => 
+        (o.userId && o.userId === authUser.id) ||
+        (authUser.phone && o.customer && o.customer.phone && o.customer.phone.replace(/[\s-]/g, '').trim() === authUser.phone.replace(/[\s-]/g, '').trim()) ||
+        (authUser.email && o.customer && o.customer.email && o.customer.email.toLowerCase() === authUser.email.toLowerCase())
+      );
+    }
+
     res.json({
       success: true,
       count: orders.length,
@@ -1531,7 +1560,16 @@ app.post('/api/admin/login', rateLimiter(15, 10 * 60 * 1000), (req, res) => {
     return res.status(400).json({ success: false, message: 'ইউজারনেম ও পাসওয়ার্ড প্রদান করুন।' });
   }
 
-  if (username === adminUser && password === adminPass) {
+  const userMatch = crypto.timingSafeEqual(
+    crypto.createHash('sha256').update(String(username)).digest(),
+    crypto.createHash('sha256').update(String(adminUser)).digest()
+  );
+  const passMatch = crypto.timingSafeEqual(
+    crypto.createHash('sha256').update(String(password)).digest(),
+    crypto.createHash('sha256').update(String(adminPass)).digest()
+  );
+
+  if (userMatch && passMatch) {
     const token = db.generateToken({
       id: 'admin_' + adminUser,
       name: 'AsbiMart Super Admin',
@@ -1960,6 +1998,7 @@ app.get('/api/health', (req, res) => {
 // ১৪. ফুল পেজ ও স্ট্যাটিক ফ্রন্টএন্ড পরিবেশন
 // ==========================================
 app.use('/assets', express.static(path.join(frontendPath, 'assets'), { etag: true, maxAge: '7d' }));
+app.use('/frontend', express.static(frontendPath, { etag: true, maxAge: '7d' }));
 app.use(express.static(frontendPath, {
   etag: true,
   maxAge: 0,
