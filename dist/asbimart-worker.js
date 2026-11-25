@@ -2621,6 +2621,154 @@ async function onRequest(context) {
       source: "cloudflare-edge-native"
     });
   }
+  if ((pathname === "/api/auth/google/verify-credential" || pathname === "/api/auth/google/verify-token" || pathname === "/api/auth/google/token") && method === "POST") {
+    const credential = body.credential || body.id_token;
+    const accessToken = body.accessToken || body.access_token;
+    if (!credential && !accessToken) {
+      return jsonResponse({ success: false, message: "\u0997\u09C1\u0997\u09B2 \u0995\u09CD\u09B0\u09C7\u09A1\u09C7\u09A8\u09B6\u09BF\u09DF\u09BE\u09B2 \u09AC\u09BE \u099F\u09CB\u0995\u09C7\u09A8 \u09AA\u09BE\u0993\u09DF\u09BE \u09AF\u09BE\u09DF\u09A8\u09BF\u0964" }, 400);
+    }
+    let googleUser = null;
+    if (credential) {
+      try {
+        const verifyRes = await fetch(`https://oauth2.googleapis.com/tokeninfo?id_token=${encodeURIComponent(credential)}`);
+        if (verifyRes.ok) {
+          const data = await verifyRes.json();
+          if (data.email) {
+            googleUser = {
+              sub: String(data.sub || ""),
+              name: data.name || (data.given_name ? `${data.given_name} ${data.family_name || ""}`.trim() : data.email.split("@")[0]),
+              email: data.email.toLowerCase(),
+              emailVerified: data.email_verified === "true" || data.email_verified === true,
+              avatar: data.picture || ""
+            };
+          }
+        }
+      } catch (e) {
+      }
+    }
+    if (!googleUser && accessToken) {
+      try {
+        const infoRes = await fetch("https://www.googleapis.com/oauth2/v3/userinfo", {
+          headers: { Authorization: `Bearer ${accessToken}` }
+        });
+        if (infoRes.ok) {
+          const data = await infoRes.json();
+          if (data.email || data.sub) {
+            googleUser = {
+              sub: String(data.sub || ""),
+              name: data.name || (data.email ? data.email.split("@")[0] : "\u0997\u09C1\u0997\u09B2 \u0997\u09CD\u09B0\u09BE\u09B9\u0995"),
+              email: data.email ? data.email.toLowerCase() : `google_${data.sub}@asbimart.com`,
+              emailVerified: !!data.email_verified,
+              avatar: data.picture || ""
+            };
+          }
+        }
+      } catch (e) {
+      }
+    }
+    if (!googleUser || !googleUser.email) {
+      return jsonResponse({ success: false, message: "\u0997\u09C1\u0997\u09B2 \u0995\u09CD\u09B0\u09C7\u09A1\u09C7\u09A8\u09B6\u09BF\u09DF\u09BE\u09B2 \u09AD\u09C7\u09B0\u09BF\u09AB\u09BF\u0995\u09C7\u09B6\u09A8 \u09AC\u09CD\u09AF\u09B0\u09CD\u09A5 \u09B9\u09DF\u09C7\u099B\u09C7\u0964" }, 401);
+    }
+    const users = await getStore(env, "users", [...SEED_USERS]);
+    let user = users.find((u) => u.email && u.email.toLowerCase() === googleUser.email || u.provider === "google" && u.providerId === googleUser.sub);
+    if (user) {
+      user.name = user.name || googleUser.name;
+      user.avatar = googleUser.avatar || user.avatar;
+      user.provider = user.provider || "google";
+      user.providerId = user.providerId || googleUser.sub;
+      user.emailVerified = true;
+    } else {
+      user = {
+        id: "usr_g_" + Date.now(),
+        name: googleUser.name,
+        email: googleUser.email,
+        phone: "",
+        role: "customer",
+        provider: "google",
+        providerId: googleUser.sub,
+        avatar: googleUser.avatar,
+        emailVerified: true,
+        createdAt: (/* @__PURE__ */ new Date()).toISOString()
+      };
+      users.push(user);
+    }
+    await setStore(env, "users", users);
+    const token = await signJwt({ id: user.id, email: user.email, name: user.name, role: user.role }, secret);
+    return jsonResponse({
+      success: true,
+      message: `\u0985\u09AD\u09BF\u09A8\u09A8\u09CD\u09A6\u09A8 ${user.name}! \u0997\u09C1\u0997\u09B2 \u09A6\u09BF\u09DF\u09C7 \u09B8\u09AB\u09B2\u09AD\u09BE\u09AC\u09C7 \u09B8\u09BE\u0987\u09A8-\u0987\u09A8 \u09B8\u09AE\u09CD\u09AA\u09A8\u09CD\u09A8 \u09B9\u09DF\u09C7\u099B\u09C7\u0964`,
+      token,
+      user: {
+        id: user.id,
+        name: user.name,
+        email: user.email,
+        phone: user.phone || "",
+        role: user.role,
+        avatar: user.avatar || "",
+        provider: "google",
+        loggedIn: true
+      }
+    });
+  }
+  if ((pathname === "/api/auth/facebook/verify-token" || pathname === "/api/auth/facebook/token") && method === "POST") {
+    const accessToken = body.accessToken || body.access_token;
+    if (!accessToken) {
+      return jsonResponse({ success: false, message: "\u09AB\u09C7\u09B8\u09AC\u09C1\u0995 \u098F\u0995\u09CD\u09B8\u09C7\u09B8 \u099F\u09CB\u0995\u09C7\u09A8 \u09AA\u09BE\u0993\u09DF\u09BE \u09AF\u09BE\u09DF\u09A8\u09BF\u0964" }, 400);
+    }
+    let fbProfile = null;
+    try {
+      const profileRes = await fetch(`https://graph.facebook.com/v19.0/me?fields=id,name,email,picture.type(large)&access_token=${encodeURIComponent(accessToken)}`);
+      if (profileRes.ok) {
+        fbProfile = await profileRes.json();
+      }
+    } catch (e) {
+    }
+    if (!fbProfile || !fbProfile.id) {
+      return jsonResponse({ success: false, message: "\u09AB\u09C7\u09B8\u09AC\u09C1\u0995 \u099F\u09CB\u0995\u09C7\u09A8 \u09AD\u09C7\u09B0\u09BF\u09AB\u09BF\u0995\u09C7\u09B6\u09A8 \u09AC\u09CD\u09AF\u09B0\u09CD\u09A5 \u09B9\u09DF\u09C7\u099B\u09C7\u0964" }, 401);
+    }
+    const fbId = String(fbProfile.id);
+    const email = fbProfile.email ? fbProfile.email.toLowerCase() : `fb_${fbId}@asbimart.com`;
+    const name = fbProfile.name || "\u09AB\u09C7\u09B8\u09AC\u09C1\u0995 \u0997\u09CD\u09B0\u09BE\u09B9\u0995";
+    const avatar = fbProfile.picture && fbProfile.picture.data && fbProfile.picture.data.url ? fbProfile.picture.data.url : "";
+    const users = await getStore(env, "users", [...SEED_USERS]);
+    let user = users.find((u) => u.email && u.email.toLowerCase() === email || u.provider === "facebook" && u.providerId === fbId);
+    if (user) {
+      user.name = user.name || name;
+      user.avatar = avatar || user.avatar;
+      user.provider = user.provider || "facebook";
+      user.providerId = fbId;
+    } else {
+      user = {
+        id: "usr_fb_" + Date.now(),
+        name,
+        email,
+        phone: "",
+        role: "customer",
+        provider: "facebook",
+        providerId: fbId,
+        avatar,
+        createdAt: (/* @__PURE__ */ new Date()).toISOString()
+      };
+      users.push(user);
+    }
+    await setStore(env, "users", users);
+    const token = await signJwt({ id: user.id, email: user.email, name: user.name, role: user.role }, secret);
+    return jsonResponse({
+      success: true,
+      message: `\u0985\u09AD\u09BF\u09A8\u09A8\u09CD\u09A6\u09A8 ${user.name}! \u09AB\u09C7\u09B8\u09AC\u09C1\u0995 \u09A6\u09BF\u09DF\u09C7 \u09B8\u09AB\u09B2\u09AD\u09BE\u09AC\u09C7 \u09B8\u09BE\u0987\u09A8-\u0987\u09A8 \u09B8\u09AE\u09CD\u09AA\u09A8\u09CD\u09A8 \u09B9\u09DF\u09C7\u099B\u09C7\u0964`,
+      token,
+      user: {
+        id: user.id,
+        name: user.name,
+        email: user.email,
+        phone: user.phone || "",
+        role: user.role,
+        avatar: user.avatar || "",
+        provider: "facebook",
+        loggedIn: true
+      }
+    });
+  }
   if (pathname === "/api/auth/google" && method === "GET") {
     const returnTo = url.searchParams.get("returnTo") || "index.html";
     const googleClientId = env.GOOGLE_CLIENT_ID || "280069081577-ofqhdd3unutvbn5k28bhjc76k754hr82.apps.googleusercontent.com";
@@ -2641,6 +2789,7 @@ async function onRequest(context) {
     });
   }
   if (pathname === "/api/auth/google/callback" && method === "GET") {
+    const errorParam = url.searchParams.get("error");
     const codeParam = url.searchParams.get("code");
     const stateRaw = url.searchParams.get("state");
     let returnTo = "index.html";
@@ -2651,17 +2800,26 @@ async function onRequest(context) {
       }
     } catch (e) {
     }
-    const users = await getStore(env, "users", [...SEED_USERS]);
+    if (errorParam) {
+      const errUrl = new URL(`/${returnTo}`, url.origin);
+      errUrl.searchParams.set("auth_error", "google_" + errorParam);
+      return new Response(null, {
+        status: 302,
+        headers: { "Location": errUrl.toString() }
+      });
+    }
+    const googleSecret = env.GOOGLE_CLIENT_SECRET || "";
+    const googleClientId = env.GOOGLE_CLIENT_ID || "280069081577-ofqhdd3unutvbn5k28bhjc76k754hr82.apps.googleusercontent.com";
     let googleUser = null;
-    if (codeParam && env.GOOGLE_CLIENT_SECRET) {
+    if (codeParam && googleSecret) {
       try {
         const tokenRes = await fetch("https://oauth2.googleapis.com/token", {
           method: "POST",
           headers: { "Content-Type": "application/x-www-form-urlencoded" },
           body: new URLSearchParams({
             code: codeParam,
-            client_id: env.GOOGLE_CLIENT_ID || "280069081577-ofqhdd3unutvbn5k28bhjc76k754hr82.apps.googleusercontent.com",
-            client_secret: env.GOOGLE_CLIENT_SECRET,
+            client_id: googleClientId,
+            client_secret: googleSecret,
             redirect_uri: `${url.origin}/api/auth/google/callback`,
             grant_type: "authorization_code"
           })
@@ -2671,15 +2829,32 @@ async function onRequest(context) {
           const userinfoRes = await fetch("https://www.googleapis.com/oauth2/v3/userinfo", {
             headers: { Authorization: `Bearer ${tokenData.access_token}` }
           });
-          googleUser = await userinfoRes.json();
+          if (userinfoRes.ok) {
+            googleUser = await userinfoRes.json();
+          }
         }
       } catch (e) {
       }
     }
-    const email = googleUser && googleUser.email ? googleUser.email.toLowerCase() : `google_user_${Date.now()}@asbimart.com`;
+    if (!googleUser || !googleUser.email && !googleUser.sub) {
+      const errUrl = new URL(`/${returnTo}`, url.origin);
+      errUrl.searchParams.set("auth_error", "google_auth_failed");
+      return new Response(null, {
+        status: 302,
+        headers: { "Location": errUrl.toString() }
+      });
+    }
+    const users = await getStore(env, "users", [...SEED_USERS]);
+    const email = googleUser && googleUser.email ? googleUser.email.toLowerCase() : `google_${googleUser.sub}@asbimart.com`;
     const name = googleUser && googleUser.name ? googleUser.name : "\u0997\u09C1\u0997\u09B2 \u09AD\u09C7\u09B0\u09BF\u09AB\u09BE\u0987\u09A1 \u0997\u09CD\u09B0\u09BE\u09B9\u0995";
-    let user = users.find((u) => u.email && u.email.toLowerCase() === email);
-    if (!user) {
+    const avatar = googleUser.picture || "";
+    let user = users.find((u) => u.email && u.email.toLowerCase() === email || u.provider === "google" && u.providerId === String(googleUser.sub));
+    if (user) {
+      user.name = user.name || name;
+      user.avatar = avatar || user.avatar;
+      user.provider = user.provider || "google";
+      user.providerId = String(googleUser.sub);
+    } else {
       user = {
         id: "usr_g_" + Date.now(),
         name,
@@ -2687,11 +2862,13 @@ async function onRequest(context) {
         phone: "",
         role: "customer",
         provider: "google",
+        providerId: String(googleUser.sub),
+        avatar,
         createdAt: (/* @__PURE__ */ new Date()).toISOString()
       };
       users.push(user);
-      await setStore(env, "users", users);
     }
+    await setStore(env, "users", users);
     const token = await signJwt({ id: user.id, email: user.email, name: user.name, role: user.role }, secret);
     const targetUrl = new URL(`/${returnTo}`, url.origin);
     targetUrl.searchParams.set("token", token);
@@ -2720,6 +2897,7 @@ async function onRequest(context) {
     });
   }
   if (pathname === "/api/auth/facebook/callback" && method === "GET") {
+    const errorParam = url.searchParams.get("error");
     const codeParam = url.searchParams.get("code");
     const stateRaw = url.searchParams.get("state");
     let returnTo = "index.html";
@@ -2730,28 +2908,55 @@ async function onRequest(context) {
       }
     } catch (e) {
     }
-    const users = await getStore(env, "users", [...SEED_USERS]);
+    if (errorParam) {
+      const errUrl = new URL(`/${returnTo}`, url.origin);
+      errUrl.searchParams.set("auth_error", "facebook_" + errorParam);
+      return new Response(null, {
+        status: 302,
+        headers: { "Location": errUrl.toString() }
+      });
+    }
+    const fbSecret = env.FACEBOOK_APP_SECRET || "897114a20f107b071a202c0ba736961a";
+    const fbAppId = env.FACEBOOK_APP_ID || "1814698216118210";
     let fbProfile = null;
-    if (codeParam && env.FACEBOOK_APP_SECRET) {
+    if (codeParam && fbSecret) {
       try {
         const tokenUrl = new URL("https://graph.facebook.com/v19.0/oauth/access_token");
-        tokenUrl.searchParams.set("client_id", env.FACEBOOK_APP_ID || "1814698216118210");
-        tokenUrl.searchParams.set("client_secret", env.FACEBOOK_APP_SECRET);
+        tokenUrl.searchParams.set("client_id", fbAppId);
+        tokenUrl.searchParams.set("client_secret", fbSecret);
         tokenUrl.searchParams.set("redirect_uri", `${url.origin}/api/auth/facebook/callback`);
         tokenUrl.searchParams.set("code", codeParam);
         const tokenRes = await fetch(tokenUrl.toString());
         const tokenData = await tokenRes.json();
         if (tokenData.access_token) {
-          const profileRes = await fetch(`https://graph.facebook.com/me?fields=id,name,email&access_token=${tokenData.access_token}`);
-          fbProfile = await profileRes.json();
+          const profileRes = await fetch(`https://graph.facebook.com/me?fields=id,name,email,picture.type(large)&access_token=${tokenData.access_token}`);
+          if (profileRes.ok) {
+            fbProfile = await profileRes.json();
+          }
         }
       } catch (e) {
       }
     }
-    const email = fbProfile && fbProfile.email ? fbProfile.email.toLowerCase() : `fb_user_${Date.now()}@asbimart.com`;
+    if (!fbProfile || !fbProfile.id) {
+      const errUrl = new URL(`/${returnTo}`, url.origin);
+      errUrl.searchParams.set("auth_error", "facebook_auth_failed");
+      return new Response(null, {
+        status: 302,
+        headers: { "Location": errUrl.toString() }
+      });
+    }
+    const users = await getStore(env, "users", [...SEED_USERS]);
+    const fbId = String(fbProfile.id);
+    const email = fbProfile && fbProfile.email ? fbProfile.email.toLowerCase() : `fb_${fbId}@asbimart.com`;
     const name = fbProfile && fbProfile.name ? fbProfile.name : "\u09AB\u09C7\u09B8\u09AC\u09C1\u0995 \u09AD\u09C7\u09B0\u09BF\u09AB\u09BE\u0987\u09A1 \u0997\u09CD\u09B0\u09BE\u09B9\u0995";
-    let user = users.find((u) => u.email && u.email.toLowerCase() === email);
-    if (!user) {
+    const avatar = fbProfile.picture && fbProfile.picture.data && fbProfile.picture.data.url ? fbProfile.picture.data.url : "";
+    let user = users.find((u) => u.email && u.email.toLowerCase() === email || u.provider === "facebook" && u.providerId === fbId);
+    if (user) {
+      user.name = user.name || name;
+      user.avatar = avatar || user.avatar;
+      user.provider = user.provider || "facebook";
+      user.providerId = fbId;
+    } else {
       user = {
         id: "usr_fb_" + Date.now(),
         name,
@@ -2759,11 +2964,13 @@ async function onRequest(context) {
         phone: "",
         role: "customer",
         provider: "facebook",
+        providerId: fbId,
+        avatar,
         createdAt: (/* @__PURE__ */ new Date()).toISOString()
       };
       users.push(user);
-      await setStore(env, "users", users);
     }
+    await setStore(env, "users", users);
     const token = await signJwt({ id: user.id, email: user.email, name: user.name, role: user.role }, secret);
     const targetUrl = new URL(`/${returnTo}`, url.origin);
     targetUrl.searchParams.set("token", token);

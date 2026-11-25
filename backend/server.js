@@ -994,6 +994,72 @@ app.get('/api/auth/auth0/callback', async (req, res) => {
   }
 });
 
+// ৯. Google Credential (GIS) & Access Token ভেরিফিকেশন API
+app.post(['/api/auth/google/verify-credential', '/api/auth/google/verify-token', '/api/auth/google/token'], rateLimiter(30, 10 * 60 * 1000), async (req, res) => {
+  try {
+    const { credential, accessToken, access_token, id_token } = req.body || {};
+    let profile = null;
+    const cred = credential || id_token;
+    const token = accessToken || access_token;
+
+    if (cred) {
+      profile = await authServices.verifyGoogleCredential(cred);
+    } else if (token) {
+      profile = await authServices.verifyGoogleAccessToken(token);
+    } else {
+      return res.status(400).json({ success: false, message: 'গুগল ক্রেডেনশিয়াল বা টোকেন পাওয়া যায়নি।' });
+    }
+
+    const user = upsertOAuthUser(profile);
+    const jwtToken = db.generateToken({ id: user.id, phone: user.phone, email: user.email, name: user.name, role: user.role });
+    const safeUser = { ...user };
+    delete safeUser.passwordHash;
+
+    return res.json({
+      success: true,
+      message: `অভিনন্দন ${user.name}! গুগল দিয়ে সফলভাবে সাইন-ইন সম্পন্ন হয়েছে।`,
+      token: jwtToken,
+      user: {
+        ...safeUser,
+        location: safeUser.division || safeUser.city || 'Dhaka',
+        loggedIn: true
+      }
+    });
+  } catch (err) {
+    console.error('[Google Verify Error]:', err.message);
+    return res.status(401).json({ success: false, message: 'গুগল ক্রেডেনশিয়াল ভেরিফিকেশন ব্যর্থ হয়েছে।' });
+  }
+});
+
+// ১০. Facebook Access Token ভেরিফিকেশন API (Facebook JS SDK & FB.login)
+app.post(['/api/auth/facebook/verify-token', '/api/auth/facebook/token'], rateLimiter(30, 10 * 60 * 1000), async (req, res) => {
+  try {
+    const { accessToken, access_token } = req.body || {};
+    const tokenStr = accessToken || access_token;
+    if (!tokenStr) return res.status(400).json({ success: false, message: 'ফেসবুক এক্সেস টোকেন পাওয়া যায়নি।' });
+
+    const profile = await authServices.verifyFacebookAccessToken(tokenStr);
+    const user = upsertOAuthUser(profile);
+    const jwtToken = db.generateToken({ id: user.id, phone: user.phone, email: user.email, name: user.name, role: user.role });
+    const safeUser = { ...user };
+    delete safeUser.passwordHash;
+
+    return res.json({
+      success: true,
+      message: `অভিনন্দন ${user.name}! ফেসবুক দিয়ে সফলভাবে সাইন-ইন সম্পন্ন হয়েছে।`,
+      token: jwtToken,
+      user: {
+        ...safeUser,
+        location: safeUser.division || safeUser.city || 'Dhaka',
+        loggedIn: true
+      }
+    });
+  } catch (err) {
+    console.error('[Facebook Verify Error]:', err.message);
+    return res.status(401).json({ success: false, message: 'ফেসবুক টোকেন ভেরিফিকেশন ব্যর্থ হয়েছে।' });
+  }
+});
+
 // মক সোশ্যাল লগইন বন্ধের নোটিশ
 app.post('/api/auth/social', (req, res) => {
   return res.status(410).json({

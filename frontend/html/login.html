@@ -3,8 +3,10 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Sign In / Sign Up — AsbiMart</title>
+  <title>সাইন ইন / অ্যাকাউন্ট খুলুন — AsbiMart</title>
   <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://accounts.google.com/gsi/client" async defer></script>
+  <script async defer crossorigin="anonymous" src="https://connect.facebook.net/bn_IN/sdk.js"></script>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@300;400;500;600;700&family=Plus+Jakarta+Sans:wght@600;700;800;900&display=swap" rel="stylesheet">
@@ -433,26 +435,86 @@
       if (!err) return;
 
       const messages = {
-        auth0_not_configured: '<strong>Auth0 Setup Required:</strong> Add <code>AUTH0_DOMAIN</code>, <code>AUTH0_CLIENT_ID</code>, and <code>AUTH0_CLIENT_SECRET</code> in <code>backend/.env</code> (Allowed Callback URL: <code>http://localhost:5000/api/auth/auth0/callback</code>), then restart the server.',
-        auth0_invalid_state: 'Auth0 login session expired or state mismatch. Please click Auth0 again.',
-        auth0_auth_failed: 'Could not complete Auth0 verification. Please check your Auth0 application settings and try again.',
-        auth0_access_denied: 'Auth0 sign-in was cancelled. You can sign in with another method.',
-        google_not_configured: '<strong>Google Sign-In Setup Required:</strong> Add <code>GOOGLE_CLIENT_ID</code> and <code>GOOGLE_CLIENT_SECRET</code> in <code>backend/.env</code> (Redirect URI: <code>http://localhost:5000/api/auth/google/callback</code>), then restart the server.',
-        facebook_not_configured: '<strong>Facebook Login Setup Required:</strong> Add <code>FACEBOOK_APP_ID</code> and <code>FACEBOOK_APP_SECRET</code> in <code>backend/.env</code> (Redirect URI: <code>http://localhost:5000/api/auth/facebook/callback</code>), then restart the server.',
-        google_access_denied: 'Google sign-in was cancelled. You can select another account or sign in with your phone/email.',
-        facebook_access_denied: 'Facebook login was cancelled. Please try again.',
-        google_invalid_state: 'Google login session expired. Please click Google again.',
-        facebook_invalid_state: 'Facebook login session expired. Please click Facebook again.',
-        google_auth_failed: 'Could not complete Google verification. Please verify your Google OAuth credentials and try again.',
-        facebook_auth_failed: 'Could not complete Facebook verification. Please verify your Facebook App settings and try again.'
+        auth0_not_configured: '<strong>Auth0 সেটআপ প্রয়োজন:</strong> অনুগ্রহ করে Auth0 কনফিগারেশন চেক করুন।',
+        auth0_invalid_state: 'Auth0 লগইন সেশনের মেয়াদ শেষ হয়েছে। অনুগ্রহ করে আবার ক্লিক করুন।',
+        auth0_auth_failed: 'Auth0 ভেরিফিকেশন সম্পন্ন করা সম্ভব হয়নি। আবার চেষ্টা করুন।',
+        auth0_access_denied: 'Auth0 সাইন-ইন বাতিল করা হয়েছে।',
+        google_not_configured: '<strong>গুগল সাইন-ইন সেটআপ প্রয়োজন:</strong> গুগল কনসোল ক্রেডেনশিয়াল পরীক্ষা করুন।',
+        facebook_not_configured: '<strong>ফেসবুক লগইন সেটআপ প্রয়োজন:</strong> ফেসবুক অ্যাপ আইডি ও সিক্রেট পরীক্ষা করুন।',
+        google_access_denied: 'গুগল সাইন-ইন বাতিল করা হয়েছে। আপনি অন্য কোনো একাউন্ট বাছাই করতে পারেন।',
+        facebook_access_denied: 'ফেসবুক লগইন বাতিল করা হয়েছে। অনুগ্রহ করে আবার চেষ্টা করুন।',
+        google_invalid_state: 'গুগল লগইন সেশনের মেয়াদ শেষ হয়েছে। অনুগ্রহ করে আবার গুগলে ক্লিক করুন।',
+        facebook_invalid_state: 'ফেসবুক লগইন সেশনের মেয়াদ শেষ হয়েছে। অনুগ্রহ করে আবার ফেসবুকে ক্লিক করুন।',
+        google_auth_failed: 'গুগল একাউন্ট ভেরিফিকেশন সম্পন্ন করা যায়নি। অনুগ্রহ করে পুনরায় গুগলে ক্লিক করে একাউন্ট নির্বাচন করুন।',
+        facebook_auth_failed: 'ফেসবুক একাউন্ট ভেরিফিকেশন সম্পন্ন করা যায়নি। অনুগ্রহ করে পুনরায় ফেসবুকে ক্লিক করে চেষ্টা করুন।'
       };
 
       const isConfig = err.includes('not_configured');
-      showFeedback(messages[err] || 'Authentication could not be completed. Please try again.', isConfig ? 'warning' : 'error');
+      showFeedback(messages[err] || 'অথেনটিকেশন সম্পন্ন করা সম্ভব হয়নি। অনুগ্রহ করে আবার চেষ্টা করুন।', isConfig ? 'warning' : 'error');
       if (window.history && window.history.replaceState) {
         window.history.replaceState({}, '', 'login.html');
       }
     }
+
+    // Google Identity Services (GIS) One Tap ইনিশিয়ালাইজেশন
+    function initGoogleOneTap() {
+      if (window.google && window.google.accounts && window.google.accounts.id) {
+        try {
+          window.google.accounts.id.initialize({
+            client_id: '280069081577-ofqhdd3unutvbn5k28bhjc76k754hr82.apps.googleusercontent.com',
+            callback: async (response) => {
+              if (response && response.credential) {
+                showFeedback('গুগল ক্রেডেনশিয়াল ভেরিফাই করা হচ্ছে...', 'info');
+                try {
+                  const res = await fetch('/api/auth/google/verify-credential', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ credential: response.credential })
+                  });
+                  const data = await res.json();
+                  if (data.success && data.token) {
+                    localStorage.setItem('asbi_auth_token', data.token);
+                    localStorage.setItem('asbi_auth_user', JSON.stringify({
+                      ...data.user,
+                      location: data.user.division || data.user.city || 'Dhaka',
+                      loggedIn: true
+                    }));
+                    showFeedback(`অভিনন্দন ${data.user.name}! গুগল দিয়ে সফলভাবে সাইন-ইন সম্পন্ন হয়েছে।`, 'success');
+                    setTimeout(() => {
+                      const params = new URLSearchParams(window.location.search);
+                      window.location.href = decodeURIComponent(params.get('returnTo') || 'index.html');
+                    }, 600);
+                  } else {
+                    showFeedback(data.message || 'গুগল ভেরিফিকেশন ব্যর্থ হয়েছে।', 'error');
+                  }
+                } catch (err) {
+                  showFeedback('সার্ভার যোগাযোগে সমস্যা হয়েছে। আবার চেষ্টা করুন।', 'error');
+                }
+              }
+            },
+            auto_select: false,
+            cancel_on_tap_outside: true
+          });
+          window.google.accounts.id.prompt();
+        } catch (e) {}
+      }
+    }
+
+    // Facebook JS SDK ইনিশিয়ালাইজেশন
+    window.fbAsyncInit = function() {
+      if (window.FB) {
+        window.FB.init({
+          appId: '1814698216118210',
+          cookie: true,
+          xfbml: true,
+          version: 'v19.0'
+        });
+      }
+    };
+
+    window.addEventListener('load', () => {
+      setTimeout(initGoogleOneTap, 600);
+    });
 
     function switchPageTab(tab) {
       hideFeedback();
@@ -481,19 +543,104 @@
       if (btn) btn.textContent = isPass ? 'Hide' : 'Show';
     }
 
-    // Real Google / Facebook / Auth0 OAuth 2.0 Redirect
-    function startRealOAuth(provider) {
+    // Real Google / Facebook / Auth0 OAuth 2.0 Integration (GIS Client + Popups + Fallback)
+    async function startRealOAuth(provider) {
       hideFeedback();
       const params = new URLSearchParams(window.location.search);
       const returnTo = encodeURIComponent(params.get('returnTo') || 'index.html');
+
       if (provider === 'google') {
+        if (window.google && window.google.accounts && window.google.accounts.oauth2) {
+          try {
+            showFeedback('গুগল একাউন্ট নির্বাচন উইন্ডো খোলা হচ্ছে...', 'info');
+            const client = window.google.accounts.oauth2.initTokenClient({
+              client_id: '280069081577-ofqhdd3unutvbn5k28bhjc76k754hr82.apps.googleusercontent.com',
+              scope: 'openid email profile',
+              callback: async (tokenResponse) => {
+                if (tokenResponse && tokenResponse.access_token) {
+                  showFeedback('গুগল ক্রেডেনশিয়াল ভেরিফাই করা হচ্ছে...', 'info');
+                  try {
+                    const res = await fetch('/api/auth/google/verify-credential', {
+                      method: 'POST',
+                      headers: { 'Content-Type': 'application/json' },
+                      body: JSON.stringify({ accessToken: tokenResponse.access_token })
+                    });
+                    const data = await res.json();
+                    if (data.success && data.token) {
+                      localStorage.setItem('asbi_auth_token', data.token);
+                      localStorage.setItem('asbi_auth_user', JSON.stringify({
+                        ...data.user,
+                        location: data.user.division || data.user.city || 'Dhaka',
+                        loggedIn: true
+                      }));
+                      showFeedback(`অভিনন্দন ${data.user.name}! গুগল দিয়ে সফলভাবে সাইন-ইন সম্পন্ন হয়েছে।`, 'success');
+                      setTimeout(() => {
+                        window.location.href = decodeURIComponent(params.get('returnTo') || 'index.html');
+                      }, 600);
+                    } else {
+                      showFeedback(data.message || 'গুগল ভেরিফিকেশন ব্যর্থ হয়েছে।', 'error');
+                    }
+                  } catch (err) {
+                    showFeedback('সার্ভার যোগাযোগে সমস্যা হয়েছে। আবার চেষ্টা করুন।', 'error');
+                  }
+                } else {
+                  showFeedback('গুগল সাইন-ইন বাতিল করা হয়েছে।', 'warning');
+                }
+              },
+              error_callback: () => {
+                window.location.href = `/api/auth/google?returnTo=${returnTo}`;
+              }
+            });
+            client.requestAccessToken({ prompt: 'select_account' });
+            return;
+          } catch (e) {}
+        }
         window.location.href = `/api/auth/google?returnTo=${returnTo}`;
         return;
       }
+
       if (provider === 'facebook') {
+        if (window.FB && typeof window.FB.login === 'function') {
+          try {
+            showFeedback('ফেসবুক একাউন্ট উইন্ডো খোলা হচ্ছে...', 'info');
+            window.FB.login(async function(response) {
+              if (response.authResponse && response.authResponse.accessToken) {
+                showFeedback('ফেসবুক ক্রেডেনশিয়াল ভেরিফাই করা হচ্ছে...', 'info');
+                try {
+                  const res = await fetch('/api/auth/facebook/verify-token', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ accessToken: response.authResponse.accessToken })
+                  });
+                  const data = await res.json();
+                  if (data.success && data.token) {
+                    localStorage.setItem('asbi_auth_token', data.token);
+                    localStorage.setItem('asbi_auth_user', JSON.stringify({
+                      ...data.user,
+                      location: data.user.division || data.user.city || 'Dhaka',
+                      loggedIn: true
+                    }));
+                    showFeedback(`অভিনন্দন ${data.user.name}! ফেসবুক দিয়ে সফলভাবে সাইন-ইন সম্পন্ন হয়েছে।`, 'success');
+                    setTimeout(() => {
+                      window.location.href = decodeURIComponent(params.get('returnTo') || 'index.html');
+                    }, 600);
+                  } else {
+                    showFeedback(data.message || 'ফেসবুক ভেরিফিকেশন ব্যর্থ হয়েছে।', 'error');
+                  }
+                } catch (err) {
+                  showFeedback('সার্ভার যোগাযোগে সমস্যা হয়েছে। আবার চেষ্টা করুন।', 'error');
+                }
+              } else {
+                showFeedback('ফেসবুক সাইন-ইন বাতিল করা হয়েছে।', 'warning');
+              }
+            }, { scope: 'public_profile,email' });
+            return;
+          } catch (e) {}
+        }
         window.location.href = `/api/auth/facebook?returnTo=${returnTo}`;
         return;
       }
+
       if (provider === 'auth0') {
         window.location.href = `/api/auth/auth0?returnTo=${returnTo}`;
       }

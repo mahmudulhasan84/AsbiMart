@@ -303,6 +303,21 @@ async function runTests() {
     const auth0Redirect = await request('/api/auth/auth0', { redirect: 'manual' });
     assert(auth0Redirect.status === 302, 'GET /api/auth/auth0 responds with redirect 302');
 
+    const gVerifyRes = await request('/api/auth/google/verify-credential', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({})
+    });
+    assert(gVerifyRes.status === 400, 'POST /api/auth/google/verify-credential rejects empty payload with 400');
+
+    const fbVerifyRes = await request('/api/auth/facebook/verify-token', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({})
+    });
+    assert(fbVerifyRes.status === 400, 'POST /api/auth/facebook/verify-token rejects empty payload with 400');
+    console.log('  ✓ GIS Google verify-credential and Facebook verify-token endpoints operational');
+
     // ------------------------------------------------------------------------
     console.log('\n📌 Test Suite 10: Complete Catalog Integrity & Hover Videos (All 39 Organic Products)');
     // ------------------------------------------------------------------------

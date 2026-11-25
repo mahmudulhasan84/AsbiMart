@@ -3172,6 +3172,65 @@ function handleUserRegister(e) {
   showToast(`অভিনন্দন ${name}! আসবিমার্টে আপনার অ্যাকাউন্ট তৈরি হয়েছে।`);
 }
 
+const GOOGLE_CLIENT_ID = '280069081577-ofqhdd3unutvbn5k28bhjc76k754hr82.apps.googleusercontent.com';
+const FB_APP_ID = '1814698216118210';
+
+function loadSocialSDKs() {
+  if (typeof document === 'undefined') return;
+  // ১. Google Identity Services (GIS) লোডার
+  if (!document.getElementById('google-gsi-client')) {
+    const gScript = document.createElement('script');
+    gScript.id = 'google-gsi-client';
+    gScript.src = 'https://accounts.google.com/gsi/client';
+    gScript.async = true;
+    gScript.defer = true;
+    document.head.appendChild(gScript);
+  }
+
+  // ২. Facebook JavaScript SDK লোডার
+  if (!document.getElementById('facebook-jssdk')) {
+    window.fbAsyncInit = function() {
+      if (window.FB) {
+        window.FB.init({
+          appId: FB_APP_ID,
+          cookie: true,
+          xfbml: true,
+          version: 'v19.0'
+        });
+      }
+    };
+    const fbScript = document.createElement('script');
+    fbScript.id = 'facebook-jssdk';
+    fbScript.src = 'https://connect.facebook.net/bn_IN/sdk.js';
+    fbScript.async = true;
+    fbScript.defer = true;
+    fbScript.crossOrigin = 'anonymous';
+    document.head.appendChild(fbScript);
+  }
+}
+
+async function handleSocialLoginSuccess(data, providerName) {
+  if (data && data.token && data.user) {
+    localStorage.setItem('asbi_auth_token', data.token);
+    localStorage.setItem('asbi_auth_user', JSON.stringify({
+      ...data.user,
+      location: data.user.division || data.user.city || 'Dhaka',
+      loggedIn: true
+    }));
+    updateAuthUI();
+    if (typeof syncMobileBottomProfile === 'function') syncMobileBottomProfile();
+    if (typeof closeAuthModal === 'function') closeAuthModal();
+    showToast(`স্বাগতম ${data.user.name || 'গ্রাহক'}! ${providerName} দিয়ে সফলভাবে সাইন-ইন সম্পন্ন হয়েছে।`);
+    if (window.location.pathname.includes('login')) {
+      setTimeout(() => {
+        const params = new URLSearchParams(window.location.search);
+        const ret = params.get('returnTo') || 'index.html';
+        window.location.href = decodeURIComponent(ret);
+      }, 500);
+    }
+  }
+}
+
 function socialLogin(provider) {
   const key = String(provider || '').toLowerCase();
   const currentPath = (typeof window !== 'undefined' && window.location && window.location.pathname) ? window.location.pathname.replace(/^\//, '') : 'index.html';
@@ -3179,13 +3238,81 @@ function socialLogin(provider) {
   const returnTo = encodeURIComponent((currentPath || 'index.html') + query);
 
   if (key === 'google') {
+    // GIS Client Popup প্রথমে চেষ্টা করা হবে যাতে রিডাইরেক্ট মিসম্যাচ ছাড়া সরাসরি গুগল একাউন্ট বাছাই করা যায়
+    if (window.google && window.google.accounts && window.google.accounts.oauth2) {
+      try {
+        showToast('গুগল একাউন্ট নির্বাচন উইন্ডো খোলা হচ্ছে...');
+        const client = window.google.accounts.oauth2.initTokenClient({
+          client_id: GOOGLE_CLIENT_ID,
+          scope: 'openid email profile',
+          callback: async (tokenResponse) => {
+            if (tokenResponse && tokenResponse.access_token) {
+              showToast('গুগল ক্রেডেনশিয়াল ভেরিফাই করা হচ্ছে...');
+              try {
+                const res = await fetch('/api/auth/google/verify-credential', {
+                  method: 'POST',
+                  headers: { 'Content-Type': 'application/json' },
+                  body: JSON.stringify({ accessToken: tokenResponse.access_token })
+                });
+                const data = await res.json();
+                if (data.success) {
+                  await handleSocialLoginSuccess(data, 'গুগল');
+                } else {
+                  showToast(data.message || 'গুগল সাইন-ইন সম্পন্ন করা যায়নি।', 'error');
+                }
+              } catch (err) {
+                showToast('সার্ভারের সাথে যোগাযোগ ব্যর্থ হয়েছে। আবার চেষ্টা করুন।', 'error');
+              }
+            } else {
+              showToast('গুগল সাইন-ইন বাতিল করা হয়েছে।');
+            }
+          },
+          error_callback: () => {
+            window.location.href = `/api/auth/google?returnTo=${returnTo}`;
+          }
+        });
+        client.requestAccessToken({ prompt: 'select_account' });
+        return;
+      } catch (e) {}
+    }
     window.location.href = `/api/auth/google?returnTo=${returnTo}`;
     return;
   }
+
   if (key === 'facebook') {
+    // Facebook SDK Popup
+    if (window.FB && typeof window.FB.login === 'function') {
+      try {
+        showToast('ফেসবুক একাউন্ট উইন্ডো খোলা হচ্ছে...');
+        window.FB.login(async function(response) {
+          if (response.authResponse && response.authResponse.accessToken) {
+            showToast('ফেসবুক ক্রেডেনশিয়াল ভেরিফাই করা হচ্ছে...');
+            try {
+              const res = await fetch('/api/auth/facebook/verify-token', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ accessToken: response.authResponse.accessToken })
+              });
+              const data = await res.json();
+              if (data.success) {
+                await handleSocialLoginSuccess(data, 'ফেসবুক');
+              } else {
+                showToast(data.message || 'ফেসবুক সাইন-ইন সম্পন্ন করা যায়নি।', 'error');
+              }
+            } catch (err) {
+              showToast('সার্ভারের সাথে যোগাযোগ ব্যর্থ হয়েছে। আবার চেষ্টা করুন।', 'error');
+            }
+          } else {
+            showToast('ফেসবুক সাইন-ইন বাতিল করা হয়েছে।');
+          }
+        }, { scope: 'public_profile,email' });
+        return;
+      } catch (e) {}
+    }
     window.location.href = `/api/auth/facebook?returnTo=${returnTo}`;
     return;
   }
+
   if (key === 'auth0') {
     window.location.href = `/api/auth/auth0?returnTo=${returnTo}`;
     return;
@@ -3703,6 +3830,7 @@ async function handleSupportTicketSubmit(e) {
 
 // ইনিশিয়ালাইজেশন
 document.addEventListener('DOMContentLoaded', () => {
+  loadSocialSDKs();
   syncMasterCatalogFromBackend();
   initHeroCarousel();
   renderFeaturedCategories();

@@ -234,6 +234,66 @@ async function exchangeFacebookCodeForProfile(req, code) {
 }
 
 // ==========================================
+// ২.১ Google Credential (GIS) & Access Token ভেরিফিকেশন
+// ==========================================
+async function verifyGoogleCredential(credential) {
+  if (!credential) throw new Error('Missing Google ID token credential');
+  const verifyRes = await fetch(`https://oauth2.googleapis.com/tokeninfo?id_token=${encodeURIComponent(credential)}`);
+  const data = await verifyRes.json();
+  if (!verifyRes.ok || !data.email) {
+    throw new Error(data.error_description || data.error || 'Invalid Google ID token');
+  }
+  return {
+    provider: 'google',
+    providerId: String(data.sub || ''),
+    name: data.name || (data.given_name ? `${data.given_name} ${data.family_name || ''}`.trim() : data.email.split('@')[0]),
+    email: data.email.toLowerCase(),
+    emailVerified: data.email_verified === 'true' || data.email_verified === true,
+    avatar: data.picture || ''
+  };
+}
+
+async function verifyGoogleAccessToken(accessToken) {
+  if (!accessToken) throw new Error('Missing Google access token');
+  const infoRes = await fetch('https://www.googleapis.com/oauth2/v3/userinfo', {
+    headers: { Authorization: `Bearer ${accessToken}` }
+  });
+  const data = await infoRes.json();
+  if (!infoRes.ok || (!data.email && !data.sub)) {
+    throw new Error(data.error_description || data.error || 'Invalid Google access token');
+  }
+  return {
+    provider: 'google',
+    providerId: String(data.sub || ''),
+    name: data.name || (data.email ? data.email.split('@')[0] : 'Google User'),
+    email: data.email ? data.email.toLowerCase() : `google_${data.sub}@asbimart.com`,
+    emailVerified: !!data.email_verified,
+    avatar: data.picture || ''
+  };
+}
+
+// ==========================================
+// ২.২ Facebook Access Token ভেরিফিকেশন (Facebook JS SDK & FB.login)
+// ==========================================
+async function verifyFacebookAccessToken(accessToken) {
+  if (!accessToken) throw new Error('Missing Facebook access token');
+  const profileRes = await fetch(`https://graph.facebook.com/v19.0/me?fields=id,name,email,picture.type(large)&access_token=${encodeURIComponent(accessToken)}`);
+  const data = await profileRes.json();
+  if (!profileRes.ok || !data.id) {
+    throw new Error((data.error && data.error.message) || 'Invalid Facebook access token');
+  }
+  const fbId = String(data.id);
+  return {
+    provider: 'facebook',
+    providerId: fbId,
+    name: data.name || 'Facebook User',
+    email: data.email ? data.email.toLowerCase() : `fb_${fbId}@asbimart.com`,
+    emailVerified: true,
+    avatar: (data.picture && data.picture.data && data.picture.data.url) ? data.picture.data.url : ''
+  };
+}
+
+// ==========================================
 // ৩. রিয়েল Email (Nodemailer Gmail SMTP) & SMS OTP ডেলিভারি
 // ==========================================
 function hashOtp(sessionId, otpCode) {
@@ -551,8 +611,11 @@ module.exports = {
   verifyAndConsumeOAuthState,
   buildGoogleAuthUrl,
   exchangeGoogleCodeForProfile,
+  verifyGoogleCredential,
+  verifyGoogleAccessToken,
   buildFacebookAuthUrl,
   exchangeFacebookCodeForProfile,
+  verifyFacebookAccessToken,
   buildAuth0Url,
   exchangeAuth0CodeForProfile,
   createAndSendOtpSession,

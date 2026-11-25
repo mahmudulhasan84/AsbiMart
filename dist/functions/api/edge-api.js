@@ -2815,9 +2815,177 @@ export async function onRequest(context) {
     });
   }
 
-  
   // --------------------------------------------------------------------------
-  // Real Google OAuth Redirect & Callback
+  // Real Google Identity Services (GIS) / Credential & Token Verification API
+  // --------------------------------------------------------------------------
+  if ((pathname === '/api/auth/google/verify-credential' || pathname === '/api/auth/google/verify-token' || pathname === '/api/auth/google/token') && method === 'POST') {
+    const credential = body.credential || body.id_token;
+    const accessToken = body.accessToken || body.access_token;
+
+    if (!credential && !accessToken) {
+      return jsonResponse({ success: false, message: 'গুগল ক্রেডেনশিয়াল বা টোকেন পাওয়া যায়নি।' }, 400);
+    }
+
+    let googleUser = null;
+
+    // ১. Google ID Token (GIS Credential JWT) ভেরিফিকেশন
+    if (credential) {
+      try {
+        const verifyRes = await fetch(`https://oauth2.googleapis.com/tokeninfo?id_token=${encodeURIComponent(credential)}`);
+        if (verifyRes.ok) {
+          const data = await verifyRes.json();
+          if (data.email) {
+            googleUser = {
+              sub: String(data.sub || ''),
+              name: data.name || (data.given_name ? `${data.given_name} ${data.family_name || ''}`.trim() : data.email.split('@')[0]),
+              email: data.email.toLowerCase(),
+              emailVerified: data.email_verified === 'true' || data.email_verified === true,
+              avatar: data.picture || ''
+            };
+          }
+        }
+      } catch (e) {}
+    }
+
+    // ২. Google OAuth Access Token ভেরিফিকেশন
+    if (!googleUser && accessToken) {
+      try {
+        const infoRes = await fetch('https://www.googleapis.com/oauth2/v3/userinfo', {
+          headers: { Authorization: `Bearer ${accessToken}` }
+        });
+        if (infoRes.ok) {
+          const data = await infoRes.json();
+          if (data.email || data.sub) {
+            googleUser = {
+              sub: String(data.sub || ''),
+              name: data.name || (data.email ? data.email.split('@')[0] : 'গুগল গ্রাহক'),
+              email: data.email ? data.email.toLowerCase() : `google_${data.sub}@asbimart.com`,
+              emailVerified: !!data.email_verified,
+              avatar: data.picture || ''
+            };
+          }
+        }
+      } catch (e) {}
+    }
+
+    if (!googleUser || !googleUser.email) {
+      return jsonResponse({ success: false, message: 'গুগল ক্রেডেনশিয়াল ভেরিফিকেশন ব্যর্থ হয়েছে।' }, 401);
+    }
+
+    const users = await getStore(env, 'users', [...SEED_USERS]);
+    let user = users.find(u => (u.email && u.email.toLowerCase() === googleUser.email) || (u.provider === 'google' && u.providerId === googleUser.sub));
+
+    if (user) {
+      user.name = user.name || googleUser.name;
+      user.avatar = googleUser.avatar || user.avatar;
+      user.provider = user.provider || 'google';
+      user.providerId = user.providerId || googleUser.sub;
+      user.emailVerified = true;
+    } else {
+      user = {
+        id: 'usr_g_' + Date.now(),
+        name: googleUser.name,
+        email: googleUser.email,
+        phone: '',
+        role: 'customer',
+        provider: 'google',
+        providerId: googleUser.sub,
+        avatar: googleUser.avatar,
+        emailVerified: true,
+        createdAt: new Date().toISOString()
+      };
+      users.push(user);
+    }
+    await setStore(env, 'users', users);
+
+    const token = await signJwt({ id: user.id, email: user.email, name: user.name, role: user.role }, secret);
+    return jsonResponse({
+      success: true,
+      message: `অভিনন্দন ${user.name}! গুগল দিয়ে সফলভাবে সাইন-ইন সম্পন্ন হয়েছে।`,
+      token,
+      user: {
+        id: user.id,
+        name: user.name,
+        email: user.email,
+        phone: user.phone || '',
+        role: user.role,
+        avatar: user.avatar || '',
+        provider: 'google',
+        loggedIn: true
+      }
+    });
+  }
+
+  // --------------------------------------------------------------------------
+  // Real Facebook Token Verification API (Facebook JS SDK & FB.login)
+  // --------------------------------------------------------------------------
+  if ((pathname === '/api/auth/facebook/verify-token' || pathname === '/api/auth/facebook/token') && method === 'POST') {
+    const accessToken = body.accessToken || body.access_token;
+    if (!accessToken) {
+      return jsonResponse({ success: false, message: 'ফেসবুক এক্সেস টোকেন পাওয়া যায়নি।' }, 400);
+    }
+
+    let fbProfile = null;
+    try {
+      const profileRes = await fetch(`https://graph.facebook.com/v19.0/me?fields=id,name,email,picture.type(large)&access_token=${encodeURIComponent(accessToken)}`);
+      if (profileRes.ok) {
+        fbProfile = await profileRes.json();
+      }
+    } catch (e) {}
+
+    if (!fbProfile || !fbProfile.id) {
+      return jsonResponse({ success: false, message: 'ফেসবুক টোকেন ভেরিফিকেশন ব্যর্থ হয়েছে।' }, 401);
+    }
+
+    const fbId = String(fbProfile.id);
+    const email = fbProfile.email ? fbProfile.email.toLowerCase() : `fb_${fbId}@asbimart.com`;
+    const name = fbProfile.name || 'ফেসবুক গ্রাহক';
+    const avatar = (fbProfile.picture && fbProfile.picture.data && fbProfile.picture.data.url) ? fbProfile.picture.data.url : '';
+
+    const users = await getStore(env, 'users', [...SEED_USERS]);
+    let user = users.find(u => (u.email && u.email.toLowerCase() === email) || (u.provider === 'facebook' && u.providerId === fbId));
+
+    if (user) {
+      user.name = user.name || name;
+      user.avatar = avatar || user.avatar;
+      user.provider = user.provider || 'facebook';
+      user.providerId = fbId;
+    } else {
+      user = {
+        id: 'usr_fb_' + Date.now(),
+        name,
+        email,
+        phone: '',
+        role: 'customer',
+        provider: 'facebook',
+        providerId: fbId,
+        avatar,
+        createdAt: new Date().toISOString()
+      };
+      users.push(user);
+    }
+    await setStore(env, 'users', users);
+
+    const token = await signJwt({ id: user.id, email: user.email, name: user.name, role: user.role }, secret);
+    return jsonResponse({
+      success: true,
+      message: `অভিনন্দন ${user.name}! ফেসবুক দিয়ে সফলভাবে সাইন-ইন সম্পন্ন হয়েছে।`,
+      token,
+      user: {
+        id: user.id,
+        name: user.name,
+        email: user.email,
+        phone: user.phone || '',
+        role: user.role,
+        avatar: user.avatar || '',
+        provider: 'facebook',
+        loggedIn: true
+      }
+    });
+  }
+
+  // --------------------------------------------------------------------------
+  // Real Google OAuth Redirect & Callback (Authorization Code Flow)
   // --------------------------------------------------------------------------
   if (pathname === '/api/auth/google' && method === 'GET') {
     const returnTo = url.searchParams.get('returnTo') || 'index.html';
@@ -2840,6 +3008,7 @@ export async function onRequest(context) {
   }
 
   if (pathname === '/api/auth/google/callback' && method === 'GET') {
+    const errorParam = url.searchParams.get('error');
     const codeParam = url.searchParams.get('code');
     const stateRaw = url.searchParams.get('state');
     let returnTo = 'index.html';
@@ -2850,17 +3019,28 @@ export async function onRequest(context) {
       }
     } catch (e) {}
 
-    const users = await getStore(env, 'users', [...SEED_USERS]);
+    if (errorParam) {
+      const errUrl = new URL(`/${returnTo}`, url.origin);
+      errUrl.searchParams.set('auth_error', 'google_' + errorParam);
+      return new Response(null, {
+        status: 302,
+        headers: { 'Location': errUrl.toString() }
+      });
+    }
+
+    const googleSecret = env.GOOGLE_CLIENT_SECRET || '';
+    const googleClientId = env.GOOGLE_CLIENT_ID || '280069081577-ofqhdd3unutvbn5k28bhjc76k754hr82.apps.googleusercontent.com';
+
     let googleUser = null;
-    if (codeParam && env.GOOGLE_CLIENT_SECRET) {
+    if (codeParam && googleSecret) {
       try {
         const tokenRes = await fetch('https://oauth2.googleapis.com/token', {
           method: 'POST',
           headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
           body: new URLSearchParams({
             code: codeParam,
-            client_id: env.GOOGLE_CLIENT_ID || '280069081577-ofqhdd3unutvbn5k28bhjc76k754hr82.apps.googleusercontent.com',
-            client_secret: env.GOOGLE_CLIENT_SECRET,
+            client_id: googleClientId,
+            client_secret: googleSecret,
             redirect_uri: `${url.origin}/api/auth/google/callback`,
             grant_type: 'authorization_code'
           })
@@ -2870,15 +3050,34 @@ export async function onRequest(context) {
           const userinfoRes = await fetch('https://www.googleapis.com/oauth2/v3/userinfo', {
             headers: { Authorization: `Bearer ${tokenData.access_token}` }
           });
-          googleUser = await userinfoRes.json();
+          if (userinfoRes.ok) {
+            googleUser = await userinfoRes.json();
+          }
         }
       } catch (e) {}
     }
 
-    const email = (googleUser && googleUser.email) ? googleUser.email.toLowerCase() : `google_user_${Date.now()}@asbimart.com`;
+    if (!googleUser || (!googleUser.email && !googleUser.sub)) {
+      const errUrl = new URL(`/${returnTo}`, url.origin);
+      errUrl.searchParams.set('auth_error', 'google_auth_failed');
+      return new Response(null, {
+        status: 302,
+        headers: { 'Location': errUrl.toString() }
+      });
+    }
+
+    const users = await getStore(env, 'users', [...SEED_USERS]);
+    const email = (googleUser && googleUser.email) ? googleUser.email.toLowerCase() : `google_${googleUser.sub}@asbimart.com`;
     const name = (googleUser && googleUser.name) ? googleUser.name : 'গুগল ভেরিফাইড গ্রাহক';
-    let user = users.find(u => u.email && u.email.toLowerCase() === email);
-    if (!user) {
+    const avatar = googleUser.picture || '';
+
+    let user = users.find(u => (u.email && u.email.toLowerCase() === email) || (u.provider === 'google' && u.providerId === String(googleUser.sub)));
+    if (user) {
+      user.name = user.name || name;
+      user.avatar = avatar || user.avatar;
+      user.provider = user.provider || 'google';
+      user.providerId = String(googleUser.sub);
+    } else {
       user = {
         id: 'usr_g_' + Date.now(),
         name,
@@ -2886,11 +3085,13 @@ export async function onRequest(context) {
         phone: '',
         role: 'customer',
         provider: 'google',
+        providerId: String(googleUser.sub),
+        avatar,
         createdAt: new Date().toISOString()
       };
       users.push(user);
-      await setStore(env, 'users', users);
     }
+    await setStore(env, 'users', users);
 
     const token = await signJwt({ id: user.id, email: user.email, name: user.name, role: user.role }, secret);
     const targetUrl = new URL(`/${returnTo}`, url.origin);
@@ -2904,7 +3105,7 @@ export async function onRequest(context) {
   }
 
   // --------------------------------------------------------------------------
-  // Real Facebook OAuth Redirect & Callback
+  // Real Facebook OAuth Redirect & Callback (Graph API Dialog Flow)
   // --------------------------------------------------------------------------
   if (pathname === '/api/auth/facebook' && method === 'GET') {
     const returnTo = url.searchParams.get('returnTo') || 'index.html';
@@ -2925,6 +3126,7 @@ export async function onRequest(context) {
   }
 
   if (pathname === '/api/auth/facebook/callback' && method === 'GET') {
+    const errorParam = url.searchParams.get('error');
     const codeParam = url.searchParams.get('code');
     const stateRaw = url.searchParams.get('state');
     let returnTo = 'index.html';
@@ -2935,28 +3137,59 @@ export async function onRequest(context) {
       }
     } catch (e) {}
 
-    const users = await getStore(env, 'users', [...SEED_USERS]);
+    if (errorParam) {
+      const errUrl = new URL(`/${returnTo}`, url.origin);
+      errUrl.searchParams.set('auth_error', 'facebook_' + errorParam);
+      return new Response(null, {
+        status: 302,
+        headers: { 'Location': errUrl.toString() }
+      });
+    }
+
+    const fbSecret = env.FACEBOOK_APP_SECRET || '897114a20f107b071a202c0ba736961a';
+    const fbAppId = env.FACEBOOK_APP_ID || '1814698216118210';
+
     let fbProfile = null;
-    if (codeParam && env.FACEBOOK_APP_SECRET) {
+    if (codeParam && fbSecret) {
       try {
         const tokenUrl = new URL('https://graph.facebook.com/v19.0/oauth/access_token');
-        tokenUrl.searchParams.set('client_id', env.FACEBOOK_APP_ID || '1814698216118210');
-        tokenUrl.searchParams.set('client_secret', env.FACEBOOK_APP_SECRET);
+        tokenUrl.searchParams.set('client_id', fbAppId);
+        tokenUrl.searchParams.set('client_secret', fbSecret);
         tokenUrl.searchParams.set('redirect_uri', `${url.origin}/api/auth/facebook/callback`);
         tokenUrl.searchParams.set('code', codeParam);
         const tokenRes = await fetch(tokenUrl.toString());
         const tokenData = await tokenRes.json();
         if (tokenData.access_token) {
-          const profileRes = await fetch(`https://graph.facebook.com/me?fields=id,name,email&access_token=${tokenData.access_token}`);
-          fbProfile = await profileRes.json();
+          const profileRes = await fetch(`https://graph.facebook.com/me?fields=id,name,email,picture.type(large)&access_token=${tokenData.access_token}`);
+          if (profileRes.ok) {
+            fbProfile = await profileRes.json();
+          }
         }
       } catch (e) {}
     }
 
-    const email = (fbProfile && fbProfile.email) ? fbProfile.email.toLowerCase() : `fb_user_${Date.now()}@asbimart.com`;
+    if (!fbProfile || !fbProfile.id) {
+      const errUrl = new URL(`/${returnTo}`, url.origin);
+      errUrl.searchParams.set('auth_error', 'facebook_auth_failed');
+      return new Response(null, {
+        status: 302,
+        headers: { 'Location': errUrl.toString() }
+      });
+    }
+
+    const users = await getStore(env, 'users', [...SEED_USERS]);
+    const fbId = String(fbProfile.id);
+    const email = (fbProfile && fbProfile.email) ? fbProfile.email.toLowerCase() : `fb_${fbId}@asbimart.com`;
     const name = (fbProfile && fbProfile.name) ? fbProfile.name : 'ফেসবুক ভেরিফাইড গ্রাহক';
-    let user = users.find(u => u.email && u.email.toLowerCase() === email);
-    if (!user) {
+    const avatar = (fbProfile.picture && fbProfile.picture.data && fbProfile.picture.data.url) ? fbProfile.picture.data.url : '';
+
+    let user = users.find(u => (u.email && u.email.toLowerCase() === email) || (u.provider === 'facebook' && u.providerId === fbId));
+    if (user) {
+      user.name = user.name || name;
+      user.avatar = avatar || user.avatar;
+      user.provider = user.provider || 'facebook';
+      user.providerId = fbId;
+    } else {
       user = {
         id: 'usr_fb_' + Date.now(),
         name,
@@ -2964,11 +3197,13 @@ export async function onRequest(context) {
         phone: '',
         role: 'customer',
         provider: 'facebook',
+        providerId: fbId,
+        avatar,
         createdAt: new Date().toISOString()
       };
       users.push(user);
-      await setStore(env, 'users', users);
     }
+    await setStore(env, 'users', users);
 
     const token = await signJwt({ id: user.id, email: user.email, name: user.name, role: user.role }, secret);
     const targetUrl = new URL(`/${returnTo}`, url.origin);

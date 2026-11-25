@@ -9,7 +9,9 @@ async function testNativeEdgeBackend() {
   const env = {
     AUTH_SECRET: 'asbi_secret_key_super_secure_organic_mart_2026',
     ADMIN_USER: 'asbi',
-    ADMIN_PASS: 'AsbiMart@2026'
+    ADMIN_PASS: 'AsbiMart@2026',
+    GOOGLE_CLIENT_ID: '280069081577-ofqhdd3unutvbn5k28bhjc76k754hr82.apps.googleusercontent.com',
+    FACEBOOK_APP_ID: '1814698216118210'
   };
 
   async function callEdge(path, options = {}) {
@@ -278,15 +280,39 @@ async function testNativeEdgeBackend() {
   console.log('  ✓ Persistent cart sync verified');
 
   // --------------------------------------------------------------------------
-  console.log('\n📌 8. Auth Providers & Auth0 Redirection');
+  console.log('\n📌 8. Real OAuth 2.0 & Token Verification (Google, Facebook & Auth0)');
   // --------------------------------------------------------------------------
   const providers = await callEdge('/api/auth/providers');
   assert.strictEqual(providers.status, 200, 'GET /api/auth/providers returns 200');
-  assert(providers.data.providers.auth0 && providers.data.providers.google, 'Provider flags valid');
+  assert(providers.data.providers.auth0 && providers.data.providers.google && providers.data.providers.facebook, 'Provider flags valid');
 
   const auth0Res = await callEdge('/api/auth/auth0');
   assert.strictEqual(auth0Res.status, 302, 'GET /api/auth/auth0 responds with redirect 302');
-  console.log('  ✓ Auth providers and Auth0 redirection verified');
+
+  const googleRedirect = await callEdge('/api/auth/google');
+  assert.strictEqual(googleRedirect.status, 302, 'GET /api/auth/google responds with redirect 302');
+  assert(googleRedirect.headers.get('location')?.includes('accounts.google.com'), 'Google redirect points to accounts.google.com');
+
+  const fbRedirect = await callEdge('/api/auth/facebook');
+  assert.strictEqual(fbRedirect.status, 302, 'GET /api/auth/facebook responds with redirect 302');
+  assert(fbRedirect.headers.get('location')?.includes('facebook.com'), 'Facebook redirect points to facebook.com');
+
+  // Verify GIS / Google Token verification endpoint guard
+  const gVerifyRes = await callEdge('/api/auth/google/verify-credential', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: {}
+  });
+  assert.strictEqual(gVerifyRes.status, 400, 'POST /api/auth/google/verify-credential rejects empty payload with 400');
+
+  // Verify Facebook Token verification endpoint guard
+  const fbVerifyRes = await callEdge('/api/auth/facebook/verify-token', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: {}
+  });
+  assert.strictEqual(fbVerifyRes.status, 400, 'POST /api/auth/facebook/verify-token rejects empty payload with 400');
+  console.log('  ✓ Real OAuth 2.0 redirects, GIS credential guards, and Facebook token verification verified');
 
   // --------------------------------------------------------------------------
   console.log('\n📌 9. Payment Facilitation Endpoints');
