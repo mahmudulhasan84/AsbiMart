@@ -282,25 +282,36 @@ async function runTests() {
     assert(getCartRes.status === 200 && getCartRes.data.items?.length === 2, 'Persistent cart retrieved from server matching saved items');
 
     // ------------------------------------------------------------------------
-    console.log('\n📌 Test Suite 9: Auth Providers & Auth0 Universal Login Route');
+    console.log('\n📌 Test Suite 9: Real OAuth 2.0 (Google, Facebook & Auth0) Verification');
     // ------------------------------------------------------------------------
     const providersRes = await request('/api/auth/providers');
     assert(providersRes.status === 200 && providersRes.data.success, 'GET /api/auth/providers returns 200 OK');
     assert(typeof providersRes.data.providers === 'object', 'Providers payload contains provider status map');
+    assert(providersRes.data.providers.google === true, 'Google OAuth provider is enabled and configured');
+    assert(providersRes.data.providers.facebook === true, 'Facebook OAuth provider is enabled and configured');
 
-    // When Auth0 is not yet configured, accessing /api/auth/auth0 redirects to login with auth0_not_configured
+    const googleRedirect = await request('/api/auth/google', { redirect: 'manual' });
+    assert(googleRedirect.status === 302, 'GET /api/auth/google responds with redirect 302');
+    const googleLoc = googleRedirect.headers.get ? googleRedirect.headers.get('location') : googleRedirect.headers['location'];
+    assert((googleLoc || '').includes('accounts.google.com'), 'Google redirect location points to accounts.google.com');
+
+    const fbRedirect = await request('/api/auth/facebook', { redirect: 'manual' });
+    assert(fbRedirect.status === 302, 'GET /api/auth/facebook responds with redirect 302');
+    const fbLoc = fbRedirect.headers.get ? fbRedirect.headers.get('location') : fbRedirect.headers['location'];
+    assert((fbLoc || '').includes('facebook.com'), 'Facebook redirect location points to facebook.com');
+
     const auth0Redirect = await request('/api/auth/auth0', { redirect: 'manual' });
     assert(auth0Redirect.status === 302, 'GET /api/auth/auth0 responds with redirect 302');
 
     // ------------------------------------------------------------------------
-    console.log('\n📌 Test Suite 10: Complete Catalog Integrity (39 Organic Products)');
+    console.log('\n📌 Test Suite 10: Complete Catalog Integrity & Hover Videos (All 39 Organic Products)');
     // ------------------------------------------------------------------------
     const allProducts = await request('/api/products');
     assert(allProducts.status === 200 && allProducts.data.products?.length === 39, `Full catalog loaded with exactly 39 products (actual: ${allProducts.data.products?.length})`);
     
-    // Check that every single product has id, banglaName, category, and variants
-    const validCount = allProducts.data.products.filter(p => p.id && p.banglaName && p.category && Array.isArray(p.variants)).length;
-    assert(validCount === 39, 'Every product has valid ID, Bengali name, Category, and Variants');
+    // Check that every single product has id, banglaName, category, variants, video, and videoFallback
+    const validCount = allProducts.data.products.filter(p => p.id && p.banglaName && p.category && Array.isArray(p.variants) && p.video && p.videoFallback).length;
+    assert(validCount === 39, 'Every product has valid ID, Bengali name, Category, Variants, and Hover Video paths');
 
     // ------------------------------------------------------------------------
     console.log('\n✅ ALL 10 TEST SUITES PASSED FLAWLESSLY WITH 100% SUCCESS!\n');

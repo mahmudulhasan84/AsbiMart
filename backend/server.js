@@ -431,36 +431,324 @@ app.delete('/api/admin/coupons/:code', authenticateAdmin, (req, res) => {
 });
 
 // ==========================================
-// ১০. কাস্টমার অথেনটিকেশন এপিআই (Customer Authentication)
+// ১০. কাস্টমার অথেনটিকেশন এপিআই (Customer Authentication, Real OAuth & OTP Engine)
 // ==========================================
+
+// OAuth সফল হলে ব্রাউজারে নিরাপদ সেশন হ্যান্ডঅফ পেজ
+function renderOAuthSuccessPage(res, user, token, returnTo = '/index.html') {
+  const safeUser = { ...user };
+  delete safeUser.passwordHash;
+  const sessionUser = {
+    ...safeUser,
+    location: safeUser.division || safeUser.city || 'Dhaka',
+    loggedIn: true,
+    loginTime: new Date().toISOString()
+  };
+  let safeReturn = /^[a-zA-Z0-9._\-\/?=&]+$/.test(returnTo) ? returnTo : '/index.html';
+  if (!safeReturn.startsWith('/')) safeReturn = '/' + safeReturn;
+  const serializedToken = JSON.stringify(token).replace(/</g, '\\u003c');
+  const serializedUser = JSON.stringify(sessionUser).replace(/</g, '\\u003c');
+
+  res.setHeader('Content-Type', 'text/html; charset=utf-8');
+  res.send(`<!DOCTYPE html>
+<html lang="bn">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Signing in — AsbiMart</title>
+  <style>
+    body { font-family: system-ui, sans-serif; background: #F4ECE1; color: #1E3A8A; display: flex; align-items: center; justify-content: center; min-height: 100vh; margin: 0; }
+    .box { background: #fff; border: 1px solid #E5DACB; border-radius: 20px; padding: 28px 34px; text-align: center; box-shadow: 0 12px 30px rgba(15,23,42,0.08); }
+  </style>
+</head>
+<body>
+  <div class="box">
+    <h2 style="margin: 0 0 8px;">লগইন যাচাই সম্পন্ন হয়েছে</h2>
+    <p style="margin: 0; font-size: 13px; color: #475569;">আসবিমার্ট-এ নিয়ে যাওয়া হচ্ছে...</p>
+  </div>
+  <script>
+    try {
+      localStorage.setItem('asbi_auth_token', ${serializedToken});
+      localStorage.setItem('asbi_auth_user', ${JSON.stringify(serializedUser)});
+      if (typeof BroadcastChannel !== 'undefined') {
+        new BroadcastChannel('asbimart_sync').postMessage({ type: 'AUTH_CHANGED' });
+      }
+    } catch (e) {}
+    window.location.replace(${JSON.stringify(safeReturn)});
+  </script>
+</body>
+</html>`);
+}
+
+function upsertOAuthUser(profile) {
+  let user = db.findUserByProvider(profile.provider, profile.providerId);
+  if (!user && profile.email) {
+    user = db.findUserByEmail(profile.email);
+    if (user) {
+      user = db.updateUser(user.id, {
+        provider: user.provider || profile.provider,
+        providerId: profile.providerId,
+        emailVerified: user.emailVerified || profile.emailVerified,
+        avatar: profile.avatar || user.avatar
+      });
+    }
+  }
+
+  if (!user) {
+    user = db.createUser({
+      name: sanitizeText(profile.name),
+      phone: '',
+      email: sanitizeText(profile.email),
+      avatar: profile.avatar || 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&w=200&q=80',
+      city: 'Dhaka',
+      provider: profile.provider,
+      providerId: profile.providerId,
+      emailVerified: !!profile.emailVerified
+    });
+  } else if (profile.avatar && user.avatar !== profile.avatar) {
+    user = db.updateUser(user.id, { avatar: profile.avatar });
+  }
+
+  return user;
+}
+
+// ১. অ্যাকাউন্ট তৈরির জন্য রিয়েল ৬-ডিজিট OTP পাঠানো (Email / Gmail অথবা Phone SMS)
+app.post('/api/auth/otp/send', rateLimiter(10, 15 * 60 * 1000), async (req, res) => {
+  try {
+    const {
+      name,
+      phone,
+      email,
+      password,
+      address,
+      city,
+      division,
+      district,
+      upazila,
+      avatar,
+      otpChannel
+    } = req.body || {};
+
+    if (!name || !phone || !password) {
+      return res.status(400).json({
+        success: false,
+        message: 'Full name, phone number, and password are required.'
+      });
+    }
+
+    const cleanPhone = String(phone).replace(/[\s-]/g, '').trim();
+    if (!isValidPhone(cleanPhone)) {
+      return res.status(400).json({
+        success: false,
+        message: 'Please enter a valid 11-digit Bangladeshi mobile number (e.g. 017XXXXXXXX).'
+      });
+    }
+
+    const cleanEmail = String(email || '').trim().toLowerCase();
+    const channel = otpChannel === 'sms' ? 'sms' : 'email';
+
+    if (channel === 'email' && !isValidEmail(cleanEmail)) {
+      return res.status(400).json({
+        success: false,
+        message: 'Please enter a valid Email / Gmail address to receive your OTP code.'
+      });
+    }
+
+    if (cleanEmail && !isValidEmail(cleanEmail)) {
+      return res.status(400).json({
+        success: false,
+        message: 'Please enter a valid email address.'
+      });
+    }
+
+    if (String(password).length < 6) {
+      return res.status(400).json({
+        success: false,
+        message: 'Password must be at least 6 characters long.'
+      });
+    }
+
+    if (db.findUserByPhone(cleanPhone)) {
+      return res.status(409).json({
+        success: false,
+        message: 'An account with this mobile number already exists. Please sign in.'
+      });
+    }
+
+    if (cleanEmail && db.findUserByEmail(cleanEmail)) {
+      return res.status(409).json({
+        success: false,
+        message: 'An account with this email address already exists. Please sign in.'
+      });
+    }
+
+    const payload = {
+      name: sanitizeText(name),
+      phone: cleanPhone,
+      email: cleanEmail,
+      password: String(password),
+      address: sanitizeText(address || ''),
+      city: sanitizeText(city || division || 'Dhaka'),
+      division: sanitizeText(division || ''),
+      district: sanitizeText(district || ''),
+      upazila: sanitizeText(upazila || ''),
+      avatar: avatar || 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&w=200&q=80'
+    };
+
+    const result = await authServices.createAndSendOtpSession({ channel, payload });
+
+    res.json({
+      success: true,
+      message: channel === 'sms'
+        ? `A 6-digit OTP code has been sent via SMS to ${result.maskedTarget}.`
+        : `A 6-digit OTP verification code has been sent to ${result.maskedTarget}.`,
+      ...result
+    });
+  } catch (error) {
+    console.error('[OTP Send Error]:', error.message);
+    if (error.code === 'EMAIL_OTP_NOT_CONFIGURED') {
+      return res.status(503).json({
+        success: false,
+        needsConfig: 'emailOtp',
+        message: 'Real Email/Gmail OTP is not configured yet. Please add SMTP_USER and Gmail App Password (SMTP_PASS) in backend/.env and restart the server.'
+      });
+    }
+    if (error.code === 'SMS_OTP_NOT_CONFIGURED') {
+      return res.status(503).json({
+        success: false,
+        needsConfig: 'smsOtp',
+        message: 'Real SMS OTP Gateway is not configured yet. Please add SMS_API_KEY and SMS_SENDER_ID in backend/.env, or select Email/Gmail OTP.'
+      });
+    }
+    res.status(500).json({
+      success: false,
+      message: `Failed to send verification OTP: ${error.message}`
+    });
+  }
+});
+
+// ২. OTP পুনরায় পাঠানো (Resend OTP)
+app.post('/api/auth/otp/resend', rateLimiter(10, 15 * 60 * 1000), async (req, res) => {
+  try {
+    const { otpSessionId } = req.body || {};
+    if (!otpSessionId) {
+      return res.status(400).json({ success: false, message: 'OTP session ID is required.' });
+    }
+
+    const result = await authServices.resendOtpForSession(otpSessionId);
+    res.json({
+      success: true,
+      message: `A fresh 6-digit OTP code has been sent to ${result.maskedTarget}.`,
+      ...result
+    });
+  } catch (error) {
+    console.error('[OTP Resend Error]:', error.message);
+    const status = error.code === 'OTP_SESSION_NOT_FOUND' ? 404
+      : error.code === 'RESEND_COOLDOWN' ? 429
+      : error.code === 'MAX_ATTEMPTS_EXCEEDED' ? 429 : 500;
+
+    res.status(status).json({
+      success: false,
+      message: error.message,
+      waitSeconds: error.waitSeconds || null
+    });
+  }
+});
+
+// ৩. OTP যাচাই করে নতুন ভেরিফাইড ইউজার তৈরি (Verify OTP & Register)
+app.post('/api/auth/otp/verify-register', rateLimiter(20, 15 * 60 * 1000), (req, res) => {
+  try {
+    const { otpSessionId, otpCode } = req.body || {};
+    if (!otpSessionId || !otpCode) {
+      return res.status(400).json({
+        success: false,
+        message: 'OTP session ID and 6-digit verification code are required.'
+      });
+    }
+
+    const verification = authServices.verifyAndConsumeOtpSession(otpSessionId, otpCode);
+    if (!verification.ok) {
+      return res.status(verification.status || 400).json({
+        success: false,
+        message: verification.message
+      });
+    }
+
+    const data = verification.payload;
+
+    if (db.findUserByPhone(data.phone)) {
+      return res.status(409).json({
+        success: false,
+        message: 'This phone number is already registered.'
+      });
+    }
+    if (data.email && db.findUserByEmail(data.email)) {
+      return res.status(409).json({
+        success: false,
+        message: 'This email address is already registered.'
+      });
+    }
+
+    const newUser = db.createUser({
+      ...data,
+      provider: 'local',
+      emailVerified: verification.channel === 'email',
+      phoneVerified: verification.channel === 'sms'
+    });
+
+    const token = db.generateToken({ id: newUser.id, phone: newUser.phone, email: newUser.email, name: newUser.name, role: newUser.role });
+    const safeUser = { ...newUser };
+    delete safeUser.passwordHash;
+
+    res.status(201).json({
+      success: true,
+      message: 'Verification complete! Your AsbiMart account has been created successfully.',
+      user: safeUser,
+      token
+    });
+  } catch (error) {
+    console.error('[OTP Verify Register Error]:', error);
+    res.status(500).json({ success: false, message: 'Server error during account verification.' });
+  }
+});
+
+// সরাসরি রেজিস্ট্রেশন (কাস্টমার অ্যাকাউন্ট তৈরি)
 app.post('/api/auth/register', rateLimiter(10, 10 * 60 * 1000), (req, res) => {
   try {
-    const { name, phone, email, password, address, city } = req.body;
+    const { name, phone, email, password, address, city, division, district, upazila, avatar } = req.body;
 
     if (!name || !phone || !password) {
       return res.status(400).json({ success: false, message: 'নাম, মোবাইল নম্বর এবং পাসওয়ার্ড আবশ্যক।' });
     }
 
-    const cleanPhone = phone.replace(/[\s-]/g, '').trim();
+    const cleanPhone = String(phone).replace(/[\s-]/g, '').trim();
     if (!isValidPhone(cleanPhone)) {
       return res.status(400).json({ success: false, message: 'সঠিক ১১ ডিজিটের মোবাইল নম্বর দিন।' });
     }
 
-    if (password.length < 6) {
+    if (String(password).length < 6) {
       return res.status(400).json({ success: false, message: 'পাসওয়ার্ড সর্বনিম্ন ৬ অক্ষরের হতে হবে।' });
     }
 
-    if (db.findUserByPhoneOrEmail(cleanPhone)) {
+    if (db.findUserByPhone(cleanPhone)) {
       return res.status(400).json({ success: false, message: 'এই মোবাইল নম্বর দিয়ে ইতিমধ্যে একটি অ্যাকাউন্ট রয়েছে।' });
+    }
+
+    if (email && db.findUserByEmail(email)) {
+      return res.status(400).json({ success: false, message: 'এই ইমেইল দিয়ে ইতিমধ্যে একটি অ্যাকাউন্ট রয়েছে।' });
     }
 
     const newUser = db.createUser({
       name: sanitizeText(name),
       phone: cleanPhone,
       email: sanitizeText(email || ''),
-      password,
+      password: String(password),
       address: sanitizeText(address || ''),
-      city: sanitizeText(city || 'Dhaka')
+      city: sanitizeText(city || division || 'Dhaka'),
+      division: sanitizeText(division || ''),
+      district: sanitizeText(district || ''),
+      upazila: sanitizeText(upazila || ''),
+      avatar: avatar || 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&w=200&q=80'
     });
 
     const token = db.generateToken({
@@ -471,19 +759,14 @@ app.post('/api/auth/register', rateLimiter(10, 10 * 60 * 1000), (req, res) => {
       role: newUser.role
     });
 
+    const safeUser = { ...newUser };
+    delete safeUser.passwordHash;
+
     res.status(201).json({
       success: true,
       message: 'অভিনন্দন! আপনার অ্যাকাউন্ট সফলভাবে তৈরি হয়েছে।',
       token,
-      user: {
-        id: newUser.id,
-        name: newUser.name,
-        phone: newUser.phone,
-        email: newUser.email,
-        address: newUser.address,
-        city: newUser.city,
-        role: newUser.role
-      }
+      user: safeUser
     });
   } catch (error) {
     console.error('[Register Error]:', error);
@@ -491,22 +774,31 @@ app.post('/api/auth/register', rateLimiter(10, 10 * 60 * 1000), (req, res) => {
   }
 });
 
-app.post('/api/auth/login', rateLimiter(15, 10 * 60 * 1000), (req, res) => {
+// কাস্টমার লগইন
+app.post('/api/auth/login', rateLimiter(20, 10 * 60 * 1000), (req, res) => {
   try {
-    const { identifier, phone, password } = req.body;
-    const loginId = identifier || phone;
+    const identifier = req.body.identifier || req.body.phone || req.body.email;
+    const { password } = req.body || {};
 
-    if (!loginId || !password) {
+    if (!identifier || !password) {
       return res.status(400).json({ success: false, message: 'মোবাইল নম্বর/ইমেইল এবং পাসওয়ার্ড দিন।' });
     }
 
-    const user = db.findUserByPhoneOrEmail(loginId);
+    const user = db.findUserByIdentifier(identifier) || db.findUserByPhoneOrEmail(identifier);
     if (!user) {
       return res.status(401).json({ success: false, message: 'ভুল মোবাইল নম্বর বা পাসওয়ার্ড।' });
     }
 
+    if (user.provider && user.provider !== 'local' && !user.hasLocalPassword && !user.passwordHash) {
+      const providerLabel = user.provider.charAt(0).toUpperCase() + user.provider.slice(1);
+      return res.status(401).json({
+        success: false,
+        message: `এই অ্যাকাউন্টটি ${providerLabel} দিয়ে তৈরি। দয়া করে "${providerLabel}" বোতামে চাপ দিয়ে লগইন করুন।`
+      });
+    }
+
     const hashedInput = db.hashPassword(password);
-    if (user.passwordHash !== hashedInput) {
+    if (user.passwordHash && user.passwordHash !== hashedInput) {
       return res.status(401).json({ success: false, message: 'ভুল মোবাইল নম্বর বা পাসওয়ার্ড।' });
     }
 
@@ -518,20 +810,14 @@ app.post('/api/auth/login', rateLimiter(15, 10 * 60 * 1000), (req, res) => {
       role: user.role
     });
 
+    const safeUser = { ...user };
+    delete safeUser.passwordHash;
+
     res.json({
       success: true,
-      message: 'লগইন সফল হয়েছে!',
+      message: `স্বাগতম, ${user.name}!`,
       token,
-      user: {
-        id: user.id,
-        name: user.name,
-        phone: user.phone,
-        email: user.email,
-        address: user.address,
-        city: user.city,
-        avatar: user.avatar,
-        role: user.role
-      }
+      user: safeUser
     });
   } catch (error) {
     console.error('[Login Error]:', error);
@@ -539,50 +825,42 @@ app.post('/api/auth/login', rateLimiter(15, 10 * 60 * 1000), (req, res) => {
   }
 });
 
+// প্রোফাইল তথ্য আনা
 app.get('/api/auth/me', authenticateToken, (req, res) => {
   const user = db.findUserById(req.user.id);
   if (!user) {
     return res.status(404).json({ success: false, message: 'ব্যবহারকারী পাওয়া যায়নি।' });
   }
+  const safeUser = { ...user };
+  delete safeUser.passwordHash;
   res.json({
     success: true,
-    user: {
-      id: user.id,
-      name: user.name,
-      phone: user.phone,
-      email: user.email,
-      address: user.address,
-      city: user.city,
-      avatar: user.avatar,
-      role: user.role
-    }
+    user: safeUser
   });
 });
 
+// প্রোফাইল আপডেট
 app.put('/api/auth/profile', authenticateToken, (req, res) => {
   try {
-    const { name, email, address, city, avatar } = req.body;
+    const { name, email, address, city, avatar, division, district, upazila } = req.body;
     const updated = db.updateUser(req.user.id, {
       name: sanitizeText(name || req.user.name),
       email: sanitizeText(email || req.user.email),
       address: sanitizeText(address || ''),
       city: sanitizeText(city || 'Dhaka'),
+      division: sanitizeText(division || ''),
+      district: sanitizeText(district || ''),
+      upazila: sanitizeText(upazila || ''),
       avatar: avatar || req.user.avatar
     });
+
+    const safeUser = { ...updated };
+    delete safeUser.passwordHash;
 
     res.json({
       success: true,
       message: 'প্রোফাইল সফলভাবে আপডেট হয়েছে!',
-      user: {
-        id: updated.id,
-        name: updated.name,
-        phone: updated.phone,
-        email: updated.email,
-        address: updated.address,
-        city: updated.city,
-        avatar: updated.avatar,
-        role: updated.role
-      }
+      user: safeUser
     });
   } catch (error) {
     res.status(500).json({ success: false, message: 'প্রোফাইল আপডেট ব্যর্থ।' });
@@ -600,20 +878,122 @@ app.put('/api/cart', authenticateToken, (req, res) => {
   res.json({ success: true, message: 'কার্ট সেভ করা হয়েছে।', items });
 });
 
-// OAuth প্রোভাইডার স্ট্যাটাস ও Auth0
+// OAuth প্রোভাইডার স্ট্যাটাস
 app.get('/api/auth/providers', (req, res) => {
   res.json({
     success: true,
-    providers: {
-      auth0: { enabled: true, name: 'Auth0 Universal Login' },
-      google: { enabled: false, name: 'Google OAuth' },
-      otp: { enabled: true, name: 'Fast SMS OTP Login' }
-    }
+    providers: authServices.getAuthProvidersStatus(req)
   });
 });
 
+// ৬. রিয়েল Google OAuth 2.0 রিডাইরেক্ট ও কলব্যাক
+app.get('/api/auth/google', (req, res) => {
+  const status = authServices.getAuthProvidersStatus(req);
+  if (!status.google) {
+    return res.redirect('/login.html?auth_error=google_not_configured');
+  }
+  const returnTo = req.query.returnTo || 'index.html';
+  const authUrl = authServices.buildGoogleAuthUrl(req, returnTo);
+  return res.redirect(authUrl);
+});
+
+app.get('/api/auth/google/callback', async (req, res) => {
+  try {
+    const { code, state, error } = req.query;
+    if (error) {
+      return res.redirect(`/login.html?auth_error=${encodeURIComponent('google_' + error)}`);
+    }
+
+    const stateData = authServices.verifyAndConsumeOAuthState(state, 'google');
+    if (!stateData || !code) {
+      return res.redirect('/login.html?auth_error=google_invalid_state');
+    }
+
+    const profile = await authServices.exchangeGoogleCodeForProfile(req, code);
+    const user = upsertOAuthUser(profile);
+    const token = db.generateToken({ id: user.id, phone: user.phone, email: user.email, name: user.name, role: user.role });
+
+    return renderOAuthSuccessPage(res, user, token, stateData.returnTo);
+  } catch (err) {
+    console.error('[Google OAuth Callback Error]:', err.message);
+    return res.redirect('/login.html?auth_error=google_auth_failed');
+  }
+});
+
+// ৭. রিয়েল Facebook OAuth 2.0 রিডাইরেক্ট ও কলব্যাক
+app.get('/api/auth/facebook', (req, res) => {
+  const status = authServices.getAuthProvidersStatus(req);
+  if (!status.facebook) {
+    return res.redirect('/login.html?auth_error=facebook_not_configured');
+  }
+  const returnTo = req.query.returnTo || 'index.html';
+  const authUrl = authServices.buildFacebookAuthUrl(req, returnTo);
+  return res.redirect(authUrl);
+});
+
+app.get('/api/auth/facebook/callback', async (req, res) => {
+  try {
+    const { code, state, error } = req.query;
+    if (error) {
+      return res.redirect(`/login.html?auth_error=${encodeURIComponent('facebook_' + error)}`);
+    }
+
+    const stateData = authServices.verifyAndConsumeOAuthState(state, 'facebook');
+    if (!stateData || !code) {
+      return res.redirect('/login.html?auth_error=facebook_invalid_state');
+    }
+
+    const profile = await authServices.exchangeFacebookCodeForProfile(req, code);
+    const user = upsertOAuthUser(profile);
+    const token = db.generateToken({ id: user.id, phone: user.phone, email: user.email, name: user.name, role: user.role });
+
+    return renderOAuthSuccessPage(res, user, token, stateData.returnTo);
+  } catch (err) {
+    console.error('[Facebook OAuth Callback Error]:', err.message);
+    return res.redirect('/login.html?auth_error=facebook_auth_failed');
+  }
+});
+
+// ৮. Auth0 Universal Login রিডাইরেক্ট ও কলব্যাক
 app.get('/api/auth/auth0', (req, res) => {
-  res.redirect('/login.html?auth0=simulated');
+  const status = authServices.getAuthProvidersStatus(req);
+  if (!status.auth0) {
+    return res.redirect('/login.html?auth_error=auth0_not_configured');
+  }
+  const returnTo = req.query.returnTo || 'index.html';
+  const authUrl = authServices.buildAuth0Url(req, returnTo);
+  return res.redirect(authUrl);
+});
+
+app.get('/api/auth/auth0/callback', async (req, res) => {
+  try {
+    const { code, state, error } = req.query;
+    if (error) {
+      return res.redirect(`/login.html?auth_error=${encodeURIComponent('auth0_' + error)}`);
+    }
+
+    const stateData = authServices.verifyAndConsumeOAuthState(state, 'auth0');
+    if (!stateData || !code) {
+      return res.redirect('/login.html?auth_error=auth0_invalid_state');
+    }
+
+    const profile = await authServices.exchangeAuth0CodeForProfile(req, code);
+    const user = upsertOAuthUser(profile);
+    const token = db.generateToken({ id: user.id, phone: user.phone, email: user.email, name: user.name, role: user.role });
+
+    return renderOAuthSuccessPage(res, user, token, stateData.returnTo);
+  } catch (err) {
+    console.error('[Auth0 OAuth Callback Error]:', err.message);
+    return res.redirect('/login.html?auth_error=auth0_auth_failed');
+  }
+});
+
+// মক সোশ্যাল লগইন বন্ধের নোটিশ
+app.post('/api/auth/social', (req, res) => {
+  return res.status(410).json({
+    success: false,
+    message: 'Demo social login has been disabled. Please sign in via real Google (/api/auth/google) or Facebook (/api/auth/facebook) OAuth.'
+  });
 });
 
 // ==========================================

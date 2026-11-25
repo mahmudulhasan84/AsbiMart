@@ -3595,23 +3595,39 @@ async function applyCheckoutCoupon() {
   }
 }
 
-// সেন্ট্রালাইজড প্রোডাক্ট ডেটাবেস সিঙ্ক (Triple-Decoupling Flaw Fix)
+// সেন্ট্রালাইজড প্রোডাক্ট ডেটাবেস সিঙ্ক (Triple-Decoupling Flaw Fix & Video Preservation)
 async function syncMasterCatalogFromBackend() {
   try {
     const res = await fetch('/api/products');
     if (res.ok) {
       const data = await res.json();
       if (data && Array.isArray(data.products) && data.products.length > 0) {
+        // Merge with local products to ensure video & videoFallback properties are NEVER lost
+        const localList = (typeof PRODUCTS_DATA !== 'undefined' && Array.isArray(PRODUCTS_DATA)) ? PRODUCTS_DATA : (window.PRODUCTS_DATA || []);
+        const localMap = new Map(localList.map(p => [p.id, p]));
+
+        const merged = data.products.map(bp => {
+          const local = localMap.get(bp.id);
+          return {
+            ...bp,
+            video: bp.video || (local && local.video),
+            videoFallback: bp.videoFallback || (local && local.videoFallback)
+          };
+        });
+
         if (typeof PRODUCTS_DATA !== 'undefined' && Array.isArray(PRODUCTS_DATA)) {
           PRODUCTS_DATA.length = 0;
-          PRODUCTS_DATA.push(...data.products);
+          PRODUCTS_DATA.push(...merged);
         }
-        window.PRODUCTS_DATA = data.products;
+        window.PRODUCTS_DATA = merged;
         if (typeof renderFeaturedCategories === 'function') renderFeaturedCategories();
         if (typeof renderTopProductsGrid === 'function') renderTopProductsGrid();
         if (typeof renderProductGrid === 'function') renderProductGrid();
         if (typeof initCategoryPage === 'function' && typeof isOnCategoryPage === 'function' && isOnCategoryPage()) {
           initCategoryPage();
+        }
+        if (typeof initBestsellerVideoHovers === 'function') {
+          setTimeout(initBestsellerVideoHovers, 80);
         }
       }
     }
@@ -3674,6 +3690,40 @@ document.addEventListener('DOMContentLoaded', () => {
   checkPaymentCallbackReturn();
   initMobileBottomNav();
   initMainNavScrollArrows();
+
+  // OAuth লগইন রিডাইরেক্ট টোকেন হ্যান্ডলিং (Cloudflare Pages & Real OAuth Callback)
+  try {
+    const authParams = new URLSearchParams(window.location.search);
+    const oauthToken = authParams.get('token');
+    const oauthLogin = authParams.get('login');
+    if (oauthToken && oauthLogin === 'success') {
+      localStorage.setItem('asbi_auth_token', oauthToken);
+      fetch('/api/auth/me', {
+        headers: { 'Authorization': `Bearer ${oauthToken}` }
+      })
+      .then(res => res.json())
+      .then(data => {
+        if (data.success && data.user) {
+          localStorage.setItem('asbi_auth_user', JSON.stringify({
+            ...data.user,
+            location: data.user.division || data.user.city || 'Dhaka',
+            loggedIn: true
+          }));
+          updateAuthUI();
+          syncMobileBottomProfile();
+        }
+      })
+      .catch(() => {});
+
+      if (window.history && window.history.replaceState) {
+        authParams.delete('token');
+        authParams.delete('login');
+        authParams.delete('provider');
+        const cleanSearch = authParams.toString() ? `?${authParams.toString()}` : '';
+        window.history.replaceState({}, '', window.location.pathname + cleanSearch);
+      }
+    }
+  } catch (e) {}
 
   // পারমালিংক ও শেয়ারযোগ্য ইউআরএল হ্যান্ডলিং (URL Permalink & Search Auto-Restore)
   try {

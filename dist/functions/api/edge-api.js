@@ -60,7 +60,9 @@ const EDGE_SEED_PRODUCTS = [
         "date": "১ সপ্তাহ আগে",
         "comment": "প্যাকেজিং খুবই চমৎকার ছিল। সম্পূর্ণ অক্ষত পেয়েছি।"
       }
-    ]
+    ],
+    "video": "../assets/videos/honey-sundarban-01.mp4",
+    "videoFallback": "https://assets.mixkit.co/videos/2801/2801-720.mp4"
   },
   {
     "id": "honey-kalojira-02",
@@ -103,7 +105,9 @@ const EDGE_SEED_PRODUCTS = [
         "date": "২ দিন আগে",
         "comment": "গাঢ় প্রাকৃতিক মধু, অনেক ভালো লেগেছে।"
       }
-    ]
+    ],
+    "video": "../assets/videos/honey-kalojira-02.mp4",
+    "videoFallback": "https://assets.mixkit.co/videos/46373/46373-360.mp4"
   },
   {
     "id": "honey-litchi-03",
@@ -146,7 +150,9 @@ const EDGE_SEED_PRODUCTS = [
         "date": "৫ দিন আগে",
         "comment": "বাচ্চারা খুব পছন্দ করেছে। দারুণ স্বাদ।"
       }
-    ]
+    ],
+    "video": "../assets/videos/honey-litchi-03.mp4",
+    "videoFallback": "https://assets.mixkit.co/videos/2690/2690-360.mp4"
   },
   {
     "id": "honey-mustard-04",
@@ -189,7 +195,9 @@ const EDGE_SEED_PRODUCTS = [
         "date": "১ সপ্তাহ আগে",
         "comment": "একদম ক্রিমি আসল সরিষা ফুলের মধু।"
       }
-    ]
+    ],
+    "video": "../assets/videos/honey-mustard-04.mp4",
+    "videoFallback": "https://assets.mixkit.co/videos/14749/14749-360.mp4"
   },
   {
     "id": "honey-nut-premium-05",
@@ -232,7 +240,9 @@ const EDGE_SEED_PRODUCTS = [
         "date": "১ দিন আগে",
         "comment": "অবিশ্বাস্য রকমের সুস্বাদু! এক চামচ খেলেই মন ভরে যায়।"
       }
-    ]
+    ],
+    "video": "../assets/videos/honey-nut-premium-05.mp4",
+    "videoFallback": "https://assets.mixkit.co/videos/43912/43912-720.mp4"
   },
   {
     "id": "ghee-pabna-06",
@@ -275,7 +285,9 @@ const EDGE_SEED_PRODUCTS = [
         "date": "২ দিন আগে",
         "comment": "ঘির ঘ্রাণে পুরো বাড়ি ম ম করছে। দানাদার খাঁটি ঘি!"
       }
-    ]
+    ],
+    "video": "../assets/videos/ghee-pabna-06.mp4",
+    "videoFallback": "https://assets.mixkit.co/videos/45895/45895-720.mp4"
   },
   {
     "id": "ghee-buffalo-07",
@@ -318,7 +330,9 @@ const EDGE_SEED_PRODUCTS = [
         "date": "৪ দিন আগে",
         "comment": "মহিষের খাঁটি ঘি পাওয়া খুব কঠিন ছিল। অসাধারণ কোয়ালিটি।"
       }
-    ]
+    ],
+    "video": "../assets/videos/ghee-buffalo-07.mp4",
+    "videoFallback": "https://assets.mixkit.co/videos/45724/45724-360.mp4"
   },
   {
     "id": "ghee-butter-home-08",
@@ -361,7 +375,9 @@ const EDGE_SEED_PRODUCTS = [
         "date": "৩ দিন আগে",
         "comment": "বিলোনার আসল ঘ্রাণ পাওয়া যায়। সেরা ঘি!"
       }
-    ]
+    ],
+    "video": "../assets/videos/ghee-butter-home-08.mp4",
+    "videoFallback": "https://assets.mixkit.co/videos/28983/28983-360.mp4"
   },
   {
     "id": "oil-mustard-ghani-09",
@@ -404,7 +420,9 @@ const EDGE_SEED_PRODUCTS = [
         "date": "৪ দিন আগে",
         "comment": "তিলের ঝাঁঝ আর আসল সরিষার গন্ধ পাওয়া যায়।"
       }
-    ]
+    ],
+    "video": "../assets/videos/oil-mustard-ghani-09.mp4",
+    "videoFallback": "https://assets.mixkit.co/videos/21529/21529-720.mp4"
   },
   {
     "id": "kalojira-oil-pure-10",
@@ -447,7 +465,9 @@ const EDGE_SEED_PRODUCTS = [
         "date": "৪ দিন আগে",
         "comment": "তেলটা একদম আসল ও ঘন।"
       }
-    ]
+    ],
+    "video": "../assets/videos/kalojira-oil-pure-10.mp4",
+    "videoFallback": "https://assets.mixkit.co/videos/13935/13935-360.mp4"
   },
   {
     "id": "coconut-oil-extra-virgin-11",
@@ -490,7 +510,9 @@ const EDGE_SEED_PRODUCTS = [
         "date": "৩ দিন আগে",
         "comment": "নারিকেলের মিষ্টি প্রাকৃতিক গন্ধ। চুল পরা কমে গেছে।"
       }
-    ]
+    ],
+    "video": "../assets/videos/coconut-oil-extra-virgin-11.mp4",
+    "videoFallback": "https://assets.mixkit.co/videos/47785/47785-360.mp4"
   },
   {
     "id": "oil-sesame-til-12",
@@ -533,7 +555,9 @@ const EDGE_SEED_PRODUCTS = [
         "date": "১ সপ্তাহ আগে",
         "comment": "ব্যথায় মালিশ করে খুব আরাম পেয়েছি।"
       }
-    ]
+    ],
+    "video": "../assets/videos/oil-sesame-til-12.mp4",
+    "videoFallback": "https://assets.mixkit.co/videos/14781/14781-360.mp4"
   },
   {
     "id": "nuts-dryfruits-mix-13",
@@ -576,7 +600,9 @@ const EDGE_SEED_PRODUCTS = [
         "date": "৩ দিন আগে",
         "comment": "প্রতিটি বাদাম অনেক ফ্রেশ এবং ক্রিস্পি।"
       }
-    ]
+    ],
+    "video": "../assets/videos/nuts-dryfruits-mix-13.mp4",
+    "videoFallback": "https://assets.mixkit.co/videos/43925/43925-360.mp4"
   },
   {
     "id": "almond-california-14",
@@ -619,7 +645,9 @@ const EDGE_SEED_PRODUCTS = [
         "date": "১ সপ্তাহ আগে",
         "comment": "সাইজ বড় এবং স্বাদে অতুলনীয়।"
       }
-    ]
+    ],
+    "video": "../assets/videos/almond-california-14.mp4",
+    "videoFallback": "https://assets.mixkit.co/videos/18365/18365-360.mp4"
   },
   {
     "id": "cashew-premium-15",
@@ -662,7 +690,9 @@ const EDGE_SEED_PRODUCTS = [
         "date": "৩ দিন আগে",
         "comment": "মুচমুচে এবং মিষ্টি টেস্ট।"
       }
-    ]
+    ],
+    "video": "../assets/videos/cashew-premium-15.mp4",
+    "videoFallback": "https://assets.mixkit.co/videos/26638/26638-360.mp4"
   },
   {
     "id": "walnut-kashmiri-16",
@@ -705,7 +735,9 @@ const EDGE_SEED_PRODUCTS = [
         "date": "৪ দিন আগে",
         "comment": "হাতে চাপ দিলেই খোসা ভেঙে যায়।"
       }
-    ]
+    ],
+    "video": "../assets/videos/walnut-kashmiri-16.mp4",
+    "videoFallback": "https://assets.mixkit.co/videos/26594/26594-360.mp4"
   },
   {
     "id": "pista-iranian-17",
@@ -748,7 +780,9 @@ const EDGE_SEED_PRODUCTS = [
         "date": "৫ দিন আগে",
         "comment": "অসাধারণ স্বাদ ও নিখুঁত সাইজ।"
       }
-    ]
+    ],
+    "video": "../assets/videos/pista-iranian-17.mp4",
+    "videoFallback": "https://assets.mixkit.co/videos/18363/18363-360.mp4"
   },
   {
     "id": "raisin-golden-18",
@@ -791,7 +825,9 @@ const EDGE_SEED_PRODUCTS = [
         "date": "১ সপ্তাহ আগে",
         "comment": "খুব মিষ্টি এবং পরিচ্ছন্ন।"
       }
-    ]
+    ],
+    "video": "../assets/videos/raisin-golden-18.mp4",
+    "videoFallback": "https://assets.mixkit.co/videos/10427/10427-360.mp4"
   },
   {
     "id": "care-neem-toothpaste-19",
@@ -834,7 +870,9 @@ const EDGE_SEED_PRODUCTS = [
         "date": "৩ দিন আগে",
         "comment": "দাঁতের শিরশিরানি ভাব একদম কমে গেছে।"
       }
-    ]
+    ],
+    "video": "../assets/videos/care-neem-toothpaste-19.mp4",
+    "videoFallback": "https://assets.mixkit.co/videos/48930/48930-360.mp4"
   },
   {
     "id": "care-bamboo-brush-20",
@@ -871,7 +909,9 @@ const EDGE_SEED_PRODUCTS = [
         "date": "৫ দিন আগে",
         "comment": "খুবই সফট ব্রিসল আর চমৎকার কোয়ালিটি।"
       }
-    ]
+    ],
+    "video": "../assets/videos/care-bamboo-brush-20.mp4",
+    "videoFallback": "https://assets.mixkit.co/videos/48930/48930-360.mp4"
   },
   {
     "id": "care-organic-lotion-21",
@@ -914,7 +954,9 @@ const EDGE_SEED_PRODUCTS = [
         "date": "১ দিন আগে",
         "comment": "একটুও চিটচিটে না, ত্বক নরম রাখে।"
       }
-    ]
+    ],
+    "video": "../assets/videos/care-organic-lotion-21.mp4",
+    "videoFallback": "https://assets.mixkit.co/videos/45160/45160-360.mp4"
   },
   {
     "id": "care-neem-soap-22",
@@ -957,7 +999,9 @@ const EDGE_SEED_PRODUCTS = [
         "date": "৪ দিন আগে",
         "comment": "সাবানটা মুখে দিলে দারুণ ফ্রেশ লাগে।"
       }
-    ]
+    ],
+    "video": "../assets/videos/care-neem-soap-22.mp4",
+    "videoFallback": "https://assets.mixkit.co/videos/33705/33705-360.mp4"
   },
   {
     "id": "care-aloevera-gel-23",
@@ -994,7 +1038,9 @@ const EDGE_SEED_PRODUCTS = [
         "date": "২ দিন আগে",
         "comment": "খুবই স্নিগ্ধ এবং ত্বকে দ্রুত মিশে যায়।"
       }
-    ]
+    ],
+    "video": "../assets/videos/care-aloevera-gel-23.mp4",
+    "videoFallback": "https://assets.mixkit.co/videos/14626/14626-360.mp4"
   },
   {
     "id": "chia-seed-organic-24",
@@ -1037,7 +1083,9 @@ const EDGE_SEED_PRODUCTS = [
         "date": "২ দিন আগে",
         "comment": "দানাদানা একদম পরিষ্কার ও প্রিমিয়াম।"
       }
-    ]
+    ],
+    "video": "../assets/videos/chia-seed-organic-24.mp4",
+    "videoFallback": "https://assets.mixkit.co/videos/21867/21867-360.mp4"
   },
   {
     "id": "flax-seed-organic-25",
@@ -1080,7 +1128,9 @@ const EDGE_SEED_PRODUCTS = [
         "date": "৫ দিন আগে",
         "comment": "পরিচ্ছন্ন দানা, ভালো মানের তিসি।"
       }
-    ]
+    ],
+    "video": "../assets/videos/flax-seed-organic-25.mp4",
+    "videoFallback": "https://assets.mixkit.co/videos/41148/41148-360.mp4"
   },
   {
     "id": "pumpkin-seeds-26",
@@ -1123,7 +1173,9 @@ const EDGE_SEED_PRODUCTS = [
         "date": "৩ দিন আগে",
         "comment": "রোস্ট করে খেতে দারুণ মজা।"
       }
-    ]
+    ],
+    "video": "../assets/videos/pumpkin-seeds-26.mp4",
+    "videoFallback": "https://assets.mixkit.co/videos/30835/30835-360.mp4"
   },
   {
     "id": "sunflower-seeds-27",
@@ -1166,7 +1218,9 @@ const EDGE_SEED_PRODUCTS = [
         "date": "৬ দিন আগে",
         "comment": "খুবই মুচমুচে এবং টেস্ট ভালো।"
       }
-    ]
+    ],
+    "video": "../assets/videos/sunflower-seeds-27.mp4",
+    "videoFallback": "https://assets.mixkit.co/videos/30841/30841-360.mp4"
   },
   {
     "id": "dates-ajwa-madinah-28",
@@ -1209,7 +1263,9 @@ const EDGE_SEED_PRODUCTS = [
         "date": "১ দিন আগে",
         "comment": "খেজুরগুলো অত্যন্ত নরম ও মিষ্টি।"
       }
-    ]
+    ],
+    "video": "../assets/videos/dates-ajwa-madinah-28.mp4",
+    "videoFallback": "https://assets.mixkit.co/videos/22746/22746-360.mp4"
   },
   {
     "id": "spices-haldi-morich-29",
@@ -1252,7 +1308,9 @@ const EDGE_SEED_PRODUCTS = [
         "date": "৫ দিন আগে",
         "comment": "বাজারের প্যাকেট মসলার চেয়ে অনেক ভালো।"
       }
-    ]
+    ],
+    "video": "../assets/videos/spices-haldi-morich-29.mp4",
+    "videoFallback": "https://assets.mixkit.co/videos/28392/28392-360.mp4"
   },
   {
     "id": "spices-cumin-jeera-30",
@@ -1289,7 +1347,9 @@ const EDGE_SEED_PRODUCTS = [
         "date": "৩ দিন আগে",
         "comment": "ঘিয়ে ভাজার চমৎকার ঘ্রাণ আসে।"
       }
-    ]
+    ],
+    "video": "../assets/videos/spices-cumin-jeera-30.mp4",
+    "videoFallback": "https://assets.mixkit.co/videos/34634/34634-360.mp4"
   },
   {
     "id": "tea-sreemangal-green-31",
@@ -1332,7 +1392,9 @@ const EDGE_SEED_PRODUCTS = [
         "date": "৬ দিন আগে",
         "comment": "দারুণ সতেজ ঘ্রাণ।"
       }
-    ]
+    ],
+    "video": "../assets/videos/tea-sreemangal-green-31.mp4",
+    "videoFallback": "https://assets.mixkit.co/videos/9267/9267-360.mp4"
   },
   {
     "id": "tea-masala-black-32",
@@ -1375,7 +1437,9 @@ const EDGE_SEED_PRODUCTS = [
         "date": "২ দিন আগে",
         "comment": "সিলেটের চায়ের আসল স্বাদ! লিকার অনেক কড়া।"
       }
-    ]
+    ],
+    "video": "../assets/videos/tea-masala-black-32.mp4",
+    "videoFallback": "https://assets.mixkit.co/videos/9369/9369-360.mp4"
   },
   {
     "id": "superfood-moringa-powder-33",
@@ -1418,7 +1482,9 @@ const EDGE_SEED_PRODUCTS = [
         "date": "১ দিন আগে",
         "comment": "সকালে হালকা গরম পানিতে মিশিয়ে খাই, সারাদিন অনেক এনার্জি পাই।"
       }
-    ]
+    ],
+    "video": "../assets/videos/superfood-moringa-powder-33.mp4",
+    "videoFallback": "https://assets.mixkit.co/videos/901/901-360.mp4"
   },
   {
     "id": "honey-comb-wild-34",
@@ -1461,7 +1527,9 @@ const EDGE_SEED_PRODUCTS = [
         "date": "৩ দিন আগে",
         "comment": "চাকের মোম চিবিয়ে খাওয়ার ফিলটাই আলাদা! দারুণ অরিজিনাল।"
       }
-    ]
+    ],
+    "video": "../assets/videos/honey-comb-wild-34.mp4",
+    "videoFallback": "https://assets.mixkit.co/videos/46375/46375-360.mp4"
   },
   {
     "id": "salt-himalayan-pink-35",
@@ -1504,7 +1572,9 @@ const EDGE_SEED_PRODUCTS = [
         "date": "৪ দিন আগে",
         "comment": "রান্নায় সাধারণ লবণের বদলে পিংক সল্ট ব্যবহার করছি, স্বাদ খুব ভালো।"
       }
-    ]
+    ],
+    "video": "../assets/videos/salt-himalayan-pink-35.mp4",
+    "videoFallback": "https://assets.mixkit.co/videos/28390/28390-360.mp4"
   },
   {
     "id": "dates-mabroom-saudi-36",
@@ -1547,7 +1617,9 @@ const EDGE_SEED_PRODUCTS = [
         "date": "২ দিন আগে",
         "comment": "খেজুরগুলো খুব ফ্রেশ ও সুস্বাদু ছিল।"
       }
-    ]
+    ],
+    "video": "../assets/videos/dates-mabroom-saudi-36.mp4",
+    "videoFallback": "https://assets.mixkit.co/videos/10424/10424-360.mp4"
   },
   {
     "id": "combo-health-pack-37",
@@ -1584,7 +1656,9 @@ const EDGE_SEED_PRODUCTS = [
         "date": "১ দিন আগে",
         "comment": "এক সাথে খাঁটি মধু, ঘি ও সরিষার তেল পেয়ে অনেক টাকা বাঁচল। পণ্যের মান টপ নচ।"
       }
-    ]
+    ],
+    "video": "../assets/videos/combo-health-pack-37.mp4",
+    "videoFallback": "https://assets.mixkit.co/videos/3795/3795-720.mp4"
   },
   {
     "id": "combo-royal-nuts-38",
@@ -1621,7 +1695,9 @@ const EDGE_SEED_PRODUCTS = [
         "date": "২ দিন আগে",
         "comment": "প্যাকেজিং আর বাদামের কোয়ালিটি সত্যিই অসাধারণ। ধন্যবাদ আসবিমার্ট।"
       }
-    ]
+    ],
+    "video": "../assets/videos/combo-royal-nuts-38.mp4",
+    "videoFallback": "https://assets.mixkit.co/videos/3796/3796-720.mp4"
   },
   {
     "id": "spices-green-cardamom-31",
@@ -1664,7 +1740,9 @@ const EDGE_SEED_PRODUCTS = [
         "date": "৪ দিন আগে",
         "comment": "এলাচের ঘ্রাণ অসাধারণ! একদম ফ্রেশ ও বড় দানা।"
       }
-    ]
+    ],
+    "video": "../assets/videos/spices-green-cardamom-31.mp4",
+    "videoFallback": "https://assets.mixkit.co/videos/32058/32058-360.mp4"
   }
 ];
 

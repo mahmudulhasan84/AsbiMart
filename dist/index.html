@@ -63,26 +63,6 @@
 <body class="bg-[#F4ECE1] text-slate-800 antialiased">
 
   <!-- ==========================================================================
-       ০. টপ অফার অ্যানাউন্সমেন্ট বার (Promotional Announcement Bar with Live Countdown & Coupon)
-       ========================================================================== -->
-  <div id="topAnnouncementBar" class="bg-gradient-to-r from-emerald-800 via-teal-900 to-indigo-950 text-white text-xs sm:text-sm py-2 px-4 shadow-sm relative z-50">
-    <div class="asbi-container flex items-center justify-between gap-3">
-      <div class="flex items-center gap-2 overflow-hidden text-ellipsis whitespace-nowrap">
-        <span class="bg-amber-400 text-slate-950 font-black text-[10px] sm:text-xs uppercase px-2 py-0.5 rounded-full shadow-sm animate-pulse">স্পেশাল অফার</span>
-        <span class="font-medium text-xs sm:text-sm">🎉 সারা দেশে ফ্রি ডেলিভারি ও ১০% ছাড়! কুপন কোড: <strong class="bg-white/20 px-2 py-0.5 rounded text-amber-300 font-bold tracking-wider select-all cursor-pointer" onclick="navigator.clipboard && navigator.clipboard.writeText('ASBI10'); alert('কুপন কোড ASBI10 কপি হয়েছে!');">ASBI10</strong></span>
-      </div>
-      <div class="flex items-center gap-4 flex-shrink-0">
-        <span id="announcementCountdown" class="hidden md:inline-flex items-center gap-1 font-mono text-amber-300 text-xs">
-          ⏱️ মেয়াদ বাকি: <span id="countdownTimer">০৫ ঘণ্টা ৩২ মি.</span>
-        </span>
-        <button onclick="document.getElementById('topAnnouncementBar').style.display='none'" class="text-white/70 hover:text-white transition-colors p-1" title="বন্ধ করুন">
-          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
-        </button>
-      </div>
-    </div>
-  </div>
-
-  <!-- ==========================================================================
        ১. উষ্ণ বাদামী অফ-হোয়াইট হেডার / টপ বার (নিচে স্ক্রল করলে উপরে স্লাইড হয়ে মিলিয়ে যাবে)
        ========================================================================== -->
   <header id="mainHeader" class="bg-[#F4ECE1] border-b border-[#E5DACB] relative z-50 shadow-sm transition-all duration-300">

@@ -38,9 +38,9 @@ function getSecret() {
 }
 
 function getBaseUrl(req) {
-  if (req) {
+  if (req && req.headers) {
     const proto = req.headers['x-forwarded-proto'] || req.protocol || 'https';
-    const host = req.headers['x-forwarded-host'] || req.get('host');
+    const host = req.headers['x-forwarded-host'] || (typeof req.get === 'function' ? req.get('host') : req.headers.host);
     if (host && !host.includes('localhost') && !host.includes('127.0.0.1')) {
       return `${proto}://${host}`;
     }
@@ -51,10 +51,10 @@ function getBaseUrl(req) {
       return b;
     }
   }
-  if (req) {
+  if (req && req.headers) {
     const proto = req.headers['x-forwarded-proto'] || req.protocol || 'http';
-    const host = req.headers['x-forwarded-host'] || req.get('host');
-    return `${proto}://${host}`;
+    const host = req.headers['x-forwarded-host'] || (typeof req.get === 'function' ? req.get('host') : req.headers.host);
+    if (host) return `${proto}://${host}`;
   }
   return `http://localhost:${process.env.PORT || 5000}`;
 }

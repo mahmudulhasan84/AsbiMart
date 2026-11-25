@@ -222,6 +222,28 @@ const STATUS_TEXT_MAP = {
 const db = {
   // ইউজার ও প্রোফাইল
   getUsers: () => readData('users'),
+  findUserByPhone: (phone) => {
+    if (!phone) return null;
+    const cleanPhone = String(phone).replace(/[\s-]/g, '').trim();
+    const users = readData('users');
+    return users.find(u => u.phone && u.phone.replace(/[\s-]/g, '').trim() === cleanPhone) || null;
+  },
+  findUserByEmail: (email) => {
+    if (!email) return null;
+    const clean = String(email).trim().toLowerCase();
+    const users = readData('users');
+    return users.find(u => u.email && u.email.toLowerCase() === clean) || null;
+  },
+  findUserByIdentifier: (identifier) => {
+    if (!identifier) return null;
+    const raw = String(identifier).trim();
+    const users = readData('users');
+    if (raw.includes('@')) {
+      return users.find(u => u.email && u.email.toLowerCase() === raw.toLowerCase()) || null;
+    }
+    const cleanPhone = raw.replace(/[\s-]/g, '');
+    return users.find(u => u.phone && u.phone.replace(/[\s-]/g, '') === cleanPhone) || null;
+  },
   findUserByPhoneOrEmail: (identifier) => {
     if (!identifier) return null;
     const cleanId = String(identifier).trim().toLowerCase();
@@ -231,6 +253,11 @@ const db = {
       (u.phone && u.phone.replace(/[\s-]/g, '').trim() === cleanPhone) ||
       (u.email && u.email.toLowerCase() === cleanId)
     ) || null;
+  },
+  findUserByProvider: (provider, providerId) => {
+    if (!provider || !providerId) return null;
+    const users = readData('users');
+    return users.find(u => u.provider === provider && String(u.providerId) === String(providerId)) || null;
   },
   findUserById: (id) => {
     if (!id) return null;
@@ -242,13 +269,21 @@ const db = {
     const newUser = {
       id: 'usr_' + Date.now() + '_' + Math.floor(Math.random() * 1000),
       name: userData.name,
-      phone: userData.phone,
+      phone: userData.phone || '',
       email: userData.email || '',
-      passwordHash: hashPassword(userData.password),
+      passwordHash: userData.password ? hashPassword(userData.password) : (userData.passwordHash || null),
+      hasLocalPassword: !!userData.password,
       avatar: userData.avatar || 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&w=200&q=80',
       city: userData.city || 'Dhaka',
+      division: userData.division || '',
+      district: userData.district || '',
+      upazila: userData.upazila || '',
       address: userData.address || '',
       role: userData.role || 'customer',
+      provider: userData.provider || 'local',
+      providerId: userData.providerId || null,
+      emailVerified: !!userData.emailVerified,
+      phoneVerified: !!userData.phoneVerified,
       createdAt: new Date().toISOString()
     };
     users.push(newUser);

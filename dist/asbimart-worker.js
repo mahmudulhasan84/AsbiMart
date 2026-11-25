@@ -48,7 +48,9 @@ var EDGE_SEED_PRODUCTS = [
         "date": "\u09E7 \u09B8\u09AA\u09CD\u09A4\u09BE\u09B9 \u0986\u0997\u09C7",
         "comment": "\u09AA\u09CD\u09AF\u09BE\u0995\u09C7\u099C\u09BF\u0982 \u0996\u09C1\u09AC\u0987 \u099A\u09AE\u09CE\u0995\u09BE\u09B0 \u099B\u09BF\u09B2\u0964 \u09B8\u09AE\u09CD\u09AA\u09C2\u09B0\u09CD\u09A3 \u0985\u0995\u09CD\u09B7\u09A4 \u09AA\u09C7\u09DF\u09C7\u099B\u09BF\u0964"
       }
-    ]
+    ],
+    "video": "../assets/videos/honey-sundarban-01.mp4",
+    "videoFallback": "https://assets.mixkit.co/videos/2801/2801-720.mp4"
   },
   {
     "id": "honey-kalojira-02",
@@ -91,7 +93,9 @@ var EDGE_SEED_PRODUCTS = [
         "date": "\u09E8 \u09A6\u09BF\u09A8 \u0986\u0997\u09C7",
         "comment": "\u0997\u09BE\u09DD \u09AA\u09CD\u09B0\u09BE\u0995\u09C3\u09A4\u09BF\u0995 \u09AE\u09A7\u09C1, \u0985\u09A8\u09C7\u0995 \u09AD\u09BE\u09B2\u09CB \u09B2\u09C7\u0997\u09C7\u099B\u09C7\u0964"
       }
-    ]
+    ],
+    "video": "../assets/videos/honey-kalojira-02.mp4",
+    "videoFallback": "https://assets.mixkit.co/videos/46373/46373-360.mp4"
   },
   {
     "id": "honey-litchi-03",
@@ -134,7 +138,9 @@ var EDGE_SEED_PRODUCTS = [
         "date": "\u09EB \u09A6\u09BF\u09A8 \u0986\u0997\u09C7",
         "comment": "\u09AC\u09BE\u099A\u09CD\u099A\u09BE\u09B0\u09BE \u0996\u09C1\u09AC \u09AA\u099B\u09A8\u09CD\u09A6 \u0995\u09B0\u09C7\u099B\u09C7\u0964 \u09A6\u09BE\u09B0\u09C1\u09A3 \u09B8\u09CD\u09AC\u09BE\u09A6\u0964"
       }
-    ]
+    ],
+    "video": "../assets/videos/honey-litchi-03.mp4",
+    "videoFallback": "https://assets.mixkit.co/videos/2690/2690-360.mp4"
   },
   {
     "id": "honey-mustard-04",
@@ -177,7 +183,9 @@ var EDGE_SEED_PRODUCTS = [
         "date": "\u09E7 \u09B8\u09AA\u09CD\u09A4\u09BE\u09B9 \u0986\u0997\u09C7",
         "comment": "\u098F\u0995\u09A6\u09AE \u0995\u09CD\u09B0\u09BF\u09AE\u09BF \u0986\u09B8\u09B2 \u09B8\u09B0\u09BF\u09B7\u09BE \u09AB\u09C1\u09B2\u09C7\u09B0 \u09AE\u09A7\u09C1\u0964"
       }
-    ]
+    ],
+    "video": "../assets/videos/honey-mustard-04.mp4",
+    "videoFallback": "https://assets.mixkit.co/videos/14749/14749-360.mp4"
   },
   {
     "id": "honey-nut-premium-05",
@@ -220,7 +228,9 @@ var EDGE_SEED_PRODUCTS = [
         "date": "\u09E7 \u09A6\u09BF\u09A8 \u0986\u0997\u09C7",
         "comment": "\u0985\u09AC\u09BF\u09B6\u09CD\u09AC\u09BE\u09B8\u09CD\u09AF \u09B0\u0995\u09AE\u09C7\u09B0 \u09B8\u09C1\u09B8\u09CD\u09AC\u09BE\u09A6\u09C1! \u098F\u0995 \u099A\u09BE\u09AE\u099A \u0996\u09C7\u09B2\u09C7\u0987 \u09AE\u09A8 \u09AD\u09B0\u09C7 \u09AF\u09BE\u09DF\u0964"
       }
-    ]
+    ],
+    "video": "../assets/videos/honey-nut-premium-05.mp4",
+    "videoFallback": "https://assets.mixkit.co/videos/43912/43912-720.mp4"
   },
   {
     "id": "ghee-pabna-06",
@@ -263,7 +273,9 @@ var EDGE_SEED_PRODUCTS = [
         "date": "\u09E8 \u09A6\u09BF\u09A8 \u0986\u0997\u09C7",
         "comment": "\u0998\u09BF\u09B0 \u0998\u09CD\u09B0\u09BE\u09A3\u09C7 \u09AA\u09C1\u09B0\u09CB \u09AC\u09BE\u09DC\u09BF \u09AE \u09AE \u0995\u09B0\u099B\u09C7\u0964 \u09A6\u09BE\u09A8\u09BE\u09A6\u09BE\u09B0 \u0996\u09BE\u0981\u099F\u09BF \u0998\u09BF!"
       }
-    ]
+    ],
+    "video": "../assets/videos/ghee-pabna-06.mp4",
+    "videoFallback": "https://assets.mixkit.co/videos/45895/45895-720.mp4"
   },
   {
     "id": "ghee-buffalo-07",
@@ -306,7 +318,9 @@ var EDGE_SEED_PRODUCTS = [
         "date": "\u09EA \u09A6\u09BF\u09A8 \u0986\u0997\u09C7",
         "comment": "\u09AE\u09B9\u09BF\u09B7\u09C7\u09B0 \u0996\u09BE\u0981\u099F\u09BF \u0998\u09BF \u09AA\u09BE\u0993\u09DF\u09BE \u0996\u09C1\u09AC \u0995\u09A0\u09BF\u09A8 \u099B\u09BF\u09B2\u0964 \u0985\u09B8\u09BE\u09A7\u09BE\u09B0\u09A3 \u0995\u09CB\u09DF\u09BE\u09B2\u09BF\u099F\u09BF\u0964"
       }
-    ]
+    ],
+    "video": "../assets/videos/ghee-buffalo-07.mp4",
+    "videoFallback": "https://assets.mixkit.co/videos/45724/45724-360.mp4"
   },
   {
     "id": "ghee-butter-home-08",
@@ -349,7 +363,9 @@ var EDGE_SEED_PRODUCTS = [
         "date": "\u09E9 \u09A6\u09BF\u09A8 \u0986\u0997\u09C7",
         "comment": "\u09AC\u09BF\u09B2\u09CB\u09A8\u09BE\u09B0 \u0986\u09B8\u09B2 \u0998\u09CD\u09B0\u09BE\u09A3 \u09AA\u09BE\u0993\u09DF\u09BE \u09AF\u09BE\u09DF\u0964 \u09B8\u09C7\u09B0\u09BE \u0998\u09BF!"
       }
-    ]
+    ],
+    "video": "../assets/videos/ghee-butter-home-08.mp4",
+    "videoFallback": "https://assets.mixkit.co/videos/28983/28983-360.mp4"
   },
   {
     "id": "oil-mustard-ghani-09",
@@ -392,7 +408,9 @@ var EDGE_SEED_PRODUCTS = [
         "date": "\u09EA \u09A6\u09BF\u09A8 \u0986\u0997\u09C7",
         "comment": "\u09A4\u09BF\u09B2\u09C7\u09B0 \u099D\u09BE\u0981\u099D \u0986\u09B0 \u0986\u09B8\u09B2 \u09B8\u09B0\u09BF\u09B7\u09BE\u09B0 \u0997\u09A8\u09CD\u09A7 \u09AA\u09BE\u0993\u09DF\u09BE \u09AF\u09BE\u09DF\u0964"
       }
-    ]
+    ],
+    "video": "../assets/videos/oil-mustard-ghani-09.mp4",
+    "videoFallback": "https://assets.mixkit.co/videos/21529/21529-720.mp4"
   },
   {
     "id": "kalojira-oil-pure-10",
@@ -435,7 +453,9 @@ var EDGE_SEED_PRODUCTS = [
         "date": "\u09EA \u09A6\u09BF\u09A8 \u0986\u0997\u09C7",
         "comment": "\u09A4\u09C7\u09B2\u099F\u09BE \u098F\u0995\u09A6\u09AE \u0986\u09B8\u09B2 \u0993 \u0998\u09A8\u0964"
       }
-    ]
+    ],
+    "video": "../assets/videos/kalojira-oil-pure-10.mp4",
+    "videoFallback": "https://assets.mixkit.co/videos/13935/13935-360.mp4"
   },
   {
     "id": "coconut-oil-extra-virgin-11",
@@ -478,7 +498,9 @@ var EDGE_SEED_PRODUCTS = [
         "date": "\u09E9 \u09A6\u09BF\u09A8 \u0986\u0997\u09C7",
         "comment": "\u09A8\u09BE\u09B0\u09BF\u0995\u09C7\u09B2\u09C7\u09B0 \u09AE\u09BF\u09B7\u09CD\u099F\u09BF \u09AA\u09CD\u09B0\u09BE\u0995\u09C3\u09A4\u09BF\u0995 \u0997\u09A8\u09CD\u09A7\u0964 \u099A\u09C1\u09B2 \u09AA\u09B0\u09BE \u0995\u09AE\u09C7 \u0997\u09C7\u099B\u09C7\u0964"
       }
-    ]
+    ],
+    "video": "../assets/videos/coconut-oil-extra-virgin-11.mp4",
+    "videoFallback": "https://assets.mixkit.co/videos/47785/47785-360.mp4"
   },
   {
     "id": "oil-sesame-til-12",
@@ -521,7 +543,9 @@ var EDGE_SEED_PRODUCTS = [
         "date": "\u09E7 \u09B8\u09AA\u09CD\u09A4\u09BE\u09B9 \u0986\u0997\u09C7",
         "comment": "\u09AC\u09CD\u09AF\u09A5\u09BE\u09DF \u09AE\u09BE\u09B2\u09BF\u09B6 \u0995\u09B0\u09C7 \u0996\u09C1\u09AC \u0986\u09B0\u09BE\u09AE \u09AA\u09C7\u09DF\u09C7\u099B\u09BF\u0964"
       }
-    ]
+    ],
+    "video": "../assets/videos/oil-sesame-til-12.mp4",
+    "videoFallback": "https://assets.mixkit.co/videos/14781/14781-360.mp4"
   },
   {
     "id": "nuts-dryfruits-mix-13",
@@ -564,7 +588,9 @@ var EDGE_SEED_PRODUCTS = [
         "date": "\u09E9 \u09A6\u09BF\u09A8 \u0986\u0997\u09C7",
         "comment": "\u09AA\u09CD\u09B0\u09A4\u09BF\u099F\u09BF \u09AC\u09BE\u09A6\u09BE\u09AE \u0985\u09A8\u09C7\u0995 \u09AB\u09CD\u09B0\u09C7\u09B6 \u098F\u09AC\u0982 \u0995\u09CD\u09B0\u09BF\u09B8\u09CD\u09AA\u09BF\u0964"
       }
-    ]
+    ],
+    "video": "../assets/videos/nuts-dryfruits-mix-13.mp4",
+    "videoFallback": "https://assets.mixkit.co/videos/43925/43925-360.mp4"
   },
   {
     "id": "almond-california-14",
@@ -607,7 +633,9 @@ var EDGE_SEED_PRODUCTS = [
         "date": "\u09E7 \u09B8\u09AA\u09CD\u09A4\u09BE\u09B9 \u0986\u0997\u09C7",
         "comment": "\u09B8\u09BE\u0987\u099C \u09AC\u09DC \u098F\u09AC\u0982 \u09B8\u09CD\u09AC\u09BE\u09A6\u09C7 \u0985\u09A4\u09C1\u09B2\u09A8\u09C0\u09DF\u0964"
       }
-    ]
+    ],
+    "video": "../assets/videos/almond-california-14.mp4",
+    "videoFallback": "https://assets.mixkit.co/videos/18365/18365-360.mp4"
   },
   {
     "id": "cashew-premium-15",
@@ -650,7 +678,9 @@ var EDGE_SEED_PRODUCTS = [
         "date": "\u09E9 \u09A6\u09BF\u09A8 \u0986\u0997\u09C7",
         "comment": "\u09AE\u09C1\u099A\u09AE\u09C1\u099A\u09C7 \u098F\u09AC\u0982 \u09AE\u09BF\u09B7\u09CD\u099F\u09BF \u099F\u09C7\u09B8\u09CD\u099F\u0964"
       }
-    ]
+    ],
+    "video": "../assets/videos/cashew-premium-15.mp4",
+    "videoFallback": "https://assets.mixkit.co/videos/26638/26638-360.mp4"
   },
   {
     "id": "walnut-kashmiri-16",
@@ -693,7 +723,9 @@ var EDGE_SEED_PRODUCTS = [
         "date": "\u09EA \u09A6\u09BF\u09A8 \u0986\u0997\u09C7",
         "comment": "\u09B9\u09BE\u09A4\u09C7 \u099A\u09BE\u09AA \u09A6\u09BF\u09B2\u09C7\u0987 \u0996\u09CB\u09B8\u09BE \u09AD\u09C7\u0999\u09C7 \u09AF\u09BE\u09DF\u0964"
       }
-    ]
+    ],
+    "video": "../assets/videos/walnut-kashmiri-16.mp4",
+    "videoFallback": "https://assets.mixkit.co/videos/26594/26594-360.mp4"
   },
   {
     "id": "pista-iranian-17",
@@ -736,7 +768,9 @@ var EDGE_SEED_PRODUCTS = [
         "date": "\u09EB \u09A6\u09BF\u09A8 \u0986\u0997\u09C7",
         "comment": "\u0985\u09B8\u09BE\u09A7\u09BE\u09B0\u09A3 \u09B8\u09CD\u09AC\u09BE\u09A6 \u0993 \u09A8\u09BF\u0996\u09C1\u0981\u09A4 \u09B8\u09BE\u0987\u099C\u0964"
       }
-    ]
+    ],
+    "video": "../assets/videos/pista-iranian-17.mp4",
+    "videoFallback": "https://assets.mixkit.co/videos/18363/18363-360.mp4"
   },
   {
     "id": "raisin-golden-18",
@@ -779,7 +813,9 @@ var EDGE_SEED_PRODUCTS = [
         "date": "\u09E7 \u09B8\u09AA\u09CD\u09A4\u09BE\u09B9 \u0986\u0997\u09C7",
         "comment": "\u0996\u09C1\u09AC \u09AE\u09BF\u09B7\u09CD\u099F\u09BF \u098F\u09AC\u0982 \u09AA\u09B0\u09BF\u099A\u09CD\u099B\u09A8\u09CD\u09A8\u0964"
       }
-    ]
+    ],
+    "video": "../assets/videos/raisin-golden-18.mp4",
+    "videoFallback": "https://assets.mixkit.co/videos/10427/10427-360.mp4"
   },
   {
     "id": "care-neem-toothpaste-19",
@@ -822,7 +858,9 @@ var EDGE_SEED_PRODUCTS = [
         "date": "\u09E9 \u09A6\u09BF\u09A8 \u0986\u0997\u09C7",
         "comment": "\u09A6\u09BE\u0981\u09A4\u09C7\u09B0 \u09B6\u09BF\u09B0\u09B6\u09BF\u09B0\u09BE\u09A8\u09BF \u09AD\u09BE\u09AC \u098F\u0995\u09A6\u09AE \u0995\u09AE\u09C7 \u0997\u09C7\u099B\u09C7\u0964"
       }
-    ]
+    ],
+    "video": "../assets/videos/care-neem-toothpaste-19.mp4",
+    "videoFallback": "https://assets.mixkit.co/videos/48930/48930-360.mp4"
   },
   {
     "id": "care-bamboo-brush-20",
@@ -859,7 +897,9 @@ var EDGE_SEED_PRODUCTS = [
         "date": "\u09EB \u09A6\u09BF\u09A8 \u0986\u0997\u09C7",
         "comment": "\u0996\u09C1\u09AC\u0987 \u09B8\u09AB\u099F \u09AC\u09CD\u09B0\u09BF\u09B8\u09B2 \u0986\u09B0 \u099A\u09AE\u09CE\u0995\u09BE\u09B0 \u0995\u09CB\u09DF\u09BE\u09B2\u09BF\u099F\u09BF\u0964"
       }
-    ]
+    ],
+    "video": "../assets/videos/care-bamboo-brush-20.mp4",
+    "videoFallback": "https://assets.mixkit.co/videos/48930/48930-360.mp4"
   },
   {
     "id": "care-organic-lotion-21",
@@ -902,7 +942,9 @@ var EDGE_SEED_PRODUCTS = [
         "date": "\u09E7 \u09A6\u09BF\u09A8 \u0986\u0997\u09C7",
         "comment": "\u098F\u0995\u099F\u09C1\u0993 \u099A\u09BF\u099F\u099A\u09BF\u099F\u09C7 \u09A8\u09BE, \u09A4\u09CD\u09AC\u0995 \u09A8\u09B0\u09AE \u09B0\u09BE\u0996\u09C7\u0964"
       }
-    ]
+    ],
+    "video": "../assets/videos/care-organic-lotion-21.mp4",
+    "videoFallback": "https://assets.mixkit.co/videos/45160/45160-360.mp4"
   },
   {
     "id": "care-neem-soap-22",
@@ -945,7 +987,9 @@ var EDGE_SEED_PRODUCTS = [
         "date": "\u09EA \u09A6\u09BF\u09A8 \u0986\u0997\u09C7",
         "comment": "\u09B8\u09BE\u09AC\u09BE\u09A8\u099F\u09BE \u09AE\u09C1\u0996\u09C7 \u09A6\u09BF\u09B2\u09C7 \u09A6\u09BE\u09B0\u09C1\u09A3 \u09AB\u09CD\u09B0\u09C7\u09B6 \u09B2\u09BE\u0997\u09C7\u0964"
       }
-    ]
+    ],
+    "video": "../assets/videos/care-neem-soap-22.mp4",
+    "videoFallback": "https://assets.mixkit.co/videos/33705/33705-360.mp4"
   },
   {
     "id": "care-aloevera-gel-23",
@@ -982,7 +1026,9 @@ var EDGE_SEED_PRODUCTS = [
         "date": "\u09E8 \u09A6\u09BF\u09A8 \u0986\u0997\u09C7",
         "comment": "\u0996\u09C1\u09AC\u0987 \u09B8\u09CD\u09A8\u09BF\u0997\u09CD\u09A7 \u098F\u09AC\u0982 \u09A4\u09CD\u09AC\u0995\u09C7 \u09A6\u09CD\u09B0\u09C1\u09A4 \u09AE\u09BF\u09B6\u09C7 \u09AF\u09BE\u09DF\u0964"
       }
-    ]
+    ],
+    "video": "../assets/videos/care-aloevera-gel-23.mp4",
+    "videoFallback": "https://assets.mixkit.co/videos/14626/14626-360.mp4"
   },
   {
     "id": "chia-seed-organic-24",
@@ -1025,7 +1071,9 @@ var EDGE_SEED_PRODUCTS = [
         "date": "\u09E8 \u09A6\u09BF\u09A8 \u0986\u0997\u09C7",
         "comment": "\u09A6\u09BE\u09A8\u09BE\u09A6\u09BE\u09A8\u09BE \u098F\u0995\u09A6\u09AE \u09AA\u09B0\u09BF\u09B7\u09CD\u0995\u09BE\u09B0 \u0993 \u09AA\u09CD\u09B0\u09BF\u09AE\u09BF\u09DF\u09BE\u09AE\u0964"
       }
-    ]
+    ],
+    "video": "../assets/videos/chia-seed-organic-24.mp4",
+    "videoFallback": "https://assets.mixkit.co/videos/21867/21867-360.mp4"
   },
   {
     "id": "flax-seed-organic-25",
@@ -1068,7 +1116,9 @@ var EDGE_SEED_PRODUCTS = [
         "date": "\u09EB \u09A6\u09BF\u09A8 \u0986\u0997\u09C7",
         "comment": "\u09AA\u09B0\u09BF\u099A\u09CD\u099B\u09A8\u09CD\u09A8 \u09A6\u09BE\u09A8\u09BE, \u09AD\u09BE\u09B2\u09CB \u09AE\u09BE\u09A8\u09C7\u09B0 \u09A4\u09BF\u09B8\u09BF\u0964"
       }
-    ]
+    ],
+    "video": "../assets/videos/flax-seed-organic-25.mp4",
+    "videoFallback": "https://assets.mixkit.co/videos/41148/41148-360.mp4"
   },
   {
     "id": "pumpkin-seeds-26",
@@ -1111,7 +1161,9 @@ var EDGE_SEED_PRODUCTS = [
         "date": "\u09E9 \u09A6\u09BF\u09A8 \u0986\u0997\u09C7",
         "comment": "\u09B0\u09CB\u09B8\u09CD\u099F \u0995\u09B0\u09C7 \u0996\u09C7\u09A4\u09C7 \u09A6\u09BE\u09B0\u09C1\u09A3 \u09AE\u099C\u09BE\u0964"
       }
-    ]
+    ],
+    "video": "../assets/videos/pumpkin-seeds-26.mp4",
+    "videoFallback": "https://assets.mixkit.co/videos/30835/30835-360.mp4"
   },
   {
     "id": "sunflower-seeds-27",
@@ -1154,7 +1206,9 @@ var EDGE_SEED_PRODUCTS = [
         "date": "\u09EC \u09A6\u09BF\u09A8 \u0986\u0997\u09C7",
         "comment": "\u0996\u09C1\u09AC\u0987 \u09AE\u09C1\u099A\u09AE\u09C1\u099A\u09C7 \u098F\u09AC\u0982 \u099F\u09C7\u09B8\u09CD\u099F \u09AD\u09BE\u09B2\u09CB\u0964"
       }
-    ]
+    ],
+    "video": "../assets/videos/sunflower-seeds-27.mp4",
+    "videoFallback": "https://assets.mixkit.co/videos/30841/30841-360.mp4"
   },
   {
     "id": "dates-ajwa-madinah-28",
@@ -1197,7 +1251,9 @@ var EDGE_SEED_PRODUCTS = [
         "date": "\u09E7 \u09A6\u09BF\u09A8 \u0986\u0997\u09C7",
         "comment": "\u0996\u09C7\u099C\u09C1\u09B0\u0997\u09C1\u09B2\u09CB \u0985\u09A4\u09CD\u09AF\u09A8\u09CD\u09A4 \u09A8\u09B0\u09AE \u0993 \u09AE\u09BF\u09B7\u09CD\u099F\u09BF\u0964"
       }
-    ]
+    ],
+    "video": "../assets/videos/dates-ajwa-madinah-28.mp4",
+    "videoFallback": "https://assets.mixkit.co/videos/22746/22746-360.mp4"
   },
   {
     "id": "spices-haldi-morich-29",
@@ -1240,7 +1296,9 @@ var EDGE_SEED_PRODUCTS = [
         "date": "\u09EB \u09A6\u09BF\u09A8 \u0986\u0997\u09C7",
         "comment": "\u09AC\u09BE\u099C\u09BE\u09B0\u09C7\u09B0 \u09AA\u09CD\u09AF\u09BE\u0995\u09C7\u099F \u09AE\u09B8\u09B2\u09BE\u09B0 \u099A\u09C7\u09DF\u09C7 \u0985\u09A8\u09C7\u0995 \u09AD\u09BE\u09B2\u09CB\u0964"
       }
-    ]
+    ],
+    "video": "../assets/videos/spices-haldi-morich-29.mp4",
+    "videoFallback": "https://assets.mixkit.co/videos/28392/28392-360.mp4"
   },
   {
     "id": "spices-cumin-jeera-30",
@@ -1277,7 +1335,9 @@ var EDGE_SEED_PRODUCTS = [
         "date": "\u09E9 \u09A6\u09BF\u09A8 \u0986\u0997\u09C7",
         "comment": "\u0998\u09BF\u09DF\u09C7 \u09AD\u09BE\u099C\u09BE\u09B0 \u099A\u09AE\u09CE\u0995\u09BE\u09B0 \u0998\u09CD\u09B0\u09BE\u09A3 \u0986\u09B8\u09C7\u0964"
       }
-    ]
+    ],
+    "video": "../assets/videos/spices-cumin-jeera-30.mp4",
+    "videoFallback": "https://assets.mixkit.co/videos/34634/34634-360.mp4"
   },
   {
     "id": "tea-sreemangal-green-31",
@@ -1320,7 +1380,9 @@ var EDGE_SEED_PRODUCTS = [
         "date": "\u09EC \u09A6\u09BF\u09A8 \u0986\u0997\u09C7",
         "comment": "\u09A6\u09BE\u09B0\u09C1\u09A3 \u09B8\u09A4\u09C7\u099C \u0998\u09CD\u09B0\u09BE\u09A3\u0964"
       }
-    ]
+    ],
+    "video": "../assets/videos/tea-sreemangal-green-31.mp4",
+    "videoFallback": "https://assets.mixkit.co/videos/9267/9267-360.mp4"
   },
   {
     "id": "tea-masala-black-32",
@@ -1363,7 +1425,9 @@ var EDGE_SEED_PRODUCTS = [
         "date": "\u09E8 \u09A6\u09BF\u09A8 \u0986\u0997\u09C7",
         "comment": "\u09B8\u09BF\u09B2\u09C7\u099F\u09C7\u09B0 \u099A\u09BE\u09DF\u09C7\u09B0 \u0986\u09B8\u09B2 \u09B8\u09CD\u09AC\u09BE\u09A6! \u09B2\u09BF\u0995\u09BE\u09B0 \u0985\u09A8\u09C7\u0995 \u0995\u09DC\u09BE\u0964"
       }
-    ]
+    ],
+    "video": "../assets/videos/tea-masala-black-32.mp4",
+    "videoFallback": "https://assets.mixkit.co/videos/9369/9369-360.mp4"
   },
   {
     "id": "superfood-moringa-powder-33",
@@ -1406,7 +1470,9 @@ var EDGE_SEED_PRODUCTS = [
         "date": "\u09E7 \u09A6\u09BF\u09A8 \u0986\u0997\u09C7",
         "comment": "\u09B8\u0995\u09BE\u09B2\u09C7 \u09B9\u09BE\u09B2\u0995\u09BE \u0997\u09B0\u09AE \u09AA\u09BE\u09A8\u09BF\u09A4\u09C7 \u09AE\u09BF\u09B6\u09BF\u09DF\u09C7 \u0996\u09BE\u0987, \u09B8\u09BE\u09B0\u09BE\u09A6\u09BF\u09A8 \u0985\u09A8\u09C7\u0995 \u098F\u09A8\u09BE\u09B0\u09CD\u099C\u09BF \u09AA\u09BE\u0987\u0964"
       }
-    ]
+    ],
+    "video": "../assets/videos/superfood-moringa-powder-33.mp4",
+    "videoFallback": "https://assets.mixkit.co/videos/901/901-360.mp4"
   },
   {
     "id": "honey-comb-wild-34",
@@ -1449,7 +1515,9 @@ var EDGE_SEED_PRODUCTS = [
         "date": "\u09E9 \u09A6\u09BF\u09A8 \u0986\u0997\u09C7",
         "comment": "\u099A\u09BE\u0995\u09C7\u09B0 \u09AE\u09CB\u09AE \u099A\u09BF\u09AC\u09BF\u09DF\u09C7 \u0996\u09BE\u0993\u09DF\u09BE\u09B0 \u09AB\u09BF\u09B2\u099F\u09BE\u0987 \u0986\u09B2\u09BE\u09A6\u09BE! \u09A6\u09BE\u09B0\u09C1\u09A3 \u0985\u09B0\u09BF\u099C\u09BF\u09A8\u09BE\u09B2\u0964"
       }
-    ]
+    ],
+    "video": "../assets/videos/honey-comb-wild-34.mp4",
+    "videoFallback": "https://assets.mixkit.co/videos/46375/46375-360.mp4"
   },
   {
     "id": "salt-himalayan-pink-35",
@@ -1492,7 +1560,9 @@ var EDGE_SEED_PRODUCTS = [
         "date": "\u09EA \u09A6\u09BF\u09A8 \u0986\u0997\u09C7",
         "comment": "\u09B0\u09BE\u09A8\u09CD\u09A8\u09BE\u09DF \u09B8\u09BE\u09A7\u09BE\u09B0\u09A3 \u09B2\u09AC\u09A3\u09C7\u09B0 \u09AC\u09A6\u09B2\u09C7 \u09AA\u09BF\u0982\u0995 \u09B8\u09B2\u09CD\u099F \u09AC\u09CD\u09AF\u09AC\u09B9\u09BE\u09B0 \u0995\u09B0\u099B\u09BF, \u09B8\u09CD\u09AC\u09BE\u09A6 \u0996\u09C1\u09AC \u09AD\u09BE\u09B2\u09CB\u0964"
       }
-    ]
+    ],
+    "video": "../assets/videos/salt-himalayan-pink-35.mp4",
+    "videoFallback": "https://assets.mixkit.co/videos/28390/28390-360.mp4"
   },
   {
     "id": "dates-mabroom-saudi-36",
@@ -1535,7 +1605,9 @@ var EDGE_SEED_PRODUCTS = [
         "date": "\u09E8 \u09A6\u09BF\u09A8 \u0986\u0997\u09C7",
         "comment": "\u0996\u09C7\u099C\u09C1\u09B0\u0997\u09C1\u09B2\u09CB \u0996\u09C1\u09AC \u09AB\u09CD\u09B0\u09C7\u09B6 \u0993 \u09B8\u09C1\u09B8\u09CD\u09AC\u09BE\u09A6\u09C1 \u099B\u09BF\u09B2\u0964"
       }
-    ]
+    ],
+    "video": "../assets/videos/dates-mabroom-saudi-36.mp4",
+    "videoFallback": "https://assets.mixkit.co/videos/10424/10424-360.mp4"
   },
   {
     "id": "combo-health-pack-37",
@@ -1572,7 +1644,9 @@ var EDGE_SEED_PRODUCTS = [
         "date": "\u09E7 \u09A6\u09BF\u09A8 \u0986\u0997\u09C7",
         "comment": "\u098F\u0995 \u09B8\u09BE\u09A5\u09C7 \u0996\u09BE\u0981\u099F\u09BF \u09AE\u09A7\u09C1, \u0998\u09BF \u0993 \u09B8\u09B0\u09BF\u09B7\u09BE\u09B0 \u09A4\u09C7\u09B2 \u09AA\u09C7\u09DF\u09C7 \u0985\u09A8\u09C7\u0995 \u099F\u09BE\u0995\u09BE \u09AC\u09BE\u0981\u099A\u09B2\u0964 \u09AA\u09A3\u09CD\u09AF\u09C7\u09B0 \u09AE\u09BE\u09A8 \u099F\u09AA \u09A8\u099A\u0964"
       }
-    ]
+    ],
+    "video": "../assets/videos/combo-health-pack-37.mp4",
+    "videoFallback": "https://assets.mixkit.co/videos/3795/3795-720.mp4"
   },
   {
     "id": "combo-royal-nuts-38",
@@ -1609,7 +1683,9 @@ var EDGE_SEED_PRODUCTS = [
         "date": "\u09E8 \u09A6\u09BF\u09A8 \u0986\u0997\u09C7",
         "comment": "\u09AA\u09CD\u09AF\u09BE\u0995\u09C7\u099C\u09BF\u0982 \u0986\u09B0 \u09AC\u09BE\u09A6\u09BE\u09AE\u09C7\u09B0 \u0995\u09CB\u09DF\u09BE\u09B2\u09BF\u099F\u09BF \u09B8\u09A4\u09CD\u09AF\u09BF\u0987 \u0985\u09B8\u09BE\u09A7\u09BE\u09B0\u09A3\u0964 \u09A7\u09A8\u09CD\u09AF\u09AC\u09BE\u09A6 \u0986\u09B8\u09AC\u09BF\u09AE\u09BE\u09B0\u09CD\u099F\u0964"
       }
-    ]
+    ],
+    "video": "../assets/videos/combo-royal-nuts-38.mp4",
+    "videoFallback": "https://assets.mixkit.co/videos/3796/3796-720.mp4"
   },
   {
     "id": "spices-green-cardamom-31",
@@ -1652,7 +1728,9 @@ var EDGE_SEED_PRODUCTS = [
         "date": "\u09EA \u09A6\u09BF\u09A8 \u0986\u0997\u09C7",
         "comment": "\u098F\u09B2\u09BE\u099A\u09C7\u09B0 \u0998\u09CD\u09B0\u09BE\u09A3 \u0985\u09B8\u09BE\u09A7\u09BE\u09B0\u09A3! \u098F\u0995\u09A6\u09AE \u09AB\u09CD\u09B0\u09C7\u09B6 \u0993 \u09AC\u09DC \u09A6\u09BE\u09A8\u09BE\u0964"
       }
-    ]
+    ],
+    "video": "../assets/videos/spices-green-cardamom-31.mp4",
+    "videoFallback": "https://assets.mixkit.co/videos/32058/32058-360.mp4"
   }
 ];
 var AUTH_SECRET = "asbi_secret_key_super_secure_organic_mart_2026";

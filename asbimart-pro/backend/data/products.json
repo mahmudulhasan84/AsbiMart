@@ -51,7 +51,9 @@
     "stock": 143,
     "sku": "ASBI-HONEY-SUND",
     "barcode": "880240110140",
-    "updatedAt": "2026-11-23T06:46:56.550Z"
+    "updatedAt": "2026-11-23T06:46:56.550Z",
+    "video": "../assets/videos/honey-sundarban-01.mp4",
+    "videoFallback": "https://assets.mixkit.co/videos/2801/2801-720.mp4"
   },
   {
     "id": "honey-kalojira-02",
@@ -97,7 +99,9 @@
     ],
     "stock": 45,
     "sku": "ASBI-HONEY-KALO",
-    "barcode": "880198428253"
+    "barcode": "880198428253",
+    "video": "../assets/videos/honey-kalojira-02.mp4",
+    "videoFallback": "https://assets.mixkit.co/videos/46373/46373-360.mp4"
   },
   {
     "id": "honey-litchi-03",
@@ -143,7 +147,9 @@
     ],
     "stock": 55,
     "sku": "ASBI-HONEY-LITC",
-    "barcode": "880194910834"
+    "barcode": "880194910834",
+    "video": "../assets/videos/honey-litchi-03.mp4",
+    "videoFallback": "https://assets.mixkit.co/videos/2690/2690-360.mp4"
   },
   {
     "id": "honey-mustard-04",
@@ -189,7 +195,9 @@
     ],
     "stock": 65,
     "sku": "ASBI-HONEY-MUST",
-    "barcode": "880441184211"
+    "barcode": "880441184211",
+    "video": "../assets/videos/honey-mustard-04.mp4",
+    "videoFallback": "https://assets.mixkit.co/videos/14749/14749-360.mp4"
   },
   {
     "id": "honey-nut-premium-05",
@@ -235,7 +243,9 @@
     ],
     "stock": 60,
     "sku": "ASBI-HONEY-NUT-",
-    "barcode": "880764580633"
+    "barcode": "880764580633",
+    "video": "../assets/videos/honey-nut-premium-05.mp4",
+    "videoFallback": "https://assets.mixkit.co/videos/43912/43912-720.mp4"
   },
   {
     "id": "ghee-pabna-06",
@@ -281,7 +291,9 @@
     ],
     "stock": 65,
     "sku": "ASBI-GHEE-PABNA",
-    "barcode": "880123782484"
+    "barcode": "880123782484",
+    "video": "../assets/videos/ghee-pabna-06.mp4",
+    "videoFallback": "https://assets.mixkit.co/videos/45895/45895-720.mp4"
   },
   {
     "id": "ghee-buffalo-07",
@@ -327,7 +339,9 @@
     ],
     "stock": 0,
     "sku": "ASBI-GHEE-BUFFA",
-    "barcode": "880359386026"
+    "barcode": "880359386026",
+    "video": "../assets/videos/ghee-buffalo-07.mp4",
+    "videoFallback": "https://assets.mixkit.co/videos/45724/45724-360.mp4"
   },
   {
     "id": "ghee-butter-home-08",
@@ -373,7 +387,9 @@
     ],
     "stock": 35,
     "sku": "ASBI-GHEE-BUTTE",
-    "barcode": "880757841100"
+    "barcode": "880757841100",
+    "video": "../assets/videos/ghee-butter-home-08.mp4",
+    "videoFallback": "https://assets.mixkit.co/videos/28983/28983-360.mp4"
   },
   {
     "id": "oil-mustard-ghani-09",
@@ -419,7 +435,9 @@
     ],
     "stock": 65,
     "sku": "ASBI-OIL-MUSTAR",
-    "barcode": "880391432860"
+    "barcode": "880391432860",
+    "video": "../assets/videos/oil-mustard-ghani-09.mp4",
+    "videoFallback": "https://assets.mixkit.co/videos/21529/21529-720.mp4"
   },
   {
     "id": "kalojira-oil-pure-10",
@@ -465,7 +483,9 @@
     ],
     "stock": 55,
     "sku": "ASBI-KALOJIRA-O",
-    "barcode": "880801261743"
+    "barcode": "880801261743",
+    "video": "../assets/videos/kalojira-oil-pure-10.mp4",
+    "videoFallback": "https://assets.mixkit.co/videos/13935/13935-360.mp4"
   },
   {
     "id": "coconut-oil-extra-virgin-11",
@@ -511,7 +531,9 @@
     ],
     "stock": 65,
     "sku": "ASBI-COCONUT-OI",
-    "barcode": "880206852638"
+    "barcode": "880206852638",
+    "video": "../assets/videos/coconut-oil-extra-virgin-11.mp4",
+    "videoFallback": "https://assets.mixkit.co/videos/47785/47785-360.mp4"
   },
   {
     "id": "oil-sesame-til-12",
@@ -557,7 +579,9 @@
     ],
     "stock": 55,
     "sku": "ASBI-OIL-SESAME",
-    "barcode": "880322383220"
+    "barcode": "880322383220",
+    "video": "../assets/videos/oil-sesame-til-12.mp4",
+    "videoFallback": "https://assets.mixkit.co/videos/14781/14781-360.mp4"
   },
   {
     "id": "nuts-dryfruits-mix-13",
@@ -603,7 +627,9 @@
     ],
     "stock": 70,
     "sku": "ASBI-NUTS-DRYFR",
-    "barcode": "880109728867"
+    "barcode": "880109728867",
+    "video": "../assets/videos/nuts-dryfruits-mix-13.mp4",
+    "videoFallback": "https://assets.mixkit.co/videos/43925/43925-360.mp4"
   },
   {
     "id": "almond-california-14",
@@ -649,7 +675,9 @@
     ],
     "stock": 70,
     "sku": "ASBI-ALMOND-CAL",
-    "barcode": "880515667651"
+    "barcode": "880515667651",
+    "video": "../assets/videos/almond-california-14.mp4",
+    "videoFallback": "https://assets.mixkit.co/videos/18365/18365-360.mp4"
   },
   {
     "id": "cashew-premium-15",
@@ -695,7 +723,9 @@
     ],
     "stock": 60,
     "sku": "ASBI-CASHEW-PRE",
-    "barcode": "880351926626"
+    "barcode": "880351926626",
+    "video": "../assets/videos/cashew-premium-15.mp4",
+    "videoFallback": "https://assets.mixkit.co/videos/26638/26638-360.mp4"
   },
   {
     "id": "walnut-kashmiri-16",
@@ -741,7 +771,9 @@
     ],
     "stock": 50,
     "sku": "ASBI-WALNUT-KAS",
-    "barcode": "880639287817"
+    "barcode": "880639287817",
+    "video": "../assets/videos/walnut-kashmiri-16.mp4",
+    "videoFallback": "https://assets.mixkit.co/videos/26594/26594-360.mp4"
   },
   {
     "id": "pista-iranian-17",
@@ -787,7 +819,9 @@
     ],
     "stock": 45,
     "sku": "ASBI-PISTA-IRAN",
-    "barcode": "880118458445"
+    "barcode": "880118458445",
+    "video": "../assets/videos/pista-iranian-17.mp4",
+    "videoFallback": "https://assets.mixkit.co/videos/18363/18363-360.mp4"
   },
   {
     "id": "raisin-golden-18",
@@ -833,7 +867,9 @@
     ],
     "stock": 85,
     "sku": "ASBI-RAISIN-GOL",
-    "barcode": "880240517093"
+    "barcode": "880240517093",
+    "video": "../assets/videos/raisin-golden-18.mp4",
+    "videoFallback": "https://assets.mixkit.co/videos/10427/10427-360.mp4"
   },
   {
     "id": "care-neem-toothpaste-19",
@@ -879,7 +915,9 @@
     ],
     "stock": 90,
     "sku": "ASBI-CARE-NEEM-",
-    "barcode": "880383480995"
+    "barcode": "880383480995",
+    "video": "../assets/videos/care-neem-toothpaste-19.mp4",
+    "videoFallback": "https://assets.mixkit.co/videos/48930/48930-360.mp4"
   },
   {
     "id": "care-bamboo-brush-20",
@@ -919,7 +957,9 @@
     ],
     "stock": 45,
     "sku": "ASBI-CARE-BAMBO",
-    "barcode": "880913811639"
+    "barcode": "880913811639",
+    "video": "../assets/videos/care-bamboo-brush-20.mp4",
+    "videoFallback": "https://assets.mixkit.co/videos/48930/48930-360.mp4"
   },
   {
     "id": "care-organic-lotion-21",
@@ -965,7 +1005,9 @@
     ],
     "stock": 60,
     "sku": "ASBI-CARE-ORGAN",
-    "barcode": "880148815831"
+    "barcode": "880148815831",
+    "video": "../assets/videos/care-organic-lotion-21.mp4",
+    "videoFallback": "https://assets.mixkit.co/videos/45160/45160-360.mp4"
   },
   {
     "id": "care-neem-soap-22",
@@ -1011,7 +1053,9 @@
     ],
     "stock": 95,
     "sku": "ASBI-CARE-NEEM-",
-    "barcode": "880791547765"
+    "barcode": "880791547765",
+    "video": "../assets/videos/care-neem-soap-22.mp4",
+    "videoFallback": "https://assets.mixkit.co/videos/33705/33705-360.mp4"
   },
   {
     "id": "care-aloevera-gel-23",
@@ -1051,7 +1095,9 @@
     ],
     "stock": 40,
     "sku": "ASBI-CARE-ALOEV",
-    "barcode": "880624889117"
+    "barcode": "880624889117",
+    "video": "../assets/videos/care-aloevera-gel-23.mp4",
+    "videoFallback": "https://assets.mixkit.co/videos/14626/14626-360.mp4"
   },
   {
     "id": "chia-seed-organic-24",
@@ -1097,7 +1143,9 @@
     ],
     "stock": 70,
     "sku": "ASBI-CHIA-SEED-",
-    "barcode": "880397052235"
+    "barcode": "880397052235",
+    "video": "../assets/videos/chia-seed-organic-24.mp4",
+    "videoFallback": "https://assets.mixkit.co/videos/21867/21867-360.mp4"
   },
   {
     "id": "flax-seed-organic-25",
@@ -1143,7 +1191,9 @@
     ],
     "stock": 75,
     "sku": "ASBI-FLAX-SEED-",
-    "barcode": "880502320216"
+    "barcode": "880502320216",
+    "video": "../assets/videos/flax-seed-organic-25.mp4",
+    "videoFallback": "https://assets.mixkit.co/videos/41148/41148-360.mp4"
   },
   {
     "id": "pumpkin-seeds-26",
@@ -1189,7 +1239,9 @@
     ],
     "stock": 55,
     "sku": "ASBI-PUMPKIN-SE",
-    "barcode": "880216022171"
+    "barcode": "880216022171",
+    "video": "../assets/videos/pumpkin-seeds-26.mp4",
+    "videoFallback": "https://assets.mixkit.co/videos/30835/30835-360.mp4"
   },
   {
     "id": "sunflower-seeds-27",
@@ -1235,7 +1287,9 @@
     ],
     "stock": 65,
     "sku": "ASBI-SUNFLOWER-",
-    "barcode": "880143908128"
+    "barcode": "880143908128",
+    "video": "../assets/videos/sunflower-seeds-27.mp4",
+    "videoFallback": "https://assets.mixkit.co/videos/30841/30841-360.mp4"
   },
   {
     "id": "dates-ajwa-madinah-28",
@@ -1281,7 +1335,9 @@
     ],
     "stock": 55,
     "sku": "ASBI-DATES-AJWA",
-    "barcode": "880893882152"
+    "barcode": "880893882152",
+    "video": "../assets/videos/dates-ajwa-madinah-28.mp4",
+    "videoFallback": "https://assets.mixkit.co/videos/22746/22746-360.mp4"
   },
   {
     "id": "spices-haldi-morich-29",
@@ -1327,7 +1383,9 @@
     ],
     "stock": 55,
     "sku": "ASBI-SPICES-HAL",
-    "barcode": "880602991172"
+    "barcode": "880602991172",
+    "video": "../assets/videos/spices-haldi-morich-29.mp4",
+    "videoFallback": "https://assets.mixkit.co/videos/28392/28392-360.mp4"
   },
   {
     "id": "spices-cumin-jeera-30",
@@ -1367,7 +1425,9 @@
     ],
     "stock": 40,
     "sku": "ASBI-SPICES-CUM",
-    "barcode": "880101297928"
+    "barcode": "880101297928",
+    "video": "../assets/videos/spices-cumin-jeera-30.mp4",
+    "videoFallback": "https://assets.mixkit.co/videos/34634/34634-360.mp4"
   },
   {
     "id": "tea-sreemangal-green-31",
@@ -1413,7 +1473,9 @@
     ],
     "stock": 70,
     "sku": "ASBI-TEA-SREEMA",
-    "barcode": "880459225361"
+    "barcode": "880459225361",
+    "video": "../assets/videos/tea-sreemangal-green-31.mp4",
+    "videoFallback": "https://assets.mixkit.co/videos/9267/9267-360.mp4"
   },
   {
     "id": "tea-masala-black-32",
@@ -1459,7 +1521,9 @@
     ],
     "stock": 80,
     "sku": "ASBI-TEA-MASALA",
-    "barcode": "880705075323"
+    "barcode": "880705075323",
+    "video": "../assets/videos/tea-masala-black-32.mp4",
+    "videoFallback": "https://assets.mixkit.co/videos/9369/9369-360.mp4"
   },
   {
     "id": "superfood-moringa-powder-33",
@@ -1505,7 +1569,9 @@
     ],
     "stock": 65,
     "sku": "ASBI-SUPERFOOD-",
-    "barcode": "880830753022"
+    "barcode": "880830753022",
+    "video": "../assets/videos/superfood-moringa-powder-33.mp4",
+    "videoFallback": "https://assets.mixkit.co/videos/901/901-360.mp4"
   },
   {
     "id": "honey-comb-wild-34",
@@ -1551,7 +1617,9 @@
     ],
     "stock": 32,
     "sku": "ASBI-HONEY-COMB",
-    "barcode": "880558112596"
+    "barcode": "880558112596",
+    "video": "../assets/videos/honey-comb-wild-34.mp4",
+    "videoFallback": "https://assets.mixkit.co/videos/46375/46375-360.mp4"
   },
   {
     "id": "salt-himalayan-pink-35",
@@ -1597,7 +1665,9 @@
     ],
     "stock": 95,
     "sku": "ASBI-SALT-HIMAL",
-    "barcode": "880311159742"
+    "barcode": "880311159742",
+    "video": "../assets/videos/salt-himalayan-pink-35.mp4",
+    "videoFallback": "https://assets.mixkit.co/videos/28390/28390-360.mp4"
   },
   {
     "id": "dates-mabroom-saudi-36",
@@ -1643,7 +1713,9 @@
     ],
     "stock": 48,
     "sku": "ASBI-DATES-MABR",
-    "barcode": "880654349318"
+    "barcode": "880654349318",
+    "video": "../assets/videos/dates-mabroom-saudi-36.mp4",
+    "videoFallback": "https://assets.mixkit.co/videos/10424/10424-360.mp4"
   },
   {
     "id": "combo-health-pack-37",
@@ -1683,7 +1755,9 @@
     ],
     "stock": 25,
     "sku": "ASBI-COMBO-HEAL",
-    "barcode": "880437213220"
+    "barcode": "880437213220",
+    "video": "../assets/videos/combo-health-pack-37.mp4",
+    "videoFallback": "https://assets.mixkit.co/videos/3795/3795-720.mp4"
   },
   {
     "id": "combo-royal-nuts-38",
@@ -1723,7 +1797,9 @@
     ],
     "stock": 20,
     "sku": "ASBI-COMBO-ROYA",
-    "barcode": "880590552314"
+    "barcode": "880590552314",
+    "video": "../assets/videos/combo-royal-nuts-38.mp4",
+    "videoFallback": "https://assets.mixkit.co/videos/3796/3796-720.mp4"
   },
   {
     "id": "spices-green-cardamom-31",
@@ -1769,6 +1845,8 @@
     ],
     "stock": 65,
     "sku": "ASBI-SPICES-GRE",
-    "barcode": "880596319431"
+    "barcode": "880596319431",
+    "video": "../assets/videos/spices-green-cardamom-31.mp4",
+    "videoFallback": "https://assets.mixkit.co/videos/32058/32058-360.mp4"
   }
 ]
